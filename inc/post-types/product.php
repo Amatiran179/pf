@@ -43,7 +43,7 @@ function putrafiber_register_product_post_type() {
         'hierarchical'       => false,
         'menu_position'      => 6,
         'menu_icon'          => 'dashicons-products',
-        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'revisions'),
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'comments'),
         'show_in_rest'       => true,
     );
 
@@ -120,7 +120,7 @@ function putrafiber_product_meta_boxes() {
     
     add_meta_box(
         'putrafiber_product_gallery',
-        __('Galeri Produk (Auto Slider)', 'putrafiber'),
+        __('Galeri Produk (Auto Slider 160x160)', 'putrafiber'),
         'putrafiber_product_gallery_callback',
         'product',
         'side',
@@ -349,7 +349,7 @@ function putrafiber_product_gallery_callback($post) {
         </button>
         
         <p style="font-size: 12px; color: #666; margin-bottom: 15px;">
-            <?php _e('📸 Gambar akan tampil auto slider 160x160px di halaman produk', 'putrafiber'); ?>
+            <?php _e('📸 Gambar akan tampil auto slider 160x160px dengan zoom hover + lightbox popup', 'putrafiber'); ?>
         </p>
         
         <div id="gallery-preview" class="gallery-preview-grid">
@@ -384,6 +384,7 @@ function putrafiber_product_gallery_callback($post) {
         border-radius: 8px;
         overflow: hidden;
         aspect-ratio: 1;
+        cursor: move;
     }
     
     .gallery-item img {
@@ -498,6 +499,8 @@ function putrafiber_product_seo_callback($post) {
     $enable_video_schema = get_post_meta($post->ID, '_enable_video_schema', true);
     $video_url = get_post_meta($post->ID, '_video_url', true);
     $video_duration = get_post_meta($post->ID, '_video_duration', true);
+    $video_title = get_post_meta($post->ID, '_video_title', true);
+    $video_description = get_post_meta($post->ID, '_video_description', true);
     $enable_faq_schema = get_post_meta($post->ID, '_enable_faq_schema', true);
     $faq_items = get_post_meta($post->ID, '_faq_items', true);
     $enable_howto_schema = get_post_meta($post->ID, '_enable_howto_schema', true);
@@ -555,4 +558,344 @@ function putrafiber_product_seo_callback($post) {
         </tr>
         
         <tr class="video-schema-field" style="display: <?php echo $enable_video_schema ? 'table-row' : 'none'; ?>;">
-            <th><label for="video_url"><?php _e('Video URL', 
+            <th><label for="video_url"><?php _e('Video URL', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="url" id="video_url" name="video_url" value="<?php echo esc_url($video_url); ?>" class="product-meta-input" placeholder="https://www.youtube.com/watch?v=xxxxx">
+                <p class="help-text"><?php _e('URL video YouTube atau Vimeo', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr class="video-schema-field" style="display: <?php echo $enable_video_schema ? 'table-row' : 'none'; ?>;">
+            <th><label for="video_title"><?php _e('Judul Video', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="video_title" name="video_title" value="<?php echo esc_attr($video_title); ?>" class="product-meta-input">
+            </td>
+        </tr>
+        
+        <tr class="video-schema-field" style="display: <?php echo $enable_video_schema ? 'table-row' : 'none'; ?>;">
+            <th><label for="video_description"><?php _e('Deskripsi Video', 'putrafiber'); ?></label></th>
+            <td>
+                <textarea id="video_description" name="video_description" rows="3" class="product-meta-textarea"><?php echo esc_textarea($video_description); ?></textarea>
+            </td>
+        </tr>
+        
+        <tr class="video-schema-field" style="display: <?php echo $enable_video_schema ? 'table-row' : 'none'; ?>;">
+            <th><label for="video_duration"><?php _e('Durasi Video', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="video_duration" name="video_duration" value="<?php echo esc_attr($video_duration); ?>" class="product-meta-input" placeholder="PT5M30S (5 menit 30 detik)">
+                <p class="help-text"><?php _e('Format ISO 8601 Duration. Contoh: PT5M30S untuk 5 menit 30 detik', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr style="background: #f5f5f5;">
+            <td colspan="2" style="padding: 20px;">
+                <h3 style="margin: 0 0 15px 0; color: #FF9800;">
+                    <span class="dashicons dashicons-format-chat"></span>
+                    <?php _e('Schema FAQ (Optional)', 'putrafiber'); ?>
+                </h3>
+            </td>
+        </tr>
+        
+        <tr>
+            <th>
+                <label for="enable_faq_schema">
+                    <input type="checkbox" id="enable_faq_schema" name="enable_faq_schema" value="1" <?php checked($enable_faq_schema, '1'); ?>>
+                    <?php _e('Enable FAQ Schema', 'putrafiber'); ?>
+                </label>
+            </th>
+            <td>
+                <p class="help-text"><?php _e('Centang untuk menambahkan FAQPage schema', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr class="faq-schema-field" style="display: <?php echo $enable_faq_schema ? 'table-row' : 'none'; ?>;">
+            <td colspan="2">
+                <div id="faq-items-container">
+                    <?php
+                    if (is_array($faq_items) && !empty($faq_items)) {
+                        foreach ($faq_items as $index => $item) {
+                            ?>
+                            <div class="faq-item" style="background: #f9f9f9; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong><?php printf(__('FAQ #%d', 'putrafiber'), $index + 1); ?></strong>
+                                    <button type="button" class="button remove-faq-item"><?php _e('Hapus', 'putrafiber'); ?></button>
+                                </div>
+                                <p>
+                                    <label><?php _e('Pertanyaan:', 'putrafiber'); ?></label><br>
+                                    <input type="text" name="faq_items[<?php echo $index; ?>][question]" value="<?php echo esc_attr($item['question']); ?>" class="product-meta-input" placeholder="Pertanyaan FAQ">
+                                </p>
+                                <p>
+                                    <label><?php _e('Jawaban:', 'putrafiber'); ?></label><br>
+                                    <textarea name="faq_items[<?php echo $index; ?>][answer]" rows="3" class="product-meta-textarea" placeholder="Jawaban FAQ"><?php echo esc_textarea($item['answer']); ?></textarea>
+                                </p>
+                            </div>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+                <button type="button" class="button button-secondary" id="add-faq-item">
+                    <span class="dashicons dashicons-plus-alt"></span>
+                    <?php _e('Tambah FAQ', 'putrafiber'); ?>
+                </button>
+            </td>
+        </tr>
+        
+        <tr style="background: #f5f5f5;">
+            <td colspan="2" style="padding: 20px;">
+                <h3 style="margin: 0 0 15px 0; color: #9C27B0;">
+                    <span class="dashicons dashicons-list-view"></span>
+                    <?php _e('Schema HowTo (Optional)', 'putrafiber'); ?>
+                </h3>
+            </td>
+        </tr>
+        
+        <tr>
+            <th>
+                <label for="enable_howto_schema">
+                    <input type="checkbox" id="enable_howto_schema" name="enable_howto_schema" value="1" <?php checked($enable_howto_schema, '1'); ?>>
+                    <?php _e('Enable HowTo Schema', 'putrafiber'); ?>
+                </label>
+            </th>
+            <td>
+                <p class="help-text"><?php _e('Centang untuk menambahkan HowTo schema', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr class="howto-schema-field" style="display: <?php echo $enable_howto_schema ? 'table-row' : 'none'; ?>;">
+            <td colspan="2">
+                <div id="howto-steps-container">
+                    <?php
+                    if (is_array($howto_steps) && !empty($howto_steps)) {
+                        foreach ($howto_steps as $index => $step) {
+                            ?>
+                            <div class="howto-step-item" style="background: #f9f9f9; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong><?php printf(__('Step #%d', 'putrafiber'), $index + 1); ?></strong>
+                                    <button type="button" class="button remove-howto-step"><?php _e('Hapus', 'putrafiber'); ?></button>
+                                </div>
+                                <p>
+                                    <label><?php _e('Nama Step:', 'putrafiber'); ?></label><br>
+                                    <input type="text" name="howto_steps[<?php echo $index; ?>][name]" value="<?php echo esc_attr($step['name']); ?>" class="product-meta-input" placeholder="Nama langkah">
+                                </p>
+                                <p>
+                                    <label><?php _e('Deskripsi:', 'putrafiber'); ?></label><br>
+                                    <textarea name="howto_steps[<?php echo $index; ?>][text]" rows="3" class="product-meta-textarea" placeholder="Deskripsi langkah"><?php echo esc_textarea($step['text']); ?></textarea>
+                                </p>
+                            </div>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+                <button type="button" class="button button-secondary" id="add-howto-step">
+                    <span class="dashicons dashicons-plus-alt"></span>
+                    <?php _e('Tambah Step', 'putrafiber'); ?>
+                </button>
+            </td>
+        </tr>
+    </table>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        // Character counter
+        function updateCharCount() {
+            $('#title-length').text($('#meta_title').val().length);
+            $('#desc-length').text($('#meta_description').val().length);
+        }
+        
+        $('#meta_title, #meta_description').on('input', updateCharCount);
+        updateCharCount();
+        
+        // Toggle video schema fields
+        $('#enable_video_schema').on('change', function() {
+            $('.video-schema-field').toggle(this.checked);
+        });
+        
+        // Toggle FAQ schema fields
+        $('#enable_faq_schema').on('change', function() {
+            $('.faq-schema-field').toggle(this.checked);
+        });
+        
+        // Toggle HowTo schema fields
+        $('#enable_howto_schema').on('change', function() {
+            $('.howto-schema-field').toggle(this.checked);
+        });
+        
+        // Add FAQ item
+        var faqIndex = $('.faq-item').length;
+        $('#add-faq-item').on('click', function() {
+            var html = '<div class="faq-item" style="background: #f9f9f9; padding: 15px; margin-bottom: 10px; border-radius: 4px;">' +
+                '<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">' +
+                '<strong>FAQ #' + (faqIndex + 1) + '</strong>' +
+                '<button type="button" class="button remove-faq-item">Hapus</button>' +
+                '</div>' +
+                '<p><label>Pertanyaan:</label><br>' +
+                '<input type="text" name="faq_items[' + faqIndex + '][question]" class="product-meta-input" placeholder="Pertanyaan FAQ"></p>' +
+                '<p><label>Jawaban:</label><br>' +
+                '<textarea name="faq_items[' + faqIndex + '][answer]" rows="3" class="product-meta-textarea" placeholder="Jawaban FAQ"></textarea></p>' +
+                '</div>';
+            $('#faq-items-container').append(html);
+            faqIndex++;
+        });
+        
+        // Remove FAQ item
+        $(document).on('click', '.remove-faq-item', function() {
+            $(this).closest('.faq-item').remove();
+        });
+        
+        // Add HowTo step
+        var howtoIndex = $('.howto-step-item').length;
+        $('#add-howto-step').on('click', function() {
+            var html = '<div class="howto-step-item" style="background: #f9f9f9; padding: 15px; margin-bottom: 10px; border-radius: 4px;">' +
+                '<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">' +
+                '<strong>Step #' + (howtoIndex + 1) + '</strong>' +
+                '<button type="button" class="button remove-howto-step">Hapus</button>' +
+                '</div>' +
+                '<p><label>Nama Step:</label><br>' +
+                '<input type="text" name="howto_steps[' + howtoIndex + '][name]" class="product-meta-input" placeholder="Nama langkah"></p>' +
+                '<p><label>Deskripsi:</label><br>' +
+                '<textarea name="howto_steps[' + howtoIndex + '][text]" rows="3" class="product-meta-textarea" placeholder="Deskripsi langkah"></textarea></p>' +
+                '</div>';
+            $('#howto-steps-container').append(html);
+            howtoIndex++;
+        });
+        
+        // Remove HowTo step
+        $(document).on('click', '.remove-howto-step', function() {
+            $(this).closest('.howto-step-item').remove();
+        });
+    });
+    </script>
+    <?php
+}
+
+/**
+ * Save Product Meta Data
+ */
+function putrafiber_save_product_meta($post_id) {
+    // Verify nonce
+    if (!isset($_POST['putrafiber_product_nonce_field']) || 
+        !wp_verify_nonce($_POST['putrafiber_product_nonce_field'], 'putrafiber_product_nonce')) {
+        return;
+    }
+    
+    // Check autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    
+    // Check permissions
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+    
+    // Save product details
+    $fields = array(
+        '_product_price' => 'sanitize_text_field',
+        '_product_price_type' => 'sanitize_text_field',
+        '_product_stock' => 'sanitize_text_field',
+        '_product_sku' => 'sanitize_text_field',
+        '_product_sizes' => 'sanitize_text_field',
+        '_product_colors' => 'sanitize_text_field',
+        '_product_models' => 'sanitize_text_field',
+        '_product_material' => 'sanitize_text_field',
+        '_product_warranty' => 'sanitize_text_field',
+        '_product_catalog_pdf' => 'esc_url_raw',
+        '_product_short_description' => 'sanitize_textarea_field',
+        '_product_specifications' => 'sanitize_textarea_field',
+        '_product_features' => 'sanitize_textarea_field',
+        '_product_gallery' => 'sanitize_text_field',
+        '_meta_title' => 'sanitize_text_field',
+        '_meta_description' => 'sanitize_textarea_field',
+        '_focus_keyword' => 'sanitize_text_field',
+        '_video_url' => 'esc_url_raw',
+        '_video_duration' => 'sanitize_text_field',
+        '_video_title' => 'sanitize_text_field',
+        '_video_description' => 'sanitize_textarea_field',
+    );
+    
+    foreach ($fields as $field => $sanitize_callback) {
+        $field_name = str_replace('_', '', $field);
+        if (isset($_POST[$field_name])) {
+            update_post_meta($post_id, $field, call_user_func($sanitize_callback, $_POST[$field_name]));
+        }
+    }
+    
+    // Handle price default
+    $price = isset($_POST['product_price']) ? intval($_POST['product_price']) : 0;
+    if ($price <= 0) {
+        $price = 1000; // Default Rp.1000 for schema (anti Google penalty)
+    }
+    update_post_meta($post_id, '_product_price', $price);
+    
+    // Save checkboxes
+    update_post_meta($post_id, '_enable_video_schema', isset($_POST['enable_video_schema']) ? '1' : '0');
+    update_post_meta($post_id, '_enable_faq_schema', isset($_POST['enable_faq_schema']) ? '1' : '0');
+    update_post_meta($post_id, '_enable_howto_schema', isset($_POST['enable_howto_schema']) ? '1' : '0');
+    
+    // Save FAQ items
+    if (isset($_POST['faq_items']) && is_array($_POST['faq_items'])) {
+        $faq_items = array();
+        foreach ($_POST['faq_items'] as $item) {
+            if (!empty($item['question']) && !empty($item['answer'])) {
+                $faq_items[] = array(
+                    'question' => sanitize_text_field($item['question']),
+                    'answer' => sanitize_textarea_field($item['answer']),
+                );
+            }
+        }
+        update_post_meta($post_id, '_faq_items', $faq_items);
+    } else {
+        delete_post_meta($post_id, '_faq_items');
+    }
+    
+    // Save HowTo steps
+    if (isset($_POST['howto_steps']) && is_array($_POST['howto_steps'])) {
+        $howto_steps = array();
+        foreach ($_POST['howto_steps'] as $step) {
+            if (!empty($step['name']) && !empty($step['text'])) {
+                $howto_steps[] = array(
+                    'name' => sanitize_text_field($step['name']),
+                    'text' => sanitize_textarea_field($step['text']),
+                );
+            }
+        }
+        update_post_meta($post_id, '_howto_steps', $howto_steps);
+    } else {
+        delete_post_meta($post_id, '_howto_steps');
+    }
+}
+add_action('save_post_product', 'putrafiber_save_product_meta');
+
+/**
+ * Get Related Products
+ */
+function putrafiber_get_related_products($product_id, $limit = 4) {
+    $categories = wp_get_post_terms($product_id, 'product_category', array('fields' => 'ids'));
+    
+    $args = array(
+        'post_type' => 'product',
+        'posts_per_page' => $limit,
+        'post__not_in' => array($product_id),
+        'orderby' => 'rand',
+    );
+    
+    if (!empty($categories)) {
+        $args['tax_query'] = array(
+            array(
+                'taxonomy' => 'product_category',
+                'field' => 'term_id',
+                'terms' => $categories,
+            ),
+        );
+    }
+    
+    return new WP_Query($args);
+}
+
+/**
+ * Add Product to functions.php require
+ */
+// Add this line to functions.php after other requires:
+// require_once PUTRAFIBER_DIR . '/inc/post-types/product.php';
