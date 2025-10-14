@@ -1,0 +1,65 @@
+<?php
+/**
+ * Product Card Template Part
+ * 
+ * @package PutraFiber
+ * @since 1.0.0
+ */
+
+$product_id = get_the_ID();
+$price = get_post_meta($product_id, '_product_price', true) ?: '1000';
+$price_type = get_post_meta($product_id, '_product_price_type', true) ?: 'price';
+$stock = get_post_meta($product_id, '_product_stock', true) ?: 'ready';
+$short_desc = get_post_meta($product_id, '_product_short_description', true);
+$categories = get_the_terms($product_id, 'product_category');
+?>
+
+<article class="product-card">
+    <a href="<?php the_permalink(); ?>" class="product-card-link">
+        
+        <!-- Thumbnail -->
+        <div class="product-thumbnail">
+            <?php if (has_post_thumbnail()): ?>
+                <?php the_post_thumbnail('putrafiber-product', ['alt' => get_the_title()]); ?>
+            <?php else: ?>
+                <img src="<?php echo PUTRAFIBER_URI; ?>/assets/images/no-image.svg" alt="No Image">
+            <?php endif; ?>
+            
+            <!-- Stock Badge -->
+            <?php if ($stock === 'out-of-stock'): ?>
+                <span class="stock-badge out-stock">Stok Habis</span>
+            <?php elseif ($stock === 'pre-order'): ?>
+                <span class="stock-badge pre-order">Pre-Order</span>
+            <?php endif; ?>
+            
+            <!-- Category Badge -->
+            <?php if ($categories): ?>
+                <span class="category-badge"><?php echo esc_html($categories[0]->name); ?></span>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Content -->
+        <div class="product-card-content">
+            <h3 class="product-card-title"><?php the_title(); ?></h3>
+            
+            <?php if ($short_desc): ?>
+                <p class="product-card-excerpt"><?php echo esc_html(wp_trim_words($short_desc, 12)); ?></p>
+            <?php elseif (has_excerpt()): ?>
+                <p class="product-card-excerpt"><?php echo get_the_excerpt(); ?></p>
+            <?php endif; ?>
+            
+            <div class="product-card-footer">
+                <?php if ($price_type === 'price'): ?>
+                    <span class="product-card-price">Rp <?php echo number_format($price, 0, ',', '.'); ?></span>
+                <?php else: ?>
+                    <span class="product-card-cta">Hubungi Kami</span>
+                <?php endif; ?>
+                
+                <span class="product-card-button">
+                    Lihat Detail →
+                </span>
+            </div>
+        </div>
+        
+    </a>
+</article>
