@@ -24,6 +24,7 @@ require_once PUTRAFIBER_DIR . '/inc/performance.php';
 require_once PUTRAFIBER_DIR . '/inc/pwa.php';
 require_once PUTRAFIBER_DIR . '/inc/webp-converter.php';
 require_once PUTRAFIBER_DIR . '/inc/sitemap-generator.php';
+require_once PUTRAFIBER_DIR . '/inc/post-types/product.php';
 
 /**
  * Theme Setup
@@ -265,3 +266,4 @@ function putrafiber_add_async_defer($tag, $handle) {
     return $tag;
 }
 add_filter('script_loader_tag', 'putrafiber_add_async_defer', 10, 2);
+
