@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="300" height="100" fill="#00BCD4" rx="8"/>
+    
+    <!-- Water wave design -->
+    <path d="M0,60 Q25,50 50,60 T100,60 T150,60 T200,60 T250,60 T300,60 L300,100 L0,100 Z" fill="#0097A7" opacity="0.3"/>
+    <path d="M0,70 Q25,60 50,70 T100,70 T150,70 T200,70 T250,70 T300,70 L300,100 L0,100 Z" fill="#0097A7" opacity="0.2"/>
+    
+    <!-- Icon - Water drop -->
+    <circle cx="50" cy="40" r="18" fill="white" opacity="0.9"/>
+    <path d="M50,25 Q40,35 40,42 Q40,50 50,50 Q60,50 60,42 Q60,35 50,25 Z" fill="#00BCD4"/>
+    
+    <!-- Text -->
+    <text x="80" y="45" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">
+        PUTRA
+    </text>
+    <text x="80" y="70" font-family="Arial, sans-serif" font-size="20" fill="white" opacity="0.9">
+        FIBER
+    </text>
+    
+    <!-- Tagline -->
+    <text x="80" y="85" font-family="Arial, sans-serif" font-size="10" fill="white" opacity="0.7">
+        Waterpark & Playground Solutions
+    </text>
+</svg>

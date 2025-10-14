@@ -1,0 +1,16 @@
+SCREENSHOT.PNG PLACEHOLDER
+==========================
+
+This file should be replaced with an actual screenshot.png (1200x900px)
+showing the theme's appearance.
+
+For now, you can:
+1. Take a screenshot of your theme
+2. Resize it to 1200x900 pixels
+3. Save it as screenshot.png in the theme root directory
+4. Replace this file
+
+Recommended tools:
+- Photoshop
+- GIMP (free)
+- Online image editors

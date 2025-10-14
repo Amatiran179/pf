@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Gradient -->
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00BCD4;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0097A7;stop-opacity:1" />
+        </linearGradient>
+        
+        <pattern id="waterPattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+            <circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/>
+        </pattern>
+    </defs>
+    
+    <rect width="1200" height="630" fill="url(#bgGradient)"/>
+    <rect width="1200" height="630" fill="url(#waterPattern)"/>
+    
+    <!-- Water Waves -->
+    <path d="M0,400 Q100,350 200,400 T400,400 T600,400 T800,400 T1000,400 T1200,400 L1200,630 L0,630 Z" 
+          fill="white" opacity="0.05"/>
+    <path d="M0,450 Q100,400 200,450 T400,450 T600,450 T800,450 T1000,450 T1200,450 L1200,630 L0,630 Z" 
+          fill="white" opacity="0.05"/>
+    
+    <!-- Main Icon -->
+    <g transform="translate(300, 150)">
+        <!-- Water drop -->
+        <circle cx="0" cy="0" r="80" fill="white" opacity="0.2"/>
+        <path d="M0,-60 Q-40,-20 -40,10 Q-40,50 0,50 Q40,50 40,10 Q40,-20 0,-60 Z" 
+              fill="white" opacity="0.9"/>
+        
+        <!-- Ripples -->
+        <circle cx="0" cy="0" r="100" stroke="white" stroke-width="2" fill="none" opacity="0.3"/>
+        <circle cx="0" cy="0" r="120" stroke="white" stroke-width="2" fill="none" opacity="0.2"/>
+    </g>
+    
+    <!-- Text Content -->
+    <text x="500" y="250" font-family="Arial, Helvetica, sans-serif" font-size="80" font-weight="bold" fill="white">
+        PUTRAFIBER
+    </text>
+    
+    <text x="500" y="320" font-family="Arial, Helvetica, sans-serif" font-size="36" fill="white" opacity="0.95">
+        Kontraktor Waterpark & Playground
+    </text>
+    
+    <text x="500" y="370" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="white" opacity="0.85">
+        Spesialis Fiberglass Berkualitas Tinggi
+    </text>
+    
+    <!-- Features -->
+    <g transform="translate(400, 450)">
+        <g transform="translate(0, 0)">
+            <circle cx="0" cy="0" r="8" fill="white" opacity="0.8"/>
+            <text x="20" y="5" font-family="Arial, sans-serif" font-size="20" fill="white" opacity="0.9">
+                15+ Tahun Pengalaman
+            </text>
+        </g>
+        
+        <g transform="translate(300, 0)">
+            <circle cx="0" cy="0" r="8" fill="white" opacity="0.8"/>
+            <text x="20" y="5" font-family="Arial, sans-serif" font-size="20" fill="white" opacity="0.9">
+                500+ Project Selesai
+            </text>
+        </g>
+    </g>
+    
+    <!-- Website -->
+    <text x="600" y="580" font-family="Arial, sans-serif" font-size="24" fill="white" 
+          opacity="0.8" text-anchor="middle">
+        www.putrafiber.com
+    </text>
+</svg>

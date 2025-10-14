@@ -1,0 +1,132 @@
+/* Admin Styles */
+.putrafiber-admin-wrap {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 20px 0 0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.nav-tab-wrapper {
+    border-bottom: 1px solid #ccc;
+    margin: 0 0 20px;
+    padding: 0;
+}
+
+.nav-tab {
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    margin-right: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.nav-tab:hover {
+    background: #e8e8e8;
+}
+
+.nav-tab-active {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.form-table th {
+    width: 250px;
+    font-weight: 600;
+    padding: 20px 10px 20px 0;
+}
+
+.form-table td {
+    padding: 15px 10px;
+}
+
+.image-preview img,
+.icon-preview img {
+    display: block;
+    max-width: 300px;
+    height: auto;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.portfolio-gallery-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.portfolio-gallery-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.button.putrafiber-upload-image,
+.button.putrafiber-upload-icon,
+.button.portfolio-gallery-upload {
+    background: #00BCD4;
+    border-color: #0097A7;
+    color: #fff;
+}
+
+.button.putrafiber-upload-image:hover,
+.button.putrafiber-upload-icon:hover,
+.button.portfolio-gallery-upload:hover {
+    background: #0097A7;
+    border-color: #00838F;
+}
+
+.button.putrafiber-remove-image,
+.button.putrafiber-remove-icon {
+    background: #dc3545;
+    border-color: #c82333;
+    color: #fff;
+    margin-left: 10px;
+}
+
+.button.putrafiber-remove-image:hover,
+.button.putrafiber-remove-icon:hover {
+    background: #c82333;
+    border-color: #bd2130;
+}
+
+/* Meta Box Styles */
+.components-panel__body {
+    border-top: 1px solid #e2e4e7;
+}
+
+.components-base-control {
+    margin-bottom: 20px;
+}
+
+.components-base-control__label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Character Counter */
+#title-length,
+#desc-length {
+    font-weight: 600;
+    color: #00BCD4;
+}

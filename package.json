@@ -1,0 +1,39 @@
+{
+  "name": "putrafiber-enterprise-theme",
+  "version": "1.0.0",
+  "description": "Premium WordPress theme untuk PutraFiber - Kontraktor Waterpark & Playground Fiberglass",
+  "main": "index.js",
+  "scripts": {
+    "watch": "echo 'Development mode - watching for changes...'",
+    "build": "echo 'Building production assets...'",
+    "lint:css": "echo 'Linting CSS files...'",
+    "lint:js": "echo 'Linting JavaScript files...'",
+    "test": "echo 'Running tests...'"
+  },
+  "keywords": [
+    "wordpress",
+    "theme",
+    "waterpark",
+    "playground",
+    "fiberglass",
+    "enterprise",
+    "pwa",
+    "seo"
+  ],
+  "author": "PutraFiber Development Team",
+  "license": "Proprietary",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/putrafiber/enterprise-theme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/putrafiber/enterprise-theme/issues"
+  },
+  "homepage": "https://putrafiber.com",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

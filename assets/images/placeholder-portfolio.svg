@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#E3F2FD;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#B2EBF2;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="800" height="600" fill="url(#portfolioGradient)"/>
+    
+    <!-- Pattern -->
+    <g opacity="0.1">
+        <circle cx="100" cy="100" r="40" fill="#00BCD4"/>
+        <circle cx="700" cy="100" r="40" fill="#00BCD4"/>
+        <circle cx="100" cy="500" r="40" fill="#00BCD4"/>
+        <circle cx="700" cy="500" r="40" fill="#00BCD4"/>
+    </g>
+    
+    <!-- Main Icon -->
+    <g transform="translate(400, 250)">
+        <!-- Image icon -->
+        <rect x="-100" y="-80" width="200" height="160" rx="12" fill="white" opacity="0.8"/>
+        <rect x="-90" y="-70" width="180" height="140" rx="8" fill="#00BCD4" opacity="0.2"/>
+        
+        <!-- Mountain icon -->
+        <path d="M-60,20 L-20,-20 L20,20 Z" fill="#00BCD4" opacity="0.4"/>
+        <path d="M0,20 L40,-20 L80,20 Z" fill="#00BCD4" opacity="0.3"/>
+        
+        <!-- Sun -->
+        <circle cx="-60" cy="-30" r="15" fill="#FFD54F" opacity="0.6"/>
+    </g>
+    
+    <!-- Text -->
+    <text x="400" y="450" font-family="Arial, sans-serif" font-size="32" font-weight="600" 
+          fill="#00BCD4" text-anchor="middle" opacity="0.7">
+        Portfolio Image Placeholder
+    </text>
+    
+    <text x="400" y="490" font-family="Arial, sans-serif" font-size="18" 
+          fill="#0097A7" text-anchor="middle" opacity="0.6">
+        800 x 600
+    </text>
+</svg>

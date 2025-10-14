@@ -1,0 +1,92 @@
+PROPRIETARY LICENSE AGREEMENT
+
+Copyright (c) 2024 PutraFiber. All rights reserved.
+
+IMPORTANT - READ CAREFULLY:
+
+This PutraFiber Enterprise Theme ("Software") is the proprietary property of 
+PutraFiber and is protected by copyright law and international treaty provisions.
+
+GRANT OF LICENSE:
+This license grants you the following rights:
+
+1. PERMITTED USE
+   - This Software is licensed solely for use by PutraFiber
+   - Installation on PutraFiber's official website(s) only
+   - Internal business use within PutraFiber organization
+   - Modification for internal use only
+
+2. RESTRICTIONS
+   You may NOT:
+   - Distribute, sell, or transfer this Software to any third party
+   - Make the Software available for download
+   - Use the Software on websites not owned by PutraFiber
+   - Remove or modify any copyright notices
+   - Reverse engineer, decompile, or disassemble the Software
+   - Create derivative works for commercial distribution
+   - Sublicense, rent, or lease the Software
+
+3. OWNERSHIP
+   - PutraFiber retains all rights, title, and interest in the Software
+   - This license does not grant you any intellectual property rights
+   - All modifications remain property of PutraFiber
+
+4. UPDATES AND SUPPORT
+   - Updates and enhancements are at PutraFiber's discretion
+   - No warranty or support obligation unless separately agreed
+   - Future versions may require separate licensing
+
+5. TERMINATION
+   - This license is effective until terminated
+   - License terminates automatically upon violation of terms
+   - Upon termination, you must destroy all copies
+
+6. WARRANTY DISCLAIMER
+   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+   IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS 
+   FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+7. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL PUTRAFIBER BE LIABLE FOR ANY DAMAGES WHATSOEVER ARISING 
+   OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE.
+
+8. GOVERNING LAW
+   This agreement is governed by the laws of Indonesia without regard to 
+   conflict of law principles.
+
+9. ENTIRE AGREEMENT
+   This agreement constitutes the entire agreement between the parties and 
+   supersedes all prior agreements.
+
+10. CONTACT
+    For licensing inquiries or permissions:
+    Email: legal@putrafiber.com
+    Phone: +62-21-XXXXXXX
+    Address: [PutraFiber Office Address]
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT, 
+UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+
+---
+
+Third-Party Components:
+
+This Software may include the following third-party components:
+
+1. Google Fonts (Poppins)
+   License: SIL Open Font License 1.1
+   URL: https://fonts.google.com/specimen/Poppins
+
+2. SVG Icons (Inline)
+   License: Custom created for PutraFiber
+   Copyright: PutraFiber 2024
+
+All third-party components are used in accordance with their respective licenses.
+
+---
+
+Copyright (c) 2024 PutraFiber
+All Rights Reserved
+
+Last Updated: January 15, 2024
+Version: 1.0.0

@@ -1,0 +1,122 @@
+/* Responsive Styles */
+
+/* Large Devices (Desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+    
+    .container-wide {
+        max-width: 1320px;
+    }
+}
+
+/* Medium Devices (Tablets, 768px to 991px) */
+@media (max-width: 991px) {
+    .section {
+        padding: 60px 0;
+    }
+    
+    .section-title h2 {
+        font-size: 36px;
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .hero-section {
+        min-height: 70vh;
+    }
+}
+
+/* Small Devices (Phones, 576px to 767px) */
+@media (max-width: 767px) {
+    .section {
+        padding: 40px 0;
+    }
+    
+    .section-title h2 {
+        font-size: 28px;
+    }
+    
+    .section-title p {
+        font-size: 16px;
+    }
+    
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .btn {
+        padding: 10px 24px;
+        font-size: 14px;
+    }
+    
+    .hero-section {
+        min-height: 60vh;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Extra Small Devices (Phones, less than 576px) */
+@media (max-width: 575px) {
+    .container,
+    .container-wide {
+        padding: 0 15px;
+    }
+    
+    .section-title h2 {
+        font-size: 24px;
+    }
+    
+    .feature-card,
+    .service-card {
+        padding: 30px 20px;
+    }
+    
+    .cta-contact-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .site-header,
+    .site-footer,
+    .whatsapp-float,
+    #back-to-top,
+    .cta-section,
+    .comments-area {
+        display: none;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000;
+        background: #fff;
+    }
+    
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+}

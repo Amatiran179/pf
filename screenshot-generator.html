@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PutraFiber Theme Screenshot Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .screenshot-container {
+            width: 1200px;
+            height: 900px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00BCD4, #0097A7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .logo-text h1 {
+            font-size: 24px;
+            color: #00BCD4;
+            font-weight: 800;
+        }
+        
+        .logo-text p {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-menu a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .cta-btn {
+            background: #00BCD4;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+            padding: 80px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 100"><path d="M0,50 Q300,0 600,50 T1200,50 L1200,100 L0,100 Z" fill="white" opacity="0.1"/></svg>');
+            background-size: cover;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-item h3 {
+            font-size: 36px;
+            font-weight: 700;
+        }
+        
+        .stat-item p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 60px 40px;
+            background: #f8f9fa;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .section-title h2 {
+            font-size: 32px;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .section-title p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00BCD4, #0097A7);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+        }
+        
+        .feature-card h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        .footer p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        /* Instructions */
+        .instructions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-width: 300px;
+            z-index: 1000;
+        }
+        
+        .instructions h3 {
+            color: #00BCD4;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .instructions button {
+            width: 100%;
+            background: #00BCD4;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .instructions button:hover {
+            background: #0097A7;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h3>📸 Screenshot Generator</h3>
+        <ol>
+            <li>Klik tombol "Hide Instructions"</li>
+            <li>Screenshot halaman ini (1200x900px)</li>
+            <li>Save sebagai <strong>screenshot.png</strong></li>
+            <li>Letakkan di root theme</li>
+        </ol>
+        <button onclick="this.parentElement.style.display='none'">Hide Instructions</button>
+    </div>
+
+    <div class="screenshot-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">💧</div>
+                <div class="logo-text">
+                    <h1>PUTRAFIBER</h1>
+                    <p>Waterpark & Playground Solutions</p>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Layanan</a></li>
+                <li><a href="#">Portofolio</a></li>
+                <li><a href="#">Produk</a></li>
+                <li><a href="#">Blog</a></li>
+            </ul>
+            <a href="#" class="cta-btn">Konsultasi Gratis</a>
+        </div>
+        
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Kontraktor Waterpark & Playground Terpercaya</h1>
+            <p>Spesialis pembuatan waterpark, waterboom, playground indoor & outdoor dengan kualitas premium</p>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Project Selesai</p>
+                </div>
+                <div class="stat-item">
+                    <h3>15+</h3>
+                    <p>Tahun Pengalaman</p>
+                </div>
+                <div class="stat-item">
+                    <h3>100%</h3>
+                    <p>Kepuasan Klien</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="features">
+            <div class="section-title">
+                <h2>Mengapa Memilih PutraFiber?</h2>
+                <p>Keunggulan yang membuat kami pilihan utama kontraktor fiberglass</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏭</div>
+                    <h3>Produksi Sendiri</h3>
+                    <p>Pabrik sendiri dengan kontrol kualitas ketat</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Garansi Resmi</h3>
+                    <p>Garansi untuk semua produk dan layanan</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Harga Kompetitif</h3>
+                    <p>Harga pabrik langsung tanpa markup</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Pengerjaan Cepat</h3>
+                    <p>Tim profesional dengan deadline terjamin</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2024 PutraFiber - Kontraktor Waterpark & Playground Fiberglass Profesional</p>
+        </div>
+    </div>
+</body>
+</html>

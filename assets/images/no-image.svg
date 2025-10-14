@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="400" height="300" fill="#F5F5F5"/>
+        <!-- Border -->
+    <rect x="10" y="10" width="380" height="280" rx="8" fill="none" stroke="#E0E0E0" stroke-width="2" stroke-dasharray="5,5"/>
+    
+    <!-- Icon - Image placeholder -->
+    <g transform="translate(200, 120)">
+        <!-- Frame -->
+        <rect x="-60" y="-50" width="120" height="100" rx="6" fill="#E0E0E0" opacity="0.5"/>
+        
+        <!-- Mountain -->
+        <path d="M-40,20 L-10,-10 L20,20 Z" fill="#BDBDBD"/>
+        <path d="M0,20 L30,-10 L50,20 Z" fill="#9E9E9E"/>
+        
+        <!-- Sun -->
+        <circle cx="-30" cy="-20" r="12" fill="#FFD54F" opacity="0.7"/>
+    </g>
+    
+    <!-- Text -->
+    <text x="200" y="220" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+          fill="#9E9E9E" text-anchor="middle">
+        No Image Available
+    </text>
+    
+    <text x="200" y="245" font-family="Arial, sans-serif" font-size="12" 
+          fill="#BDBDBD" text-anchor="middle">
+        Image not found
+    </text>
+</svg>
