@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  * @since 1.0.0
+ * @version 1.1.0 - FIXED VERSION
  */
 
 if (!defined('ABSPATH')) exit;
@@ -142,6 +143,7 @@ add_action('add_meta_boxes', 'putrafiber_product_meta_boxes');
  * Product Details Meta Box Callback
  */
 function putrafiber_product_details_callback($post) {
+    // PENTING: Nonce field untuk security
     wp_nonce_field('putrafiber_product_nonce', 'putrafiber_product_nonce_field');
     
     // Get saved values
@@ -172,9 +174,6 @@ function putrafiber_product_details_callback($post) {
     .price-input-wrapper { display: none; }
     .price-input-wrapper.active { display: block; }
     .help-text { font-size: 12px; color: #666; margin-top: 5px; font-style: italic; }
-    .stock-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-    .stock-ready { background: #4CAF50; color: white; }
-    .stock-preorder { background: #FFC107; color: #333; }
     </style>
     
     <table class="product-meta-table">
@@ -210,9 +209,9 @@ function putrafiber_product_details_callback($post) {
                 
                 <div class="price-input-wrapper <?php echo ($price_type === 'price') ? 'active' : ''; ?>" id="price-input-box">
                     <label for="product_price"><?php _e('Harga Produk (Rp)', 'putrafiber'); ?></label>
-                    <input type="number" id="product_price" name="product_price" value="<?php echo esc_attr($price); ?>" class="product-meta-input" placeholder="1000">
+                    <input type="number" id="product_price" name="product_price" value="<?php echo esc_attr($price); ?>" class="product-meta-input" placeholder="0" min="0" step="1">
                     <p class="help-text">
-                        <?php _e('⚠️ Kosongkan atau isi 0 akan otomatis jadi Rp.1.000 untuk schema (anti Google penalty)', 'putrafiber'); ?>
+                        <?php _e('💡 Kosongkan atau isi 0 akan otomatis jadi Rp.1.000 untuk schema (anti Google penalty)', 'putrafiber'); ?>
                     </p>
                 </div>
                 
@@ -318,10 +317,9 @@ function putrafiber_product_details_callback($post) {
         // Upload PDF
         $('.upload-pdf-button').on('click', function(e) {
             e.preventDefault();
-            var button = $(this);
             var custom_uploader = wp.media({
-                title: 'Select PDF Catalog',
-                button: { text: 'Use this file' },
+                title: '<?php _e('Select PDF Catalog', 'putrafiber'); ?>',
+                button: { text: '<?php _e('Use this file', 'putrafiber'); ?>' },
                 multiple: false,
                 library: { type: 'application/pdf' }
             }).on('select', function() {
@@ -431,8 +429,8 @@ function putrafiber_product_gallery_callback($post) {
             }
             
             galleryUploader = wp.media({
-                title: 'Select Gallery Images',
-                button: { text: 'Add to Gallery' },
+                title: '<?php _e('Select Gallery Images', 'putrafiber'); ?>',
+                button: { text: '<?php _e('Add to Gallery', 'putrafiber'); ?>' },
                 multiple: true
             });
             
@@ -771,86 +769,122 @@ function putrafiber_product_seo_callback($post) {
 }
 
 /**
- * Save Product Meta Data
+ * =====================================================
+ * SAVE PRODUCT META DATA - FIXED VERSION
+ * =====================================================
+ * Bug fix: Mapping yang benar antara POST field dan meta key
  */
 function putrafiber_save_product_meta($post_id) {
-    // Verify nonce
+    // 1. Verify nonce
     if (!isset($_POST['putrafiber_product_nonce_field']) || 
         !wp_verify_nonce($_POST['putrafiber_product_nonce_field'], 'putrafiber_product_nonce')) {
         return;
     }
     
-    // Check autosave
+    // 2. Check autosave
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
         return;
     }
     
-    // Check permissions
+    // 3. Check permissions
     if (!current_user_can('edit_post', $post_id)) {
         return;
     }
     
-    // Save product details
-    $fields = array(
-        '_product_price' => 'sanitize_text_field',
-        '_product_price_type' => 'sanitize_text_field',
-        '_product_stock' => 'sanitize_text_field',
-        '_product_sku' => 'sanitize_text_field',
-        '_product_sizes' => 'sanitize_text_field',
-        '_product_colors' => 'sanitize_text_field',
-        '_product_models' => 'sanitize_text_field',
-        '_product_material' => 'sanitize_text_field',
-        '_product_warranty' => 'sanitize_text_field',
-        '_product_catalog_pdf' => 'esc_url_raw',
-        '_product_short_description' => 'sanitize_textarea_field',
-        '_product_specifications' => 'sanitize_textarea_field',
-        '_product_features' => 'sanitize_textarea_field',
-        '_product_gallery' => 'sanitize_text_field',
-        '_meta_title' => 'sanitize_text_field',
-        '_meta_description' => 'sanitize_textarea_field',
-        '_focus_keyword' => 'sanitize_text_field',
-        '_video_url' => 'esc_url_raw',
-        '_video_duration' => 'sanitize_text_field',
-        '_video_title' => 'sanitize_text_field',
-        '_video_description' => 'sanitize_textarea_field',
+    // 4. Check post type
+    if (get_post_type($post_id) !== 'product') {
+        return;
+    }
+    
+    // 5. FIELD MAPPING: POST field name => Meta key database
+    $field_mapping = array(
+        // Product Details
+        'product_short_description' => '_product_short_description',
+        'product_sku'               => '_product_sku',
+        'product_price_type'        => '_product_price_type',
+        'product_price'             => '_product_price',
+        'product_stock'             => '_product_stock',
+        'product_sizes'             => '_product_sizes',
+        'product_colors'            => '_product_colors',
+        'product_models'            => '_product_models',
+        'product_material'          => '_product_material',
+        'product_warranty'          => '_product_warranty',
+        'product_catalog_pdf'       => '_product_catalog_pdf',
+        'product_specifications'    => '_product_specifications',
+        'product_features'          => '_product_features',
+        'product_gallery'           => '_product_gallery',
+        
+        // SEO Fields
+        'meta_title'                => '_meta_title',
+        'meta_description'          => '_meta_description',
+        'focus_keyword'             => '_focus_keyword',
+        
+        // Video Schema
+        'video_url'                 => '_video_url',
+        'video_duration'            => '_video_duration',
+        'video_title'               => '_video_title',
+        'video_description'         => '_video_description',
     );
     
-    foreach ($fields as $field => $sanitize_callback) {
-        $field_name = str_replace('_', '', $field);
-        if (isset($_POST[$field_name])) {
-            update_post_meta($post_id, $field, call_user_func($sanitize_callback, $_POST[$field_name]));
+    // 6. Save each field with proper sanitization
+    foreach ($field_mapping as $post_field => $meta_key) {
+        if (isset($_POST[$post_field])) {
+            $value = $_POST[$post_field];
+            
+            // Sanitize based on field type
+            if (in_array($post_field, array('product_short_description', 'product_specifications', 'product_features', 'meta_description', 'video_description'))) {
+                // Textarea fields
+                $value = sanitize_textarea_field($value);
+                
+            } elseif (in_array($post_field, array('product_catalog_pdf', 'video_url'))) {
+                // URL fields
+                $value = esc_url_raw($value);
+                
+            } elseif ($post_field === 'product_price') {
+                // Price field - special handling
+                $value = absint($value);
+                // Default to 1000 if empty or 0 (for schema anti Google penalty)
+                if ($value <= 0) {
+                    $value = 1000;
+                }
+                
+            } else {
+                // Text fields
+                $value = sanitize_text_field($value);
+            }
+            
+            // Update meta
+            update_post_meta($post_id, $meta_key, $value);
         }
     }
     
-    // Handle price default
-    $price = isset($_POST['product_price']) ? intval($_POST['product_price']) : 0;
-    if ($price <= 0) {
-        $price = 1000; // Default Rp.1000 for schema (anti Google penalty)
-    }
-    update_post_meta($post_id, '_product_price', $price);
-    
-    // Save checkboxes
+    // 7. Save checkboxes (special handling - tidak ada di POST jika tidak dicentang)
     update_post_meta($post_id, '_enable_video_schema', isset($_POST['enable_video_schema']) ? '1' : '0');
     update_post_meta($post_id, '_enable_faq_schema', isset($_POST['enable_faq_schema']) ? '1' : '0');
     update_post_meta($post_id, '_enable_howto_schema', isset($_POST['enable_howto_schema']) ? '1' : '0');
     
-    // Save FAQ items
+    // 8. Save FAQ items (array data)
     if (isset($_POST['faq_items']) && is_array($_POST['faq_items'])) {
         $faq_items = array();
         foreach ($_POST['faq_items'] as $item) {
             if (!empty($item['question']) && !empty($item['answer'])) {
                 $faq_items[] = array(
                     'question' => sanitize_text_field($item['question']),
-                    'answer' => sanitize_textarea_field($item['answer']),
+                    'answer'   => sanitize_textarea_field($item['answer']),
                 );
             }
         }
-        update_post_meta($post_id, '_faq_items', $faq_items);
+        
+        if (!empty($faq_items)) {
+            update_post_meta($post_id, '_faq_items', $faq_items);
+        } else {
+            delete_post_meta($post_id, '_faq_items');
+        }
     } else {
         delete_post_meta($post_id, '_faq_items');
     }
     
-    // Save HowTo steps
+    // 9. Save HowTo steps (array data)
     if (isset($_POST['howto_steps']) && is_array($_POST['howto_steps'])) {
         $howto_steps = array();
         foreach ($_POST['howto_steps'] as $step) {
@@ -861,41 +895,44 @@ function putrafiber_save_product_meta($post_id) {
                 );
             }
         }
-        update_post_meta($post_id, '_howto_steps', $howto_steps);
+        
+        if (!empty($howto_steps)) {
+            update_post_meta($post_id, '_howto_steps', $howto_steps);
+        } else {
+            delete_post_meta($post_id, '_howto_steps');
+        }
     } else {
         delete_post_meta($post_id, '_howto_steps');
     }
 }
-add_action('save_post_product', 'putrafiber_save_product_meta');
+add_action('save_post_product', 'putrafiber_save_product_meta', 10, 1);
 
 /**
  * Get Related Products
+ * 
+ * @param int $product_id Product ID
+ * @param int $limit Number of products to return
+ * @return WP_Query
  */
 function putrafiber_get_related_products($product_id, $limit = 4) {
     $categories = wp_get_post_terms($product_id, 'product_category', array('fields' => 'ids'));
     
     $args = array(
-        'post_type' => 'product',
+        'post_type'      => 'product',
         'posts_per_page' => $limit,
-        'post__not_in' => array($product_id),
-        'orderby' => 'rand',
+        'post__not_in'   => array($product_id),
+        'orderby'        => 'rand',
     );
     
     if (!empty($categories)) {
         $args['tax_query'] = array(
             array(
                 'taxonomy' => 'product_category',
-                'field' => 'term_id',
-                'terms' => $categories,
+                'field'    => 'term_id',
+                'terms'    => $categories,
             ),
         );
     }
     
     return new WP_Query($args);
 }
-
-/**
- * Add Product to functions.php require
- */
-// Add this line to functions.php after other requires:
-// require_once PUTRAFIBER_DIR . '/inc/post-types/product.php';
