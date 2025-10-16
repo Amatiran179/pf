@@ -438,6 +438,52 @@
         }
 
         // ===================================================================
+        // ANALYTICS RESET ACTION
+        // ===================================================================
+        $(document).on('click', '.putrafiber-reset-analytics', function(e) {
+            e.preventDefault();
+
+            var $button = $(this);
+            var confirmMessage = $button.data('confirm') || 'Reset analytics data?';
+            var successMessage = $button.data('success') || (window.putrafiberAdminVars && putrafiberAdminVars.analyticsResetSuccess ? putrafiberAdminVars.analyticsResetSuccess : 'Analytics cleared.');
+            var errorMessage = (window.putrafiberAdminVars && putrafiberAdminVars.analyticsResetError) ? putrafiberAdminVars.analyticsResetError : 'Terjadi kesalahan saat menghapus data analytics.';
+
+            if (!window.confirm(confirmMessage)) {
+                return;
+            }
+
+            var nonce = $button.data('nonce') || '';
+            var ajaxUrl = (window.putrafiberAdminVars && putrafiberAdminVars.ajax_url) ? putrafiberAdminVars.ajax_url : (typeof ajaxurl !== 'undefined' ? ajaxurl : '');
+
+            if (!ajaxUrl) {
+                window.alert(errorMessage);
+                return;
+            }
+
+            $button.addClass('is-busy').prop('disabled', true);
+
+            $.post(ajaxUrl, {
+                action: 'putrafiber_reset_analytics',
+                nonce: nonce
+            }).done(function(response) {
+                if (response && response.success) {
+                    if (successMessage) {
+                        window.alert(successMessage);
+                    }
+                    window.location.reload();
+                } else if (response && response.data && response.data.message) {
+                    window.alert(response.data.message);
+                } else {
+                    window.alert(errorMessage);
+                }
+            }).fail(function() {
+                window.alert(errorMessage);
+            }).always(function() {
+                $button.removeClass('is-busy').prop('disabled', false);
+            });
+        });
+
+        // ===================================================================
         // INITIALIZATION COMPLETE
         // ===================================================================
         console.log('✅ PutraFiber Admin JS fully loaded');

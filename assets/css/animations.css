@@ -54,6 +54,51 @@
     }
 }
 
+@keyframes pf-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(48px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pf-slide-left {
+    0% {
+        opacity: 0;
+        transform: translateX(52px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pf-zoom-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.84);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pf-tilt-in {
+    0% {
+        opacity: 0;
+        transform: translateY(36px) rotateX(12deg);
+        transform-origin: top;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+    }
+}
+
 @keyframes scaleIn {
     from {
         opacity: 0;
@@ -122,6 +167,51 @@
 .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.fade-in.animate-rise,
+.fade-in.animate-slide-left,
+.fade-in.animate-zoom-in,
+.fade-in.animate-tilt-in {
+    transition: none;
+    opacity: 0;
+}
+
+.fade-in.animate-rise {
+    transform: translateY(48px);
+}
+
+.fade-in.animate-rise.visible {
+    animation: pf-rise 0.85s cubic-bezier(0.21, 0.74, 0.34, 0.99) forwards;
+    animation-delay: var(--animation-delay, 0s);
+}
+
+.fade-in.animate-slide-left {
+    transform: translateX(52px);
+}
+
+.fade-in.animate-slide-left.visible {
+    animation: pf-slide-left 0.85s cubic-bezier(0.21, 0.74, 0.34, 0.99) forwards;
+    animation-delay: var(--animation-delay, 0s);
+}
+
+.fade-in.animate-zoom-in {
+    transform: scale(0.88);
+}
+
+.fade-in.animate-zoom-in.visible {
+    animation: pf-zoom-in 0.9s cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
+    animation-delay: var(--animation-delay, 0s);
+}
+
+.fade-in.animate-tilt-in {
+    transform-origin: top;
+    transform: translateY(30px) rotateX(10deg);
+}
+
+.fade-in.animate-tilt-in.visible {
+    animation: pf-tilt-in 0.9s cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
+    animation-delay: var(--animation-delay, 0s);
 }
 
 /* Scroll Animations */

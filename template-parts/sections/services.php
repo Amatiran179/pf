@@ -31,7 +31,12 @@ $services_items = putrafiber_frontpage_parse_repeater('front_services_items', $s
 
         <div class="grid grid-3 services-grid">
             <?php foreach ($services_items as $index => $service): ?>
-                <div class="card service-card fade-in" style="animation-delay: <?php echo esc_attr($index * 0.1); ?>s;">
+                <?php
+                $animations = array('animate-slide-left', 'animate-rise', 'animate-zoom-in');
+                $animation_class = $animations[$index % count($animations)];
+                $delay_value = number_format($index * 0.1, 2, '.', '');
+                ?>
+                <div class="card service-card fade-in <?php echo esc_attr($animation_class); ?>" style="--animation-delay: <?php echo esc_attr($delay_value); ?>s;">
                     <div class="service-icon">
                         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <?php echo putrafiber_frontpage_icon_svg($service['icon']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

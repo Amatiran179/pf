@@ -164,6 +164,66 @@ function putrafiber_frontpage_limit($section, $default) {
 }
 
 /**
+ * Retrieve manually curated blog slots configuration.
+ *
+ * Each line stored in Theme Options should follow the pattern:
+ * "Artikel 1 | 123" where 123 is the post ID. The label segment is optional.
+ *
+ * @return array<int,array{post_id:int,label:string}>
+ */
+function putrafiber_frontpage_blog_slots() {
+    $raw = putrafiber_get_option('front_blog_manual_posts', '');
+    if (empty($raw)) {
+        return array();
+    }
+
+    $lines = preg_split('/\r\n|\r|\n/', $raw);
+    if (!$lines) {
+        return array();
+    }
+
+    $slots = array();
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        $parts   = array_map('trim', explode('|', $line));
+        $post_id = 0;
+        $label   = '';
+
+        if (count($parts) === 1) {
+            $post_id = (int) $parts[0];
+        } else {
+            $label   = $parts[0];
+            $post_id = (int) $parts[1];
+        }
+
+        if ($post_id <= 0) {
+            continue;
+        }
+
+        $status = get_post_status($post_id);
+        if ($status !== 'publish') {
+            continue;
+        }
+
+        if ($label === '') {
+            /* translators: %d: article position on the landing page */
+            $label = sprintf(__('Artikel %d', 'putrafiber'), count($slots) + 1);
+        }
+
+        $slots[] = array(
+            'post_id' => $post_id,
+            'label'   => $label,
+        );
+    }
+
+    return $slots;
+}
+
+/**
  * Resolve the query parameter key used for section pagination.
  *
  * @param string $section
@@ -370,10 +430,10 @@ function putrafiber_frontpage_print_color_vars() {
         return;
     }
 
-    $primary = putrafiber_frontpage_color('front_primary_color', '#0f4c81');
-    $gold    = putrafiber_frontpage_color('front_gold_color', '#f4c542');
-    $dark    = putrafiber_frontpage_color('front_dark_color', '#0b1320');
-    $water   = putrafiber_frontpage_color('front_water_color', 'rgba(15, 76, 129, 0.12)');
+    $primary = putrafiber_frontpage_color('front_primary_color', '#0f75ff');
+    $gold    = putrafiber_frontpage_color('front_gold_color', '#f9c846');
+    $dark    = putrafiber_frontpage_color('front_dark_color', '#0b142b');
+    $water   = putrafiber_frontpage_color('front_water_color', 'rgba(15, 117, 255, 0.14)');
 
     echo '<style id="putrafiber-frontpage-vars">:root{';
     echo '--pf-front-primary:' . esc_attr($primary) . ';';

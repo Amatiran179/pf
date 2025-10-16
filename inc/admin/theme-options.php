@@ -110,6 +110,7 @@ function putrafiber_settings_init() {
     add_settings_field('front_blog_title', __('Blog Title', 'putrafiber'), 'putrafiber_front_blog_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_blog_description', __('Blog Description', 'putrafiber'), 'putrafiber_front_blog_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_blog_limit', __('Blog Posts Limit', 'putrafiber'), 'putrafiber_front_blog_limit_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_blog_manual_posts', __('Blog Slot Manual Order', 'putrafiber'), 'putrafiber_front_blog_manual_posts_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
 
     add_settings_field('front_cta_title', __('CTA Title', 'putrafiber'), 'putrafiber_front_cta_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_cta_description', __('CTA Description', 'putrafiber'), 'putrafiber_front_cta_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
@@ -244,7 +245,7 @@ function putrafiber_sanitize_options($input) {
         'hero_description', 'company_address', 'business_description',
         'front_features_description', 'front_services_description', 'front_portfolio_description',
         'front_products_description', 'front_cta_description',
-        'front_features_items', 'front_services_items', 'meta_description'
+        'front_features_items', 'front_services_items', 'front_blog_manual_posts', 'meta_description'
     );
     foreach ($textarea_fields as $field) {
         $output[$field] = isset($input[$field]) ? sanitize_textarea_field($input[$field]) : '';
@@ -610,27 +611,27 @@ function putrafiber_front_water_intensity_render() {
 
 function putrafiber_front_primary_color_render() {
     $options = get_option('putrafiber_options', array());
-    $value = isset($options['front_primary_color']) ? $options['front_primary_color'] : '#0f4c81';
+    $value = isset($options['front_primary_color']) ? $options['front_primary_color'] : '#0f75ff';
     ?>
-    <input type="text" name="putrafiber_options[front_primary_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#0f4c81">
-    <p class="description"><?php _e('Warna biru utama untuk tone air.', 'putrafiber'); ?></p>
+    <input type="text" name="putrafiber_options[front_primary_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#0f75ff">
+    <p class="description"><?php _e('Warna biru elektrik untuk nuansa air yang modern.', 'putrafiber'); ?></p>
     <?php
 }
 
 function putrafiber_front_gold_color_render() {
     $options = get_option('putrafiber_options', array());
-    $value = isset($options['front_gold_color']) ? $options['front_gold_color'] : '#f4c542';
+    $value = isset($options['front_gold_color']) ? $options['front_gold_color'] : '#f9c846';
     ?>
-    <input type="text" name="putrafiber_options[front_gold_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#f4c542">
-    <p class="description"><?php _e('Aksen emas elegan untuk tombol dan garis dekoratif.', 'putrafiber'); ?></p>
+    <input type="text" name="putrafiber_options[front_gold_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#f9c846">
+    <p class="description"><?php _e('Aksen emas mencolok untuk highlight premium.', 'putrafiber'); ?></p>
     <?php
 }
 
 function putrafiber_front_dark_color_render() {
     $options = get_option('putrafiber_options', array());
-    $value = isset($options['front_dark_color']) ? $options['front_dark_color'] : '#0b1320';
+    $value = isset($options['front_dark_color']) ? $options['front_dark_color'] : '#0b142b';
     ?>
-    <input type="text" name="putrafiber_options[front_dark_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#0b1320">
+    <input type="text" name="putrafiber_options[front_dark_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#0b142b">
     <p class="description"><?php _e('Sentuhan gelap untuk menciptakan kedalaman dan kontras.', 'putrafiber'); ?></p>
     <?php
 }
@@ -780,6 +781,21 @@ function putrafiber_front_blog_limit_render() {
     $value = isset($options['front_blog_limit']) ? (int) $options['front_blog_limit'] : 3;
     ?>
     <input type="number" name="putrafiber_options[front_blog_limit]" value="<?php echo esc_attr($value); ?>" min="3" max="9" class="small-text">
+    <p class="description"><?php _e('Jumlah artikel yang ditampilkan pada landing page.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_blog_manual_posts_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_manual_posts']) ? $options['front_blog_manual_posts'] : '';
+    ?>
+    <textarea name="putrafiber_options[front_blog_manual_posts]" rows="4" class="large-text code" placeholder="Artikel 1 | 123&#10;Artikel 2 | 456"><?php echo esc_textarea($value); ?></textarea>
+    <p class="description">
+        <?php _e('Satu baris per slot. Gunakan format <strong>Label | ID Artikel</strong>. Urutan baris menentukan posisi di landing page.', 'putrafiber'); ?>
+    </p>
+    <p class="description">
+        <?php _e('Kosongkan untuk menampilkan artikel terbaru secara otomatis.', 'putrafiber'); ?>
+    </p>
     <?php
 }
 

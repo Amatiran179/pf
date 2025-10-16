@@ -31,7 +31,12 @@ $features_items = putrafiber_frontpage_parse_repeater('front_features_items', $f
 
         <div class="grid grid-3 feature-grid">
             <?php foreach ($features_items as $index => $feature): ?>
-                <div class="card feature-card fade-in" style="animation-delay: <?php echo esc_attr($index * 0.08); ?>s;">
+                <?php
+                $animations = array('animate-zoom-in', 'animate-rise', 'animate-slide-left');
+                $animation_class = $animations[$index % count($animations)];
+                $delay_value = number_format($index * 0.08, 2, '.', '');
+                ?>
+                <div class="card feature-card fade-in <?php echo esc_attr($animation_class); ?>" style="--animation-delay: <?php echo esc_attr($delay_value); ?>s;">
                     <div class="feature-icon">
                         <span class="feature-icon-circle">
                             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

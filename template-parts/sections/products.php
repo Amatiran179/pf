@@ -6,7 +6,6 @@
  */
 
 $products_limit = putrafiber_frontpage_limit('products', 6);
-$products_page  = putrafiber_frontpage_section_paged('products');
 $products_title = putrafiber_frontpage_text('products', 'title', __('Produk Terlaris', 'putrafiber'));
 $products_desc  = putrafiber_frontpage_text('products', 'description', __('Pilihan wahana dan perosotan fiberglass yang siap dikirim ke lokasi Anda.', 'putrafiber'));
 
@@ -15,9 +14,8 @@ $products_query = new WP_Query(array(
     'posts_per_page' => $products_limit,
     'orderby'        => 'date',
     'order'          => 'DESC',
-    'paged'          => $products_page,
     'post_status'    => 'publish',
-    'no_found_rows'  => false,
+    'no_found_rows'  => true,
     'ignore_sticky_posts' => true,
 ));
 ?>
@@ -42,13 +40,16 @@ $products_query = new WP_Query(array(
         <?php if ($products_query->have_posts()): ?>
             <div class="grid grid-3 products-grid">
                 <?php
-                $delay = 0;
+                $index      = 0;
+                $animations = array('animate-rise', 'animate-slide-left', 'animate-zoom-in', 'animate-tilt-in');
                 while ($products_query->have_posts()):
                     $products_query->the_post();
                     $price = get_post_meta(get_the_ID(), '_product_price', true);
                     $stock = get_post_meta(get_the_ID(), '_product_stock', true);
+                    $animation_class = $animations[$index % count($animations)];
+                    $delay_value     = $index * 0.1;
                     ?>
-                    <article class="card product-card fade-in" style="animation-delay: <?php echo esc_attr($delay); ?>s;">
+                    <article class="card product-card fade-in <?php echo esc_attr($animation_class); ?>" style="--animation-delay: <?php echo esc_attr(number_format($delay_value, 2, '.', '')); ?>s;">
                         <?php if (has_post_thumbnail()): ?>
                             <div class="product-image">
                                 <a href="<?php the_permalink(); ?>">
@@ -60,6 +61,8 @@ $products_query = new WP_Query(array(
                                     <span class="product-badge badge-ready"><?php esc_html_e('Ready Stock', 'putrafiber'); ?></span>
                                 <?php endif; ?>
                             </div>
+                        <?php else: ?>
+                            <span class="product-badge badge-ready product-badge--floating"><?php esc_html_e('Ready Stock', 'putrafiber'); ?></span>
                         <?php endif; ?>
 
                         <div class="product-content">
@@ -84,13 +87,11 @@ $products_query = new WP_Query(array(
                         </div>
                     </article>
                     <?php
-                    $delay += 0.1;
+                    $index++;
                 endwhile;
                 wp_reset_postdata();
                 ?>
             </div>
-
-            <?php echo putrafiber_frontpage_render_pagination('products', $products_query); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php else: ?>
             <p class="section-empty fade-in"><?php esc_html_e('Belum ada produk yang ditampilkan. Tambahkan artikel kategori produk melalui menu Blog.', 'putrafiber'); ?></p>
         <?php endif; ?>
