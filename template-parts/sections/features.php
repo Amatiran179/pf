@@ -1,111 +1,50 @@
 <?php
 /**
  * Features Section
- * 
+ *
  * @package PutraFiber
  */
+
+$features_title = putrafiber_frontpage_text('features', 'title', __('Kelebihan PutraFiber', 'putrafiber'));
+$features_desc  = putrafiber_frontpage_text('features', 'description', __('Kami menggabungkan inovasi fiberglass dengan rekayasa konstruksi berkelas dunia.', 'putrafiber'));
+
+$features_default = array(
+    array('title' => 'Waterpark', 'description' => 'Desain dan konstruksi waterpark lengkap dengan berbagai wahana air yang aman dan menyenangkan.', 'icon' => 'wave'),
+    array('title' => 'Waterboom', 'description' => 'Pembangunan waterboom dengan standar keamanan internasional dan desain menarik.', 'icon' => 'drop'),
+    array('title' => 'Playground Indoor', 'description' => 'Playground indoor dengan material fiberglass berkualitas, aman untuk anak-anak segala usia.', 'icon' => 'spark'),
+    array('title' => 'Playground Outdoor', 'description' => 'Playground outdoor tahan cuaca dengan berbagai permainan edukatif dan menyenangkan.', 'icon' => 'compass'),
+    array('title' => 'Perosotan Fiberglass', 'description' => 'Berbagai jenis perosotan fiberglass dari spiral hingga custom design sesuai kebutuhan.', 'icon' => 'gear'),
+    array('title' => 'Kolam Renang Fiberglass', 'description' => 'Kolam prefabrikasi tahan lama dengan instalasi cepat dan presisi.', 'icon' => 'shield'),
+);
+
+$features_items = putrafiber_frontpage_parse_repeater('front_features_items', $features_default);
 ?>
 
-<section class="features-section section" id="features">
+<section class="features-section section bg-light" id="features">
     <div class="container">
         <div class="section-title fade-in">
-            <h2>Mengapa Memilih PutraFiber?</h2>
-            <p>Keunggulan yang membuat kami menjadi pilihan utama kontraktor waterpark dan playground fiberglass</p>
+            <h2><?php echo esc_html($features_title); ?></h2>
+            <?php if ($features_desc): ?>
+                <p><?php echo esc_html($features_desc); ?></p>
+            <?php endif; ?>
         </div>
-        
-        <div class="grid grid-4">
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                    </svg>
+
+        <div class="grid grid-3 feature-grid">
+            <?php foreach ($features_items as $index => $feature): ?>
+                <div class="card feature-card fade-in" style="animation-delay: <?php echo esc_attr($index * 0.08); ?>s;">
+                    <div class="feature-icon">
+                        <span class="feature-icon-circle">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <?php echo putrafiber_frontpage_icon_svg($feature['icon']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                            </svg>
+                        </span>
+                    </div>
+                    <h3><?php echo esc_html($feature['title']); ?></h3>
+                    <?php if (!empty($feature['description'])): ?>
+                        <p><?php echo esc_html($feature['description']); ?></p>
+                    <?php endif; ?>
                 </div>
-                <h3>Produksi Sendiri</h3>
-                <p>Pabrik produksi sendiri dengan kontrol kualitas ketat, memastikan setiap produk memenuhi standar tertinggi.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <circle cx="12" cy="8" r="7"></circle>
-                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                    </svg>
-                </div>
-                <h3>Garansi Terpercaya</h3>
-                <p>Garansi resmi untuk semua produk dan layanan, memberikan ketenangan pikiran untuk investasi Anda.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
-                </div>
-                <h3>Harga Kompetitif</h3>
-                <p>Harga pabrik langsung tanpa perantara, memberikan nilai terbaik untuk budget Anda.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                </div>
-                <h3>Customer Care 24/7</h3>
-                <p>Tim customer service siap membantu Anda kapan saja, memastikan kepuasan pelanggan maksimal.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
-                </div>
-                <h3>Pengalaman 15+ Tahun</h3>
-                <p>Lebih dari 15 tahun pengalaman dalam industri, dengan ratusan project sukses di seluruh Indonesia.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                </div>
-                <h3>Sertifikasi Lengkap</h3>
-                <p>Produk bersertifikat SNI dan memenuhi standar keamanan internasional untuk area bermain anak.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                </div>
-                <h3>Pengerjaan Tepat Waktu</h3>
-                <p>Komitmen penuh terhadap deadline, dengan manajemen project profesional dan efisien.</p>
-            </div>
-            
-            <div class="card feature-card fade-in">
-                <div class="feature-icon">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                </div>
-                <h3>Custom Design</h3>
-                <p>Desain kustom sesuai kebutuhan dan tema yang Anda inginkan, dengan tim desainer berpengalaman.</p>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>

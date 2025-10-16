@@ -5,13 +5,34 @@
  * @package PutraFiber
  */
 
-$hero_title = putrafiber_get_option('hero_title', 'Kontraktor Waterpark & Playground Fiberglass Terpercaya');
-$hero_desc = putrafiber_get_option('hero_description', 'Spesialis pembuatan waterpark, waterboom, playground indoor & outdoor, perosotan fiberglass, kolam renang, dan berbagai produk fiberglass berkualitas tinggi.');
-$hero_image = putrafiber_get_option('hero_image', '');
-$hero_cta_text = putrafiber_get_option('hero_cta_text', 'Konsultasi Gratis');
+$hero_title         = putrafiber_get_option('hero_title', 'Kontraktor Waterpark & Playground Fiberglass Terpercaya');
+$hero_desc          = putrafiber_get_option('hero_description', 'Spesialis pembuatan waterpark, waterboom, playground indoor & outdoor, perosotan fiberglass, kolam renang, dan berbagai produk fiberglass berkualitas tinggi.');
+$hero_image         = putrafiber_get_option('hero_image', '');
+$hero_cta_text      = putrafiber_get_option('hero_cta_text', 'Konsultasi Gratis');
+$hero_highlight     = putrafiber_get_option('hero_highlight', '20+ Tahun Menghadirkan Wahana Air Spektakuler');
+$hero_secondary_txt = putrafiber_get_option('hero_secondary_cta', __('Lihat Portofolio', 'putrafiber'));
+$hero_secondary_url = putrafiber_get_option('hero_secondary_url', function_exists('get_post_type_archive_link') ? get_post_type_archive_link('portfolio') : home_url('/'));
+
+$features_default = array(
+    array('title' => __('Garansi 5 Tahun', 'putrafiber'), 'description' => __('Jaminan kualitas dan layanan purna jual responsif.', 'putrafiber'), 'icon' => 'shield'),
+    array('title' => __('Tim Berpengalaman', 'putrafiber'), 'description' => __('Insinyur fiberglass bersertifikat dan kru terlatih.', 'putrafiber'), 'icon' => 'trophy'),
+    array('title' => __('Teknologi Mutakhir', 'putrafiber'), 'description' => __('Produksi modern dengan standar keamanan internasional.', 'putrafiber'), 'icon' => 'gear'),
+);
+$hero_badges = array_slice(putrafiber_frontpage_parse_repeater('front_features_items', $features_default), 0, 3);
+
+$sections = function_exists('putrafiber_frontpage_sections') ? putrafiber_frontpage_sections() : array('services');
+$scroll_target = '#services';
+if (!empty($sections)) {
+    foreach ($sections as $slug) {
+        if ($slug !== 'hero') {
+            $scroll_target = '#' . sanitize_title($slug);
+            break;
+        }
+    }
+}
 ?>
 
-<section class="hero-section" id="hero">
+<section class="hero-section" id="hero" data-parallax-layer>
     <?php if ($hero_image): ?>
         <div class="hero-background" style="background-image: url('<?php echo esc_url($hero_image); ?>');">
             <div class="hero-overlay"></div>
@@ -22,9 +43,13 @@ $hero_cta_text = putrafiber_get_option('hero_cta_text', 'Konsultasi Gratis');
     
     <div class="container">
         <div class="hero-content fade-in">
+            <?php if ($hero_highlight): ?>
+                <span class="hero-highlight"><?php echo esc_html($hero_highlight); ?></span>
+            <?php endif; ?>
+
             <h1 class="hero-title"><?php echo esc_html($hero_title); ?></h1>
             <p class="hero-description"><?php echo esc_html($hero_desc); ?></p>
-            
+
             <div class="hero-actions">
                 <a href="<?php echo esc_url(putrafiber_whatsapp_link()); ?>" class="btn btn-primary btn-lg" target="_blank" rel="noopener">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -32,40 +57,45 @@ $hero_cta_text = putrafiber_get_option('hero_cta_text', 'Konsultasi Gratis');
                     </svg>
                     <?php echo esc_html($hero_cta_text); ?>
                 </a>
-                
-                <a href="#services" class="btn btn-outline btn-lg scroll-to">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 16 16 12 12 8"></polyline>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                    Lihat Layanan
-                </a>
+
+                <?php if ($hero_secondary_txt && $hero_secondary_url): ?>
+                    <a href="<?php echo esc_url($hero_secondary_url); ?>" class="btn btn-outline btn-lg scroll-to">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 16 16 12 12 8"></polyline>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        <?php echo esc_html($hero_secondary_txt); ?>
+                    </a>
+                <?php endif; ?>
             </div>
-            
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <h3>500+</h3>
-                    <p>Project Selesai</p>
-                </div>
-                <div class="stat-item">
-                    <h3>15+</h3>
-                    <p>Tahun Pengalaman</p>
-                </div>
-                <div class="stat-item">
-                    <h3>100%</h3>
-                    <p>Kepuasan Klien</p>
-                </div>
+
+            <div class="hero-badges">
+                <?php foreach ($hero_badges as $badge): ?>
+                    <div class="hero-badge">
+                        <?php if (!empty($badge['icon'])): ?>
+                            <span class="hero-badge-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <?php echo putrafiber_frontpage_icon_svg($badge['icon']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                </svg>
+                            </span>
+                        <?php endif; ?>
+                        <span class="hero-badge-title"><?php echo esc_html($badge['title']); ?></span>
+                        <?php if (!empty($badge['description'])): ?>
+                            <span class="hero-badge-desc"><?php echo esc_html($badge['description']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>
-    
-    <div class="hero-scroll-indicator">
+
+    <a href="<?php echo esc_url($scroll_target); ?>" class="hero-scroll-indicator scroll-to" aria-label="Scroll ke section berikutnya">
         <svg width="30" height="50" viewBox="0 0 30 50">
             <rect x="5" y="5" width="20" height="40" rx="10" stroke="currentColor" stroke-width="2" fill="none"/>
             <circle cx="15" cy="15" r="3" fill="currentColor">
                 <animate attributeName="cy" from="15" to="35" dur="1.5s" repeatCount="indefinite"/>
             </circle>
         </svg>
-    </div>
+    </a>
 </section>

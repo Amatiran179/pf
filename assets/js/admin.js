@@ -208,7 +208,7 @@
 
         $('.putrafiber-upload-image, .putrafiber-upload-icon').on('click', function(e) {
             e.preventDefault();
-            
+
             var button = $(this);
             var inputField = button.siblings('input[type="hidden"]');
             var previewContainer = button.siblings('.image-preview, .icon-preview');
@@ -247,6 +247,55 @@
             $(this).siblings('input[type="hidden"]').val('');
             $(this).siblings('.image-preview, .icon-preview').html('');
             console.log('🗑️ Image removed');
+        });
+
+        // ===================================================================
+        // TAXONOMY SEO IMAGE UPLOADER
+        // ===================================================================
+        var termOgUploader;
+        var currentTermOgTarget;
+        $(document).on('click', '.pf-term-og-upload', function(e) {
+            e.preventDefault();
+
+            currentTermOgTarget = $(this).closest('.form-field, td');
+
+            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+                alert('WordPress Media library not loaded. Please refresh the page.');
+                return;
+            }
+
+            if (termOgUploader) {
+                termOgUploader.open();
+            } else {
+                termOgUploader = wp.media({
+                    title: 'Pilih Gambar SEO',
+                    button: { text: 'Gunakan Gambar' },
+                    multiple: false
+                });
+
+                termOgUploader.on('select', function() {
+                    var attachment = termOgUploader.state().get('selection').first().toJSON();
+                    if (!currentTermOgTarget) {
+                        return;
+                    }
+                    currentTermOgTarget.find('.pf-term-og-image-id').val(attachment.id);
+                    currentTermOgTarget.find('.pf-term-og-image-url').val(attachment.url);
+                    currentTermOgTarget.find('.pf-term-og-preview').html('<img src="' + attachment.url + '" style="max-width:160px;border-radius:4px;margin-top:8px;">');
+                });
+            }
+
+            termOgUploader.open();
+        });
+
+        $(document).on('click', '.pf-term-og-remove', function(e) {
+            e.preventDefault();
+            var $container = $(this).closest('.form-field, td');
+            $container.find('.pf-term-og-image-id').val('');
+            $container.find('.pf-term-og-image-url').val('');
+            $container.find('.pf-term-og-preview').empty();
+            if ($container.is(currentTermOgTarget)) {
+                currentTermOgTarget = null;
+            }
         });
 
         // ===================================================================

@@ -10,94 +10,37 @@
  */
 
 get_header();
+
+$sections      = function_exists('putrafiber_frontpage_sections') ? putrafiber_frontpage_sections() : array();
+$water_bubbles = function_exists('putrafiber_frontpage_water_intensity') ? putrafiber_frontpage_water_intensity() : 8;
+$parallax_on   = putrafiber_get_option('front_enable_parallax', '1');
 ?>
 
-<main id="primary" class="site-main front-page">
-    
-    <?php
-    /**
-     * Hero Section
-     * 
-     * Displays main hero banner with CTA
-     */
-    get_template_part('template-parts/sections/hero');
-    ?>
-    
-    <?php
-    /**
-     * Features Section
-     * 
-     * Company advantages and features
-     */
-    get_template_part('template-parts/sections/features');
-    ?>
-    
-    <?php
-    /**
-     * Services Section
-     * 
-     * Main services offered
-     */
-    get_template_part('template-parts/sections/services');
-    ?>
-    
-    <?php
-    /**
-     * Portfolio Section
-     * 
-     * Latest portfolio projects
-     */
-    get_template_part('template-parts/sections/portfolio');
-    ?>
-    
-    <?php
-    /**
-     * CTA Section
-     * 
-     * Call to action for consultation
-     */
-    get_template_part('template-parts/sections/cta');
-    ?>
-    
-    <?php
-    /**
-     * Products Section
-     * 
-     * Featured products
-     */
-    get_template_part('template-parts/sections/products');
-    ?>
-    
-    <?php
-    /**
-     * Blog Section
-     * 
-     * Latest blog posts
-     */
-    get_template_part('template-parts/sections/blog');
-    ?>
-    
-    <?php
-    /**
-     * Testimonials Section (Optional)
-     * 
-     * You can add testimonials section here
-     */
-    if (putrafiber_get_option('enable_testimonials', false)):
-        get_template_part('template-parts/sections/testimonials');
-    endif;
-    ?>
-    
-    <?php
-    /**
-     * Partners/Clients Section (Optional)
-     * 
-     * Display partner logos or client list
-     */
-    if (putrafiber_get_option('enable_partners', false)):
-        get_template_part('template-parts/sections/partners');
-    endif;
-    ?>
+<main
+    id="primary"
+    class="site-main front-page"
+    data-water-intensity="<?php echo esc_attr($water_bubbles); ?>"
+    data-parallax="<?php echo esc_attr($parallax_on ? '1' : '0'); ?>"
+>
+
+    <div class="frontpage-water-overlay" aria-hidden="true">
+        <div class="frontpage-water-layer"></div>
+        <div class="frontpage-water-bubbles"></div>
+    </div>
+
+    <?php if (!empty($sections)) : ?>
+        <?php foreach ($sections as $section_slug) : ?>
+            <?php putrafiber_render_frontpage_section($section_slug); ?>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <?php
+        // Fallback to legacy order if helper returns nothing (edge case when options deleted).
+        $legacy_sections = array('hero', 'features', 'services', 'portfolio', 'cta', 'products', 'blog');
+        foreach ($legacy_sections as $legacy_section) {
+            putrafiber_render_frontpage_section($legacy_section);
+        }
+        ?>
+    <?php endif; ?>
 
 </main><!-- #primary -->
 

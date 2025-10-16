@@ -1,40 +1,49 @@
 /*!
- * PUTRAFIBER — PRODUCT GALLERY (SQUARE VARIANT – FINAL)
- * - Anti double-init & teardown aman
- * - Autoplay/loop hanya jika slide > 1
- * - Thumbs sinkron (slidesPerView: 'auto', spaceBetween: 8→6 di mobile)
- * - Paksa frame & img thumbnail selalu KOTAK (84/72) via inline !important
- * - SimpleLightbox opsional (kalau ada)
- * - Tidak menyentuh transform wrapper (Swiper tetap normal)
+ * PUTRAFIBER — UNIFIED PRODUCT & PORTFOLIO GALLERY
+ * ------------------------------------------------------------------
+ * - Shared initializer for both product (shop) & portfolio templates
+ * - Anti double-init & resilient against missing Swiper/Lightbox
+ * - Autoplay/loop enabled only when slides > 1
+ * - Optional thumbnail square enforcement (product only)
+ * - Lightbox scoped per gallery root to avoid cross-interference
+ * - Graceful degradation: skips silently if requirements are missing
  */
 
 (function () {
   "use strict";
 
-  // Cegah binding dobel
-  if (window.pfProductGalleryBound) return;
-  window.pfProductGalleryBound = true;
+  if (window.pfUnifiedGalleryBound) return;
+  window.pfUnifiedGalleryBound = true;
 
-  // ---------- Teardown ----------
-  function destroyPrevious() {
-    try { if (window.pfGalleryMain && window.pfGalleryMain.destroy)   window.pfGalleryMain.destroy(true, true); } catch(e){}
-    try { if (window.pfGalleryThumbs && window.pfGalleryThumbs.destroy) window.pfGalleryThumbs.destroy(true, true); } catch(e){}
-    try { if (window.pfLightbox && window.pfLightbox.destroy)          window.pfLightbox.destroy(); } catch(e){}
-    window.pfGalleryMain = null;
-    window.pfGalleryThumbs = null;
-    window.pfLightbox = null;
-    window.pfProductGalleryInitialized = false;
-  }
+  var galleryConfigs = [
+    {
+      type: "product",
+      rootSelector: ".product-gallery",
+      sliderSelector: ".product-gallery-slider",
+      thumbsSelector: ".product-gallery-thumbs",
+      enforceSquareThumbs: true,
+      thumbSize: { desktop: 84, mobile: 72 },
+    },
+    {
+      type: "portfolio",
+      rootSelector: ".portfolio-gallery",
+      sliderSelector: ".portfolio-gallery-slider",
+      thumbsSelector: ".portfolio-gallery-thumbs",
+      enforceSquareThumbs: false,
+      thumbSize: { desktop: 84, mobile: 72 },
+    },
+  ];
 
-  // ---------- Helpers ----------
-  function debounce(fn, wait){ let t; return function(){ clearTimeout(t); t=setTimeout(()=>fn.apply(this, arguments), wait); }; }
+  var instances = [];
 
-  function initLightbox(scopeEl) {
+  function createLightbox(root) {
     if (typeof SimpleLightbox !== "function") return null;
-    var selector = ".product-gallery .gallery-item";
-    if (!scopeEl.querySelector(selector)) return null;
+    var anchors = root.querySelectorAll("a.gallery-item");
+    if (!anchors || anchors.length === 0) return null;
+
     try {
-      return new SimpleLightbox(selector, {
+      return new SimpleLightbox({
+        elements: anchors,
         captions: true,
         captionsData: "alt",
         captionDelay: 200,
@@ -42,183 +51,231 @@
         nav: true,
         loop: true,
         history: false,
-        docClose: true
+        docClose: true,
       });
-    } catch(e){ return null; }
+    } catch (e) {
+      return null;
+    }
   }
 
-  // ——— Enforce thumbnail square (84 desktop / 72 mobile) ———
-  function enforceThumbSquare() {
+  function resetImageTransforms(mainEl) {
+    if (!mainEl) return;
     try {
-      var isMobile = window.matchMedia('(max-width: 640px)').matches;
-      var sz = isMobile ? 72 : 84;
-      var slides = document.querySelectorAll('.product-gallery .product-gallery-thumbs .swiper-slide');
-      var imgs   = document.querySelectorAll('.product-gallery .product-gallery-thumbs .swiper-slide img');
-
-      slides.forEach(function (sl) {
-        sl.style.setProperty('width',     sz + 'px', 'important');
-        sl.style.setProperty('min-width', sz + 'px', 'important');
-        sl.style.setProperty('height',    sz + 'px', 'important');
-        sl.style.setProperty('flex',    '0 0 ' + sz + 'px', 'important');
-        sl.style.setProperty('box-sizing','content-box', 'important');
-        sl.style.display = 'inline-flex';
-        sl.style.alignItems = 'center';
-        sl.style.justifyContent = 'center';
-      });
-
-      imgs.forEach(function (im) {
-        im.style.setProperty('width',  sz + 'px', 'important');
-        im.style.setProperty('height', sz + 'px', 'important');
-        im.style.objectFit = 'cover';
-        im.style.display = 'block';
+      mainEl.querySelectorAll(".gallery-image, img.gallery-image").forEach(function (img) {
+        img.style.transform = "none";
+        img.style.animation = "none";
+        img.style.transition = "none";
+        img.style.willChange = "auto";
       });
     } catch (e) {}
   }
 
-  // ——— Init utama ———
-  function initGallery() {
-    var galleryRoot = document.querySelector(".product-gallery");
-    var mainEl = document.querySelector(".product-gallery-slider");
-    if (!galleryRoot || !mainEl || typeof Swiper !== "function") return;
+  function nodeListToArray(list) {
+    return Array.prototype.slice.call(list || []);
+  }
 
-    destroyPrevious();
+  function enforceThumbDimensions(instance) {
+    if (!instance || !instance.config || !instance.thumbsEl) return;
 
-    // Bersihkan transform/anim di IMG (bukan wrapper)
-    mainEl.querySelectorAll(".gallery-image").forEach(function (img) {
-      img.style.transform = "none";
-      img.style.animation = "none";
-      img.style.transition = "none";
-      img.style.willChange = "auto";
-    });
+    var config = instance.config;
+    var thumbsEl = instance.thumbsEl;
+    var slides = nodeListToArray(thumbsEl.querySelectorAll(".swiper-slide"));
+    var imgs = nodeListToArray(thumbsEl.querySelectorAll(".swiper-slide img"));
 
-    var mainSlides = mainEl.querySelectorAll(".swiper-slide");
-    var slideCount = mainSlides ? mainSlides.length : 0;
+    if (slides.length === 0 || imgs.length === 0) return;
+
+    if (config.enforceSquareThumbs) {
+      var isMobile = false;
+      try {
+        isMobile = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
+      } catch (e) {}
+
+      var size = isMobile ? config.thumbSize.mobile : config.thumbSize.desktop;
+
+      slides.forEach(function (slide) {
+        slide.style.setProperty("width", size + "px", "important");
+        slide.style.setProperty("min-width", size + "px", "important");
+        slide.style.setProperty("height", size + "px", "important");
+        slide.style.setProperty("flex", "0 0 " + size + "px", "important");
+        slide.style.setProperty("box-sizing", "content-box", "important");
+        slide.style.display = "inline-flex";
+        slide.style.alignItems = "center";
+        slide.style.justifyContent = "center";
+      });
+
+      imgs.forEach(function (img) {
+        img.style.setProperty("width", size + "px", "important");
+        img.style.setProperty("height", size + "px", "important");
+        img.style.objectFit = "cover";
+        img.style.display = "block";
+      });
+    } else {
+      slides.forEach(function (slide) {
+        slide.style.removeProperty("width");
+        slide.style.removeProperty("min-width");
+        slide.style.removeProperty("height");
+        slide.style.removeProperty("flex");
+        slide.style.removeProperty("box-sizing");
+        slide.style.removeProperty("display");
+        slide.style.removeProperty("align-items");
+        slide.style.removeProperty("justify-content");
+      });
+
+      imgs.forEach(function (img) {
+        img.style.removeProperty("width");
+        img.style.removeProperty("height");
+        img.style.removeProperty("object-fit");
+        img.style.removeProperty("display");
+      });
+    }
+  }
+
+  function setupGallery(root, config) {
+    if (!root || root.dataset.pfGalleryInitialized === "true") return;
+    if (typeof Swiper !== "function") return;
+
+    var mainEl = root.querySelector(config.sliderSelector);
+    if (!mainEl) return;
+
+    resetImageTransforms(mainEl);
+
+    var slides = mainEl.querySelectorAll(".swiper-slide");
+    var slideCount = slides ? slides.length : 0;
     var enableLoop = slideCount > 1;
     var enableAutoplay = slideCount > 1;
 
-    var navPrev = mainEl.querySelector(".swiper-button-prev") || galleryRoot.querySelector(".swiper-button-prev");
-    var navNext = mainEl.querySelector(".swiper-button-next") || galleryRoot.querySelector(".swiper-button-next");
-    var paginationEl = mainEl.querySelector(".swiper-pagination") || galleryRoot.querySelector(".swiper-pagination");
+    var navPrev = root.querySelector(".swiper-button-prev");
+    var navNext = root.querySelector(".swiper-button-next");
+    var paginationEl = root.querySelector(".swiper-pagination");
 
-    // Thumbs
-    var thumbsEl = document.querySelector(".product-gallery-thumbs");
+    var thumbsEl = config.thumbsSelector ? root.querySelector(config.thumbsSelector) : null;
     var thumbsSwiper = null;
 
     if (thumbsEl && thumbsEl.querySelectorAll(".swiper-slide").length > 0) {
       try {
         thumbsSwiper = new Swiper(thumbsEl, {
-          slidesPerView: 'auto',
-          spaceBetween: 8,               // default
+          slidesPerView: "auto",
+          spaceBetween: 8,
           freeMode: true,
           watchSlidesProgress: true,
           watchSlidesVisibility: true,
           slideToClickedSlide: true,
           breakpoints: {
-            0:    { slidesPerView: 'auto', spaceBetween: 6 },
-            480:  { slidesPerView: 'auto', spaceBetween: 6 },
-            768:  { slidesPerView: 'auto', spaceBetween: 8 },
-            1024: { slidesPerView: 'auto', spaceBetween: 8 }
-          }
+            0: { slidesPerView: "auto", spaceBetween: 6 },
+            480: { slidesPerView: "auto", spaceBetween: 6 },
+            768: { slidesPerView: "auto", spaceBetween: 8 },
+            1024: { slidesPerView: "auto", spaceBetween: 8 },
+          },
         });
-      } catch (e) { thumbsSwiper = null; }
+      } catch (e) {
+        thumbsSwiper = null;
+      }
     }
 
-    // Main Swiper
     var gallerySwiper = null;
+
     try {
       gallerySwiper = new Swiper(mainEl, {
         observer: true,
         observeParents: true,
         resizeObserver: true,
-
-        navigation: (navPrev && navNext) ? { prevEl: navPrev, nextEl: navNext } : {},
-        pagination: paginationEl ? { el: paginationEl, clickable: true } : {},
-
+        navigation:
+          navPrev && navNext
+            ? {
+                prevEl: navPrev,
+                nextEl: navNext,
+              }
+            : {},
+        pagination: paginationEl
+          ? {
+              el: paginationEl,
+              clickable: true,
+            }
+          : {},
         loop: enableLoop,
-        autoplay: enableAutoplay ? { delay: 3500, disableOnInteraction: false } : false,
-
+        autoplay: enableAutoplay
+          ? {
+              delay: 3500,
+              disableOnInteraction: false,
+            }
+          : false,
         effect: "slide",
         speed: 500,
-
         thumbs: thumbsSwiper ? { swiper: thumbsSwiper } : undefined,
-
         on: {
           init: function () {
             var self = this;
-            if (self.params.autoplay && self.autoplay && typeof self.autoplay.start === 'function') {
+            if (self.params.autoplay && self.autoplay && typeof self.autoplay.start === "function") {
               self.autoplay.start();
             }
-            setTimeout(function(){
+            setTimeout(function () {
               try {
                 self.update();
                 thumbsSwiper && thumbsSwiper.update();
-                enforceThumbSquare();
-              } catch(e){}
+              } catch (e) {}
             }, 60);
           },
           imagesReady: function () {
             try {
               this.update();
-              if (this.params.autoplay && this.autoplay && this.autoplay.start) this.autoplay.start();
+              if (this.params.autoplay && this.autoplay && this.autoplay.start) {
+                this.autoplay.start();
+              }
               thumbsSwiper && thumbsSwiper.update();
-              enforceThumbSquare();
-            } catch(e){}
-          }
-        }
+            } catch (e) {}
+          },
+        },
       });
-    } catch (e) { gallerySwiper = null; }
+    } catch (e) {
+      gallerySwiper = null;
+    }
 
-    // Terapkan ukuran kotak di berbagai lifecycle
-    enforceThumbSquare();
+    var instance = {
+      root: root,
+      config: config,
+      mainEl: mainEl,
+      thumbsEl: thumbsEl,
+      gallerySwiper: gallerySwiper,
+      thumbsSwiper: thumbsSwiper,
+      lightbox: createLightbox(root),
+    };
+
+    instance.enforceThumbDimensions = function () {
+      enforceThumbDimensions(instance);
+    };
+
+    instance.enforceThumbDimensions();
     if (thumbsSwiper) {
-      thumbsSwiper.on('init resize update imagesReady setTranslate transitionEnd', enforceThumbSquare);
+      thumbsSwiper.on("init resize update imagesReady setTranslate transitionEnd", instance.enforceThumbDimensions);
     }
     if (gallerySwiper) {
-      gallerySwiper.on('imagesReady transitionEnd', enforceThumbSquare);
+      gallerySwiper.on("imagesReady transitionEnd", instance.enforceThumbDimensions);
     }
-    window.addEventListener('resize', enforceThumbSquare);
-    setTimeout(enforceThumbSquare, 100);
-    setTimeout(enforceThumbSquare, 300);
+    window.addEventListener("resize", instance.enforceThumbDimensions);
 
-    // Klik thumb → pindah slide (fallback)
-    if (thumbsSwiper && gallerySwiper && thumbsEl) {
-      thumbsEl.addEventListener('click', function(e){
-        var slide = e.target.closest('.swiper-slide');
-        if (!slide) return;
-        var all = thumbsEl.querySelectorAll('.swiper-slide');
-        var idx = Array.prototype.indexOf.call(all, slide);
-        if (idx >= 0) { try { gallerySwiper.slideToLoop(idx); } catch(e){} }
+    if (!window.pfGalleryMain) window.pfGalleryMain = gallerySwiper;
+    if (!window.pfGalleryThumbs) window.pfGalleryThumbs = thumbsSwiper;
+    if (!window.pfLightbox) window.pfLightbox = instance.lightbox;
+
+    root.dataset.pfGalleryInitialized = "true";
+    instances.push(instance);
+  }
+
+  function bootstrapGalleries() {
+    galleryConfigs.forEach(function (config) {
+      var roots = document.querySelectorAll(config.rootSelector);
+      if (!roots || roots.length === 0) return;
+      roots.forEach(function (root) {
+        setupGallery(root, config);
       });
-    }
-
-    // Lightbox (opsional)
-    var lightbox = initLightbox(galleryRoot);
-
-    // Ekspor untuk debug
-    window.pfGalleryMain   = gallerySwiper;
-    window.pfGalleryThumbs = thumbsSwiper;
-    window.pfLightbox      = lightbox;
-    window.pfProductGalleryInitialized = true;
-
-    // Debounced resize update
-    var onResize = debounce(function(){
-      try {
-        gallerySwiper && gallerySwiper.update();
-        thumbsSwiper && thumbsSwiper.update();
-        enforceThumbSquare();
-      } catch(e){}
-    }, 120);
-    if (!window._pfGalleryResizeBound) {
-      window.addEventListener("resize", onResize);
-      window._pfGalleryResizeBound = true;
-      window._pfGalleryOnResize = onResize;
-    }
+    });
   }
 
-  function ready(fn){
-    if (document.readyState === "complete" || document.readyState === "interactive") { setTimeout(fn,0); }
-    else { document.addEventListener("DOMContentLoaded", fn, { once: true }); }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootstrapGalleries);
+  } else {
+    bootstrapGalleries();
   }
 
-  ready(function(){ initGallery(); });
+  window.pfGalleryInstances = instances;
 })();
