@@ -152,9 +152,10 @@ while (have_posts()) : the_post();
         <!-- ====================== GALERI ====================== -->
         <div class="product-gallery">
           <?php if ($total_gallery_images > 0): ?>
-            <div class="gallery-container">
+            <?php $gallery_group = 'pf-product-' . $product_id; ?>
+            <div class="gallery-container" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
               <!-- Main slider -->
-              <div class="swiper product-gallery-slider">
+              <div class="swiper product-gallery-slider" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
                 <div class="swiper-wrapper">
                   <?php foreach ($all_gallery_images as $index => $image):
                     if (empty($image['url'])) {
@@ -169,6 +170,8 @@ while (have_posts()) : the_post();
                        data-lightbox="product-<?php echo (int) $product_id; ?>"
                        data-title="<?php echo esc_attr($img_alt); ?>"
                        class="gallery-item"
+                       data-gallery-group="<?php echo esc_attr($gallery_group); ?>"
+                       data-gallery-index="<?php echo esc_attr($index); ?>"
                        style="<?php echo esc_attr($anti_zoom_style); ?>">
                       <img
                         src="<?php echo esc_url($image['url']); ?>"

@@ -16,6 +16,35 @@
 /* Slide utama: lebar penuh aman */
 .product-gallery-slider .swiper-slide { width: 100%; min-width: 100%; }
 
+.product-gallery .product-gallery-slider .swiper-slide {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-gallery .product-gallery-slider .gallery-item {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: var(--pf-product-gallery-ratio, 4 / 3);
+  background: radial-gradient(120% 120% at 50% 50%, rgba(222, 244, 255, 0.9) 0%, rgba(227, 236, 245, 0.85) 48%, rgba(208, 224, 239, 0.75) 100%);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  max-height: clamp(260px, 48vw, 540px);
+}
+
+.product-gallery .product-gallery-slider .gallery-image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  background-color: transparent;
+  mix-blend-mode: normal;
+}
+
 /* ===== Anti Zoom (hanya IMG/anchor) ===== */
 .product-gallery .gallery-item,
 .product-gallery .gallery-image,
@@ -31,8 +60,9 @@
 .product-gallery .swiper-slide .gallery-image {
   display: block;
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   max-width: 100% !important;
+  max-height: 100% !important;
   object-fit: contain;
 }
 
@@ -86,7 +116,7 @@
 }
 
 /* Perlindungan dasar */
-.product-gallery img { max-width: 100% !important; height: auto !important; }
+.product-gallery img { max-width: 100% !important; height: auto; }
 .product-gallery .gallery-item { display: block; width: 100%; }
 
 /* Mobile hard-fix slider utama (hindari lebar “meledak”) */

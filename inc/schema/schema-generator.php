@@ -319,15 +319,10 @@ function putrafiber_article_schema() {
     // ===================================================================
     $service_area = putrafiber_get_service_area($post_id);
     if (!empty($service_area)) {
-        $areas = is_array($service_area) ? $service_area : array($service_area);
-        $area_served = array();
-        foreach ($areas as $area) {
-            $area_served[] = array(
-                '@type' => 'City',
-                'name' => $area
-            );
-        }
-        $schema['spatial'] = count($area_served) === 1 ? $area_served[0] : $area_served;
+        $structured_area = count($service_area) === 1 ? $service_area[0] : $service_area;
+        $schema['spatial'] = $structured_area;
+        $schema['spatialCoverage'] = $structured_area;
+        $schema['areaServed'] = $structured_area;
     }
     
     // Video
@@ -366,15 +361,10 @@ function putrafiber_portfolio_schema() {
     // Service Area
     $service_area = putrafiber_get_service_area($post_id);
     if (!empty($service_area)) {
-        $areas = is_array($service_area) ? $service_area : array($service_area);
-        $area_served = array();
-        foreach ($areas as $area) {
-            $area_served[] = array(
-                '@type' => 'City',
-                'name' => $area
-            );
-        }
-        $schema['spatial'] = count($area_served) === 1 ? $area_served[0] : $area_served;
+        $structured_area = count($service_area) === 1 ? $service_area[0] : $service_area;
+        $schema['spatial'] = $structured_area;
+        $schema['spatialCoverage'] = $structured_area;
+        $schema['areaServed'] = $structured_area;
     }
     
     return $schema;
@@ -609,15 +599,7 @@ function putrafiber_generate_product_schema($product_id) {
     // ===================================================================
     $service_area = putrafiber_get_service_area($product_id);
     if (!empty($service_area)) {
-        $areas = is_array($service_area) ? $service_area : array($service_area);
-        $area_served = array();
-        foreach ($areas as $area) {
-            $area_served[] = array(
-                '@type' => 'City',
-                'name' => $area
-            );
-        }
-        $product_schema['areaServed'] = count($area_served) === 1 ? $area_served[0] : $area_served;
+        $product_schema['areaServed'] = count($service_area) === 1 ? $service_area[0] : $service_area;
     }
     
     // Aggregate Rating
@@ -765,39 +747,156 @@ function putrafiber_breadcrumb_schema() {
 }
 
 /**
+ * Build Place schema for city/province combinations.
+ */
+function putrafiber_format_service_area_place($city, $province = '', $country_code = 'ID') {
+    $city = trim((string) $city);
+    $province = trim((string) $province);
+    $country_code = strtoupper($country_code ?: 'ID');
+
+    $address = array(
+        '@type' => 'PostalAddress',
+        'addressCountry' => $country_code,
+    );
+
+    if ($city !== '') {
+        $address['addressLocality'] = $city;
+    }
+
+    if ($province !== '') {
+        $address['addressRegion'] = $province;
+    }
+
+    $name = $city !== '' ? $city : ($province !== '' ? $province : $country_code);
+
+    return array(
+        '@type' => 'Place',
+        'name' => $name,
+        'address' => $address,
+    );
+}
+
+/**
+ * Build schema array for manual service area entry.
+ */
+function putrafiber_format_manual_service_area_entry($entry) {
+    if (!is_array($entry)) {
+        return null;
+    }
+
+    $type = isset($entry['type']) ? sanitize_text_field($entry['type']) : 'Place';
+    $name = isset($entry['name']) ? sanitize_text_field($entry['name']) : '';
+
+    if ($name === '') {
+        return null;
+    }
+
+    $country_code = isset($entry['country_code']) ? strtoupper(sanitize_text_field($entry['country_code'])) : '';
+    $identifier = isset($entry['identifier']) ? $entry['identifier'] : '';
+    $note = isset($entry['note']) ? $entry['note'] : '';
+
+    $item = array(
+        '@type' => $type ?: 'Place',
+        'name' => $name,
+    );
+
+    if ($type === 'Country' && $country_code !== '') {
+        if (empty($identifier)) {
+            $item['identifier'] = $country_code;
+        }
+    } elseif ($country_code !== '') {
+        $item['addressCountry'] = $country_code;
+    }
+
+    if (!empty($identifier)) {
+        $item['identifier'] = $identifier;
+    }
+
+    if (!empty($note)) {
+        $item['description'] = $note;
+    }
+
+    return $item;
+}
+
+/**
  * ===================================================================
  * HELPER FUNCTION: Get Service Area (Auto-extract or Manual)
  * ===================================================================
  */
 function putrafiber_get_service_area($post_id) {
-    // Check if service area feature is enabled for this post
     if (get_post_meta($post_id, '_enable_service_area', true) !== '1') {
-        return null;
+        return array();
     }
-    
-    // Try to get manual service area first
-    $manual_areas = get_post_meta($post_id, '_service_areas', true);
-    
-    if (!empty($manual_areas)) {
-        // Manual input exists, use it
-        return is_array($manual_areas) ? $manual_areas : array($manual_areas);
+
+    $areas = array();
+
+    // Manual city/province selections
+    $manual_city_province = get_post_meta($post_id, '_service_areas', true);
+    if (is_array($manual_city_province)) {
+        foreach ($manual_city_province as $entry) {
+            $city = isset($entry['city']) ? $entry['city'] : '';
+            $province = isset($entry['province']) ? $entry['province'] : '';
+
+            if ($city === '' && $province === '') {
+                continue;
+            }
+
+            $province_name = $province;
+            if ($province_name === '' && !empty($city) && function_exists('putrafiber_get_province_from_city')) {
+                $province_name = putrafiber_get_province_from_city($city);
+            }
+
+            $areas[] = putrafiber_format_service_area_place($city, $province_name);
+        }
     }
-    
-    // Auto-extract from title
-    $title = get_the_title($post_id);
-    $extracted = putrafiber_extract_cities_from_text($title);
-    
-    if (!empty($extracted)) {
-        return $extracted;
+
+    // Manual custom entries (Country, AdministrativeArea, etc)
+    $manual_custom = get_post_meta($post_id, '_manual_service_areas', true);
+    if (is_array($manual_custom)) {
+        foreach ($manual_custom as $entry) {
+            $formatted = putrafiber_format_manual_service_area_entry($entry);
+            if (!empty($formatted)) {
+                $areas[] = $formatted;
+            }
+        }
     }
-    
-    // Fallback: check single meta field (backward compatibility)
-    $single_area = get_post_meta($post_id, '_service_area', true);
-    if ($single_area) {
-        return array($single_area);
+
+    // Auto-extract from title when no manual entries
+    if (empty($areas)) {
+        $title = get_the_title($post_id);
+        $extracted = putrafiber_extract_cities_from_text($title);
+
+        if (!empty($extracted)) {
+            foreach ($extracted as $city) {
+                $province = function_exists('putrafiber_get_province_from_city')
+                    ? putrafiber_get_province_from_city($city)
+                    : '';
+                $areas[] = putrafiber_format_service_area_place($city, $province);
+            }
+        }
     }
-    
-    return null;
+
+    // Fallback: legacy single field
+    if (empty($areas)) {
+        $single_area = get_post_meta($post_id, '_service_area', true);
+        if ($single_area) {
+            $areas[] = array(
+                '@type' => 'Place',
+                'name' => sanitize_text_field($single_area)
+            );
+        }
+    }
+
+    if (empty($areas)) {
+        $areas[] = array(
+            '@type' => 'Country',
+            'name' => 'Indonesia',
+            'identifier' => 'ID'
+        );
+    }
+
+    return $areas;
 }
 
 /**

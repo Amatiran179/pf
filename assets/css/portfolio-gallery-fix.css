@@ -25,14 +25,42 @@
 /* Slide utama: lebar aman */
 :is(.product-gallery-slider, .portfolio-gallery-slider) .swiper-slide { width: 100%; min-width: 100%; }
 
+.portfolio-gallery .portfolio-gallery-slider .swiper-slide {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.portfolio-gallery .portfolio-gallery-slider .gallery-item {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: var(--pf-portfolio-gallery-ratio, 16 / 9);
+  background: linear-gradient(140deg, rgba(5, 13, 28, 0.92) 0%, rgba(21, 46, 68, 0.85) 40%, rgba(13, 30, 52, 0.8) 100%);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  max-height: clamp(260px, 52vw, 620px);
+}
+
+.portfolio-gallery .portfolio-gallery-slider .gallery-image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+}
+
 /* ====== ANTI ZOOM: target IMG saja, bukan wrapper/slide ====== */
 :is(.product-gallery, .portfolio-gallery) .swiper-slide img,
 :is(.product-gallery, .portfolio-gallery) .swiper-slide .gallery-image,
 :is(.product-gallery, .portfolio-gallery) .gallery-image {
   display: block;
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   max-width: 100% !important;
+  max-height: 100% !important;
   object-fit: contain;
 
   transform: none !important;
@@ -83,5 +111,5 @@
 @media (max-width: 640px) { :is(.product-gallery-thumbs, .portfolio-gallery-thumbs) .swiper-slide img { height: 56px; } }
 
 /* Perlindungan dasar */
-:is(.product-gallery, .portfolio-gallery) img { max-width: 100% !important; height: auto !important; }
+:is(.product-gallery, .portfolio-gallery) img { max-width: 100% !important; height: auto; }
 :is(.product-gallery, .portfolio-gallery) .gallery-item { display: block; width: 100%; }

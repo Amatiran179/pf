@@ -90,16 +90,19 @@ get_header();
                             }
 
                             if (!empty($all_images)):
+                                $gallery_group = 'pf-portfolio-' . $portfolio_id;
                             ?>
-                                <div class="gallery-container">
-                                    <div class="swiper portfolio-gallery-slider">
+                                <div class="gallery-container" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
+                                    <div class="swiper portfolio-gallery-slider" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
                                         <div class="swiper-wrapper">
                                             <?php foreach ($all_images as $index => $image): ?>
                                                 <div class="swiper-slide">
                                                     <a href="<?php echo esc_url($image['full']); ?>"
                                                        data-lightbox="portfolio-<?php echo $portfolio_id; ?>"
                                                        data-title="<?php echo esc_attr($image['alt']); ?>"
-                                                       class="gallery-item">
+                                                       class="gallery-item"
+                                                       data-gallery-group="<?php echo esc_attr($gallery_group); ?>"
+                                                       data-gallery-index="<?php echo esc_attr($index); ?>">
                                                         <img src="<?php echo esc_url($image['url']); ?>"
                                                              alt="<?php echo esc_attr($image['alt']); ?>"
                                                              class="gallery-image"

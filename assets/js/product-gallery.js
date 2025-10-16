@@ -15,6 +15,39 @@
   if (window.pfUnifiedGalleryBound) return;
   window.pfUnifiedGalleryBound = true;
 
+  var globalConfig = window.pfGalleryConfig || {};
+
+  function getNumericConfig(key, fallback) {
+    var value = globalConfig[key];
+    if (typeof value === "number" && !isNaN(value)) {
+      return value;
+    }
+    if (typeof value === "string" && value !== "") {
+      var parsed = parseInt(value, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+    return fallback;
+  }
+
+  function getBooleanConfig(key, fallback) {
+    var value = globalConfig[key];
+    if (typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "string") {
+      var lowered = value.toLowerCase();
+      if (lowered === "1" || lowered === "true") {
+        return true;
+      }
+      if (lowered === "0" || lowered === "false") {
+        return false;
+      }
+    }
+    return fallback;
+  }
+
   var galleryConfigs = [
     {
       type: "product",
@@ -36,26 +69,106 @@
 
   var instances = [];
 
-  function createLightbox(root) {
+  function createLightbox(root, config, options) {
     if (typeof SimpleLightbox !== "function") return null;
     var anchors = root.querySelectorAll("a.gallery-item");
     if (!anchors || anchors.length === 0) return null;
 
-    try {
-      return new SimpleLightbox({
-        elements: anchors,
-        captions: true,
-        captionsData: "alt",
-        captionDelay: 200,
-        close: true,
-        nav: true,
-        loop: true,
-        history: false,
-        docClose: true,
-      });
-    } catch (e) {
-      return null;
+    var anchorArray = nodeListToArray(anchors);
+    if (anchorArray.length === 0) return null;
+
+    var groupId = root.getAttribute("data-gallery-group");
+    if (!groupId && anchorArray[0]) {
+      groupId = anchorArray[0].getAttribute("data-gallery-group");
     }
+    if (!groupId) {
+      groupId = "pf-gallery-" + Math.random().toString(36).slice(2, 10);
+      root.setAttribute("data-gallery-group", groupId);
+    }
+
+    anchorArray.forEach(function (anchor, index) {
+      if (!anchor.getAttribute("data-gallery-group")) {
+        anchor.setAttribute("data-gallery-group", groupId);
+      }
+      anchor.setAttribute("data-slb-group", groupId);
+      if (!anchor.getAttribute("data-gallery-index")) {
+        anchor.setAttribute("data-gallery-index", String(index));
+      }
+    });
+
+    var selector = 'a.gallery-item[data-gallery-group="' + groupId + '"]';
+
+    var lightbox = null;
+    var lightboxOptions = {
+      captions: true,
+      captionsData: "alt",
+      captionDelay: 200,
+      close: true,
+      nav: true,
+      loop: true,
+      history: false,
+      docClose: true,
+      animationSpeed: getNumericConfig("lightboxAnimationSpeed", 300),
+    };
+
+    try {
+      lightbox = new SimpleLightbox(selector, lightboxOptions);
+    } catch (e) {
+      try {
+        lightbox = new SimpleLightbox(
+          Object.assign(
+            {
+              elements: selector,
+            },
+            lightboxOptions
+          )
+        );
+      } catch (err) {
+        return null;
+      }
+    }
+
+    if (!lightbox) return null;
+
+    var autoplayEnabled = options && options.autoplay;
+    var autoplayDelay = options && options.delay ? options.delay : 4800;
+    var autoplayTimer = null;
+
+    function stopAutoplay() {
+      if (!autoplayTimer) return;
+      window.clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+
+    function restartAutoplay() {
+      stopAutoplay();
+      startAutoplay();
+    }
+
+    function startAutoplay() {
+      if (!autoplayEnabled || autoplayTimer) return;
+      autoplayTimer = window.setInterval(function () {
+        try {
+          lightbox.next();
+        } catch (err) {
+          stopAutoplay();
+        }
+      }, autoplayDelay);
+    }
+
+    if (autoplayEnabled) {
+      lightbox.on("shown.simplelightbox", startAutoplay);
+      lightbox.on("close.simplelightbox", stopAutoplay);
+      lightbox.on("closed.simplelightbox", stopAutoplay);
+      lightbox.on("next.simplelightbox", restartAutoplay);
+      lightbox.on("prev.simplelightbox", restartAutoplay);
+      lightbox.on("changed.simplelightbox", restartAutoplay);
+    }
+
+    lightbox.startAutoplay = startAutoplay;
+    lightbox.stopAutoplay = stopAutoplay;
+
+    return lightbox;
   }
 
   function resetImageTransforms(mainEl) {
@@ -143,6 +256,10 @@
     var slideCount = slides ? slides.length : 0;
     var enableLoop = slideCount > 1;
     var enableAutoplay = slideCount > 1;
+    var shouldLoop = enableLoop && getBooleanConfig("enableLoop", true);
+    var shouldAutoplay = enableAutoplay && getBooleanConfig("enableAutoplay", true);
+    var autoplayDelay = Math.max(getNumericConfig("autoplayDelay", 3500), 1800);
+    var slideSpeed = Math.max(getNumericConfig("slideSpeed", 500), 240);
 
     var navPrev = root.querySelector(".swiper-button-prev");
     var navNext = root.querySelector(".swiper-button-next");
@@ -192,15 +309,16 @@
               clickable: true,
             }
           : {},
-        loop: enableLoop,
-        autoplay: enableAutoplay
+        loop: shouldLoop,
+        autoplay: shouldAutoplay
           ? {
-              delay: 3500,
+              delay: autoplayDelay,
               disableOnInteraction: false,
+              pauseOnMouseEnter: true,
             }
           : false,
         effect: "slide",
-        speed: 500,
+        speed: slideSpeed,
         thumbs: thumbsSwiper ? { swiper: thumbsSwiper } : undefined,
         on: {
           init: function () {
@@ -237,8 +355,24 @@
       thumbsEl: thumbsEl,
       gallerySwiper: gallerySwiper,
       thumbsSwiper: thumbsSwiper,
-      lightbox: createLightbox(root),
+      lightbox: createLightbox(root, config, {
+        autoplay: getBooleanConfig("lightboxAutoplay", true) && slideCount > 1,
+        delay: getNumericConfig("lightboxAutoplayDelay", 5200),
+      }),
     };
+
+    if (instance.lightbox && gallerySwiper && gallerySwiper.autoplay) {
+      instance.lightbox.on("shown.simplelightbox", function () {
+        try {
+          gallerySwiper.autoplay.stop();
+        } catch (err) {}
+      });
+      instance.lightbox.on("closed.simplelightbox", function () {
+        try {
+          gallerySwiper.autoplay.start();
+        } catch (err) {}
+      });
+    }
 
     instance.enforceThumbDimensions = function () {
       enforceThumbDimensions(instance);

@@ -20,14 +20,7 @@
         const searchBg = document.querySelector('.search-overlay-bg');
         const searchField = document.querySelector('.search-overlay .search-field');
 
-        // Debug log
-        console.log('Search script loaded');
-        console.log('Search toggle:', searchToggle);
-        console.log('Search overlay:', searchOverlay);
-
-        // Exit if elements not found
         if (!searchToggle || !searchOverlay) {
-            console.warn('Search elements not found!');
             return;
         }
 
@@ -38,7 +31,6 @@
         // Open search overlay
         searchToggle.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Search toggle clicked!');
             openSearch();
         });
 
@@ -64,10 +56,9 @@
 
         // Functions
         function openSearch() {
-            console.log('Opening search...');
             searchOverlay.style.display = 'block';
             document.body.style.overflow = 'hidden';
-            
+
             // Trigger animation
             setTimeout(function() {
                 searchOverlay.classList.add('active');
@@ -82,7 +73,6 @@
         }
 
         function closeSearch() {
-            console.log('Closing search...');
             searchOverlay.classList.remove('active');
             document.body.style.overflow = '';
             

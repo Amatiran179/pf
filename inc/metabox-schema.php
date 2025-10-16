@@ -44,7 +44,57 @@ function putrafiber_schema_metabox_callback($post) {
     // Get saved data - ServiceArea
     $enable_service_area = get_post_meta($post->ID, '_enable_service_area', true);
     $service_areas = get_post_meta($post->ID, '_service_areas', true);
-    
+    $manual_service_areas = get_post_meta($post->ID, '_manual_service_areas', true);
+
+    if (!is_array($service_areas)) {
+        $service_areas = array();
+    }
+
+    if (!is_array($manual_service_areas)) {
+        $manual_service_areas = array();
+    }
+
+    if (!empty($manual_service_areas)) {
+        foreach ($manual_service_areas as $index => $area) {
+            if (!is_array($area)) {
+                $manual_service_areas[$index] = array(
+                    'type' => 'Place',
+                    'name' => sanitize_text_field($area),
+                    'country_code' => 'ID',
+                    'identifier' => '',
+                    'note' => ''
+                );
+                continue;
+            }
+
+            $manual_service_areas[$index] = wp_parse_args($area, array(
+                'type' => 'Place',
+                'name' => '',
+                'country_code' => 'ID',
+                'identifier' => '',
+                'note' => ''
+            ));
+        }
+    }
+
+    if (empty($manual_service_areas)) {
+        $manual_service_areas[] = array(
+            'type' => 'Country',
+            'name' => 'Indonesia',
+            'country_code' => 'ID',
+            'identifier' => '',
+            'note' => ''
+        );
+    }
+
+    $manual_service_area_types = array(
+        'Country' => __('Country', 'putrafiber'),
+        'AdministrativeArea' => __('Administrative Area (Province/Region)', 'putrafiber'),
+        'City' => __('City', 'putrafiber'),
+        'Place' => __('Place / Landmark', 'putrafiber'),
+        'PostalAddress' => __('Postal Address', 'putrafiber'),
+    );
+
     // Get saved data - Video
     $enable_video = get_post_meta($post->ID, '_enable_video_schema', true);
     $video_url = get_post_meta($post->ID, '_video_url', true);
@@ -196,6 +246,56 @@ function putrafiber_schema_metabox_callback($post) {
                     </div>
 
                     <button type="button" class="schema-repeater-add" id="add-service-area">+ Tambah Kota</button>
+                </div>
+
+                <div class="schema-field">
+                    <label>🌍 Manual Service Area (Opsional)</label>
+                    <p class="schema-help">Gunakan ketika kota/provinsi tidak tersedia di daftar. Secara default terisi INDONESIA sesuai standar Schema.org.</p>
+
+                    <div id="manual-service-areas-container">
+                        <?php foreach ($manual_service_areas as $index => $manual_area) : ?>
+                        <div class="schema-repeater-item manual-service-area-item">
+                            <?php if ($index > 0) : ?>
+                            <button type="button" class="schema-repeater-remove remove-manual-service-area">✕</button>
+                            <?php endif; ?>
+
+                            <div class="schema-grid-3 manual-area-grid">
+                                <div>
+                                    <label><?php esc_html_e('Tipe Area', 'putrafiber'); ?></label>
+                                    <select name="manual_service_areas[<?php echo $index; ?>][type]" class="manual-area-type">
+                                        <?php foreach ($manual_service_area_types as $value => $label) : ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($manual_area['type'], $value); ?>><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label><?php esc_html_e('Nama Area', 'putrafiber'); ?></label>
+                                    <input type="text" name="manual_service_areas[<?php echo $index; ?>][name]" value="<?php echo esc_attr($manual_area['name']); ?>" placeholder="<?php esc_attr_e('Contoh: Indonesia', 'putrafiber'); ?>">
+                                </div>
+
+                                <div>
+                                    <label><?php esc_html_e('Kode Negara (ISO)', 'putrafiber'); ?></label>
+                                    <input type="text" name="manual_service_areas[<?php echo $index; ?>][country_code]" value="<?php echo esc_attr($manual_area['country_code']); ?>" class="manual-area-country-code" maxlength="2" placeholder="<?php esc_attr_e('ID', 'putrafiber'); ?>">
+                                </div>
+                            </div>
+
+                            <div class="schema-grid-2 manual-area-extra">
+                                <div>
+                                    <label><?php esc_html_e('Identifier / URL Resmi (Opsional)', 'putrafiber'); ?></label>
+                                    <input type="text" name="manual_service_areas[<?php echo $index; ?>][identifier]" value="<?php echo esc_attr($manual_area['identifier']); ?>" placeholder="<?php esc_attr_e('Contoh: ID atau https://...', 'putrafiber'); ?>">
+                                </div>
+
+                                <div>
+                                    <label><?php esc_html_e('Catatan Tambahan (Opsional)', 'putrafiber'); ?></label>
+                                    <textarea name="manual_service_areas[<?php echo $index; ?>][note]" placeholder="<?php esc_attr_e('Contoh: Area prioritas layanan', 'putrafiber'); ?>"><?php echo esc_textarea($manual_area['note']); ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <button type="button" class="schema-repeater-add" id="add-manual-service-area">+ <?php esc_html_e('Tambah Area Manual', 'putrafiber'); ?></button>
                 </div>
             </div>
         </div>
@@ -552,7 +652,7 @@ function putrafiber_schema_metabox_callback($post) {
             var html = '<div class="schema-repeater-item service-area-item"><div class="city-province-row">' +
                 '<div><label>Kota/Kabupaten</label><select name="service_areas['+serviceAreaIndex+'][city]" class="city-select" data-index="'+serviceAreaIndex+'">' +
                 '<option value="">-- Pilih Kota --</option>' +
-                <?php 
+                <?php
                 $cities = putrafiber_get_indonesian_cities();
                 foreach ($cities as $city_name => $province_name) {
                     echo "'<option value=\"" . esc_js($city_name) . "\" data-province=\"" . esc_js($province_name) . "\">" . esc_js($city_name) . "</option>' + ";
@@ -566,6 +666,49 @@ function putrafiber_schema_metabox_callback($post) {
             serviceAreaIndex++;
         });
         $(document).on('click', '.remove-service-area', function(){ $(this).closest('.service-area-item').fadeOut(300, function(){ $(this).remove(); }); });
+
+        // Manual Service Area
+        var manualServiceAreaIndex = <?php echo count($manual_service_areas); ?>;
+        var manualServiceAreaTypes = <?php echo wp_json_encode($manual_service_area_types); ?>;
+
+        function putrafiberRenderManualAreaOptions(selected) {
+            var options = '';
+            for (var key in manualServiceAreaTypes) {
+                if (!Object.prototype.hasOwnProperty.call(manualServiceAreaTypes, key)) {
+                    continue;
+                }
+                var isSelected = key === selected ? ' selected' : '';
+                options += '<option value="' + key + '"' + isSelected + '>' + manualServiceAreaTypes[key] + '</option>';
+            }
+            return options;
+        }
+
+        $('#add-manual-service-area').on('click', function(){
+            var options = putrafiberRenderManualAreaOptions('Place');
+            var html = '<div class="schema-repeater-item manual-service-area-item">' +
+                '<button type="button" class="schema-repeater-remove remove-manual-service-area">✕</button>' +
+                '<div class="schema-grid-3 manual-area-grid">' +
+                '<div><label><?php echo esc_js(__('Tipe Area', 'putrafiber')); ?></label><select name="manual_service_areas[' + manualServiceAreaIndex + '][type]" class="manual-area-type">' + options + '</select></div>' +
+                '<div><label><?php echo esc_js(__('Nama Area', 'putrafiber')); ?></label><input type="text" name="manual_service_areas[' + manualServiceAreaIndex + '][name]" placeholder="<?php echo esc_js(__('Contoh: Indonesia', 'putrafiber')); ?>"></div>' +
+                '<div><label><?php echo esc_js(__('Kode Negara (ISO)', 'putrafiber')); ?></label><input type="text" name="manual_service_areas[' + manualServiceAreaIndex + '][country_code]" class="manual-area-country-code" maxlength="2" placeholder="ID"></div>' +
+                '</div>' +
+                '<div class="schema-grid-2 manual-area-extra">' +
+                '<div><label><?php echo esc_js(__('Identifier / URL Resmi (Opsional)', 'putrafiber')); ?></label><input type="text" name="manual_service_areas[' + manualServiceAreaIndex + '][identifier]" placeholder="<?php echo esc_js(__('Contoh: ID atau https://...', 'putrafiber')); ?>"></div>' +
+                '<div><label><?php echo esc_js(__('Catatan Tambahan (Opsional)', 'putrafiber')); ?></label><textarea name="manual_service_areas[' + manualServiceAreaIndex + '][note]" placeholder="<?php echo esc_js(__('Contoh: Area prioritas layanan', 'putrafiber')); ?>"></textarea></div>' +
+                '</div>' +
+                '</div>';
+            $('#manual-service-areas-container').append(html);
+            manualServiceAreaIndex++;
+        });
+
+        $(document).on('click', '.remove-manual-service-area', function(){
+            $(this).closest('.manual-service-area-item').fadeOut(300, function(){ $(this).remove(); });
+        });
+
+        $(document).on('input', '.manual-area-country-code', function(){
+            var cleaned = $(this).val().replace(/[^a-zA-Z]/g, '').toUpperCase();
+            $(this).val(cleaned.slice(0, 2));
+        });
 
         // Add FAQ
         var faqIndex = <?php echo count($faq_items); ?>;
@@ -641,7 +784,45 @@ function putrafiber_save_schema_meta($post_id) {
     } else {
         delete_post_meta($post_id, '_service_areas');
     }
-    
+
+    if (isset($_POST['manual_service_areas']) && is_array($_POST['manual_service_areas'])) {
+        $manual_entries = array();
+        foreach ($_POST['manual_service_areas'] as $entry) {
+            $type = isset($entry['type']) ? sanitize_text_field($entry['type']) : '';
+            $name = isset($entry['name']) ? sanitize_text_field($entry['name']) : '';
+
+            if (empty($type) || empty($name)) {
+                continue;
+            }
+
+            $country_code = isset($entry['country_code']) ? strtoupper(sanitize_text_field($entry['country_code'])) : '';
+            $identifier_raw = isset($entry['identifier']) ? trim(wp_unslash($entry['identifier'])) : '';
+            $identifier = '';
+
+            if (!empty($identifier_raw)) {
+                $identifier = filter_var($identifier_raw, FILTER_VALIDATE_URL)
+                    ? esc_url_raw($identifier_raw)
+                    : sanitize_text_field($identifier_raw);
+            }
+
+            $manual_entries[] = array(
+                'type' => $type,
+                'name' => $name,
+                'country_code' => $country_code,
+                'identifier' => $identifier,
+                'note' => isset($entry['note']) ? sanitize_textarea_field($entry['note']) : ''
+            );
+        }
+
+        if (!empty($manual_entries)) {
+            update_post_meta($post_id, '_manual_service_areas', $manual_entries);
+        } else {
+            delete_post_meta($post_id, '_manual_service_areas');
+        }
+    } else {
+        delete_post_meta($post_id, '_manual_service_areas');
+    }
+
     // Save Video
     update_post_meta($post_id, '_enable_video_schema', isset($_POST['enable_video_schema']) ? '1' : '0');
     update_post_meta($post_id, '_video_url', isset($_POST['video_url']) ? esc_url_raw($_POST['video_url']) : '');

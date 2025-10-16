@@ -243,12 +243,16 @@ function putrafiber_sanitize_options($input) {
     $textarea_fields = array(
         'hero_description', 'company_address', 'business_description',
         'front_features_description', 'front_services_description', 'front_portfolio_description',
-        'front_products_description', 'front_blog_description', 'front_cta_description',
+        'front_products_description', 'front_cta_description',
         'front_features_items', 'front_services_items', 'meta_description'
     );
     foreach ($textarea_fields as $field) {
         $output[$field] = isset($input[$field]) ? sanitize_textarea_field($input[$field]) : '';
     }
+
+    $output['front_blog_description'] = isset($input['front_blog_description'])
+        ? wp_kses_post($input['front_blog_description'])
+        : '';
 
     $color_fields = array('front_primary_color', 'front_gold_color', 'front_dark_color');
     foreach ($color_fields as $field) {
@@ -749,9 +753,26 @@ function putrafiber_front_blog_title_render() {
 function putrafiber_front_blog_description_render() {
     $options = get_option('putrafiber_options', array());
     $value = isset($options['front_blog_description']) ? $options['front_blog_description'] : __('Strategi operasional waterpark, tips maintenance, dan berita terbaru industri rekreasi air.', 'putrafiber');
-    ?>
-    <textarea name="putrafiber_options[front_blog_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
-    <?php
+
+    wp_editor(
+        $value,
+        'putrafiber_front_blog_description',
+        array(
+            'textarea_name' => 'putrafiber_options[front_blog_description]',
+            'textarea_rows' => 6,
+            'media_buttons' => false,
+            'teeny'         => true,
+            'tinymce'       => array(
+                'toolbar1' => 'formatselect,bold,italic,underline,link,unlink,bullist,numlist,blockquote',
+                'toolbar2' => '',
+            ),
+            'quicktags'     => array(
+                'buttons' => 'strong,em,link,ul,ol,li,code',
+            ),
+        )
+    );
+
+    echo '<p class="description">' . esc_html__('Gunakan HTML untuk mengatur struktur konten artikel di landing page.', 'putrafiber') . '</p>';
 }
 
 function putrafiber_front_blog_limit_render() {

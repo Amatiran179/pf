@@ -164,6 +164,113 @@ function putrafiber_frontpage_limit($section, $default) {
 }
 
 /**
+ * Resolve the query parameter key used for section pagination.
+ *
+ * @param string $section
+ * @return string
+ */
+function putrafiber_frontpage_section_query_var($section) {
+    return 'pf_' . sanitize_key($section) . '_page';
+}
+
+/**
+ * Determine the current paged value for a given front page section.
+ *
+ * @param string $section
+ * @return int
+ */
+function putrafiber_frontpage_section_paged($section) {
+    $param = putrafiber_frontpage_section_query_var($section);
+
+    $paged = filter_input(INPUT_GET, $param, FILTER_VALIDATE_INT);
+    if ($paged === null || $paged === false) {
+        $paged = isset($_GET[$param]) ? (int) wp_unslash($_GET[$param]) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    }
+
+    if ($paged < 1) {
+        $paged = 1;
+    }
+
+    return $paged;
+}
+
+/**
+ * Render numeric pagination for a front page section query.
+ *
+ * @param string   $section Section slug.
+ * @param WP_Query $query   Query instance.
+ * @return string Pagination markup.
+ */
+function putrafiber_frontpage_render_pagination($section, $query) {
+    if (!($query instanceof WP_Query)) {
+        return '';
+    }
+
+    $total = (int) $query->max_num_pages;
+    if ($total <= 1) {
+        return '';
+    }
+
+    $current = putrafiber_frontpage_section_paged($section);
+    $param   = putrafiber_frontpage_section_query_var($section);
+
+    $front_id = (int) get_option('page_on_front');
+    $base_url = $front_id ? get_permalink($front_id) : home_url('/');
+    $base_url = esc_url_raw(remove_query_arg($param, $base_url));
+
+    $additional_args = array();
+    foreach ($_GET as $key => $value) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        if ($key === $param) {
+            continue;
+        }
+
+        $sanitized_key = sanitize_key($key);
+        if ($sanitized_key === '') {
+            continue;
+        }
+
+        if (is_array($value)) {
+            continue;
+        }
+
+        $additional_args[$sanitized_key] = sanitize_text_field(wp_unslash($value));
+    }
+
+    $links = paginate_links(array(
+        'base'      => add_query_arg($param, '%#%', $base_url),
+        'format'    => '',
+        'current'   => max(1, $current),
+        'total'     => $total,
+        'type'      => 'array',
+        'add_args'  => $additional_args,
+        'prev_text' => __('← Sebelumnya', 'putrafiber'),
+        'next_text' => __('Selanjutnya →', 'putrafiber'),
+    ));
+
+    if (empty($links) || !is_array($links)) {
+        return '';
+    }
+
+    foreach ($links as &$link) {
+        $link = str_replace(array($param . '=1&amp;', $param . '=1'), array('', ''), $link);
+    }
+    unset($link);
+
+    /* translators: %s: section label. */
+    $label = sprintf(__('Navigasi %s', 'putrafiber'), ucfirst($section));
+
+    $output  = '<nav class="section-pagination" aria-label="' . esc_attr($label) . '">';
+    $output .= '<ul class="pagination-list">';
+    foreach ($links as $link) {
+        $output .= '<li class="pagination-item">' . $link . '</li>';
+    }
+    $output .= '</ul>';
+    $output .= '</nav>';
+
+    return $output;
+}
+
+/**
  * Parse textarea repeater items using "Title|Description|Icon" format.
  *
  * @param string $option_key

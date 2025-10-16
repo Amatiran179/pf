@@ -6,6 +6,7 @@
  */
 
 $portfolio_limit = putrafiber_frontpage_limit('portfolio', 6);
+$portfolio_page  = putrafiber_frontpage_section_paged('portfolio');
 $portfolio_title = putrafiber_frontpage_text('portfolio', 'title', __('Portofolio Unggulan', 'putrafiber'));
 $portfolio_desc  = putrafiber_frontpage_text('portfolio', 'description', __('Lihat bagaimana kami mentransformasi area kosong menjadi destinasi air spektakuler.', 'putrafiber'));
 
@@ -14,15 +15,27 @@ $portfolio_query = new WP_Query(array(
     'posts_per_page' => $portfolio_limit,
     'orderby'        => 'date',
     'order'          => 'DESC',
+    'paged'          => $portfolio_page,
+    'post_status'    => 'publish',
+    'no_found_rows'  => false,
+    'ignore_sticky_posts' => true,
 ));
 ?>
 
-<section class="portfolio-section section" id="portfolio">
-    <div class="container-wide">
+<section class="portfolio-section section section--glass" id="portfolio">
+    <div class="section-background" aria-hidden="true">
+        <span class="section-ripple"></span>
+        <span class="section-ripple section-ripple--alt"></span>
+        <span class="section-spark section-spark--left"></span>
+        <span class="section-spark section-spark--right"></span>
+    </div>
+
+    <div class="container-wide section-content">
         <div class="section-title fade-in">
+            <div class="section-pretitle"><?php esc_html_e('Project Ikonik', 'putrafiber'); ?></div>
             <h2><?php echo esc_html($portfolio_title); ?></h2>
             <?php if ($portfolio_desc): ?>
-                <p><?php echo esc_html($portfolio_desc); ?></p>
+                <div class="section-lead"><?php echo wp_kses_post($portfolio_desc); ?></div>
             <?php endif; ?>
         </div>
 
@@ -80,12 +93,14 @@ $portfolio_query = new WP_Query(array(
                 wp_reset_postdata();
                 ?>
             </div>
+
+            <?php echo putrafiber_frontpage_render_pagination('portfolio', $portfolio_query); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php else: ?>
             <p class="section-empty fade-in"><?php esc_html_e('Belum ada portofolio yang ditampilkan. Tambahkan project pertama Anda melalui menu Portfolio.', 'putrafiber'); ?></p>
         <?php endif; ?>
 
         <div class="section-cta fade-in">
-            <a href="<?php echo esc_url(get_post_type_archive_link('portfolio')); ?>" class="btn btn-outline btn-lg">
+            <a href="<?php echo esc_url(home_url('/portfolio/')); ?>" class="btn btn-outline btn-lg">
                 <?php esc_html_e('Lihat Semua Portofolio', 'putrafiber'); ?>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
