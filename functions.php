@@ -24,6 +24,8 @@ if (!defined('PUTRAFIBER_URI'))     define('PUTRAFIBER_URI', get_template_direct
 $pf_requires = array(
   '/inc/theme-setup.php',
   '/inc/enqueue.php',
+  '/inc/helpers-gallery.php',
+  '/inc/helpers-frontpage.php',
   '/inc/customizer.php',
   '/inc/post-types/portfolio.php',
   '/inc/post-types/product.php',

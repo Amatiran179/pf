@@ -34,6 +34,15 @@ function putrafiber_enqueue_styles() {
     wp_enqueue_style('putrafiber-components',  PUTRAFIBER_URI . '/assets/css/components.css',  array('putrafiber-style'), PUTRAFIBER_VERSION);
     wp_enqueue_style('putrafiber-animations',  PUTRAFIBER_URI . '/assets/css/animations.css',  array('putrafiber-style'), PUTRAFIBER_VERSION);
 
+    if (is_front_page()) {
+        wp_enqueue_style(
+            'putrafiber-front-epic',
+            PUTRAFIBER_URI . '/assets/css/front-page-epic.css',
+            array('putrafiber-components', 'putrafiber-animations'),
+            PUTRAFIBER_VERSION
+        );
+    }
+
     // Responsive (biasakan terakhir untuk layer global)
     wp_enqueue_style('putrafiber-responsive',  PUTRAFIBER_URI . '/assets/css/responsive.css',  array('putrafiber-style'), PUTRAFIBER_VERSION);
 
@@ -97,6 +106,10 @@ function putrafiber_enqueue_scripts() {
     // PWA Service Worker Registration
     wp_enqueue_script('putrafiber-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), PUTRAFIBER_VERSION, true);
 
+    if (is_front_page()) {
+        wp_enqueue_script('putrafiber-front-epic', PUTRAFIBER_URI . '/assets/js/front-page-epic.js', array('jquery'), PUTRAFIBER_VERSION, true);
+    }
+
     // ===== PRODUCT & PORTFOLIO (gabungan) =====
     if (
         is_singular('product') || is_post_type_archive('product') || is_tax('product_category') || is_tax('product_tag') ||
@@ -152,6 +165,7 @@ add_action('wp_enqueue_scripts', 'putrafiber_enqueue_scripts');
  * Admin Styles
  */
 function putrafiber_admin_styles() {
+    wp_enqueue_style('wp-color-picker');
     wp_enqueue_style('putrafiber-admin', PUTRAFIBER_URI . '/assets/css/admin.css', array(), PUTRAFIBER_VERSION);
     wp_enqueue_media();
 }
@@ -161,6 +175,7 @@ add_action('admin_enqueue_scripts', 'putrafiber_admin_styles');
  * Admin Scripts
  */
 function putrafiber_admin_scripts() {
+    wp_enqueue_script('wp-color-picker');
     wp_enqueue_script('putrafiber-admin-js', PUTRAFIBER_URI . '/assets/js/admin.js', array('jquery'), PUTRAFIBER_VERSION, true);
 }
 add_action('admin_enqueue_scripts', 'putrafiber_admin_scripts');

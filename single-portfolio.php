@@ -52,79 +52,49 @@ get_header();
                     <div class="portfolio-layout">
                         
                         <div class="portfolio-gallery">
-                            <?php 
-                            $all_images = [];
-                            
-                            // Add featured image first if exists
-                            if (has_post_thumbnail()) {
-                                $all_images[] = array(
-                                    'id' => get_post_thumbnail_id(),
-                                    'url' => get_the_post_thumbnail_url($portfolio_id, 'putrafiber-portfolio'),
-                                    'full' => get_the_post_thumbnail_url($portfolio_id, 'full'),
-                                    'alt' => get_the_title()
-                                );
-                            }
-                            
-                            // ===================================================================
-                            // START: BLOK KODE PERBAIKAN
-                            // ===================================================================
-                            
-                            // Add gallery images (REVISED AND FIXED LOGIC)
-                            $gallery_meta = get_post_meta($portfolio_id, '_portfolio_gallery', true);
-                            $gallery_ids_from_meta = [];
+                            <?php
+                            $portfolio_title = get_the_title();
+                            $featured_id     = has_post_thumbnail() ? get_post_thumbnail_id($portfolio_id) : 0;
 
-                            // Cek apakah ada data meta dan ubah menjadi array yang bersih
-                            if (!empty($gallery_meta) && is_string($gallery_meta)) {
-                                // 1. Pecah string berdasarkan koma
-                                $exploded_ids = explode(',', $gallery_meta);
-                                // 2. Ubah setiap elemen menjadi angka (integer)
-                                $int_ids = array_map('intval', $exploded_ids);
-                                // 3. Hapus ID yang tidak valid (angka 0)
-                                $gallery_ids_from_meta = array_filter($int_ids);
+                            $gallery_meta    = get_post_meta($portfolio_id, '_portfolio_gallery', true);
+                            $gallery_ids     = function_exists('putrafiber_extract_gallery_ids') ? putrafiber_extract_gallery_ids($gallery_meta) : array();
+
+                            if ($featured_id) {
+                                $gallery_ids = array_values(array_filter($gallery_ids, function ($attachment_id) use ($featured_id) {
+                                    return (int) $attachment_id !== (int) $featured_id;
+                                }));
                             }
 
-                            // Pastikan kita punya array ID yang valid sebelum melakukan loop
-                            if (!empty($gallery_ids_from_meta)) {
-                                foreach ($gallery_ids_from_meta as $img_id) {
-                                    
-                                    // Lewati gambar ini jika ID-nya sama dengan featured image (mencegah duplikat)
-                                    if ($img_id === get_post_thumbnail_id()) {
-                                        continue;
-                                    }
+                            $all_images = array();
 
-                                    // Ambil URL gambar dalam berbagai ukuran
-                                    $image_url = wp_get_attachment_image_url($img_id, 'putrafiber-portfolio');
-                                    $image_full = wp_get_attachment_image_url($img_id, 'full');
-                                    
-                                    // Hanya proses jika kedua URL gambar valid
-                                    if ($image_url && $image_full) {
-                                        // Dapatkan alt text, jika kosong, gunakan judul post sebagai cadangan
-                                        $image_alt = get_post_meta($img_id, '_wp_attachment_image_alt', true);
-                                        if (empty($image_alt)) {
-                                            $image_alt = get_the_title();
-                                        }
-
-                                        // Tambahkan data gambar ke array utama
-                                        $all_images[] = array(
-                                            'id' => $img_id,
-                                            'url' => $image_url,
-                                            'full' => $image_full,
-                                            'alt' => $image_alt
-                                        );
-                                    }
+                            if ($featured_id && function_exists('putrafiber_build_gallery_items')) {
+                                $featured_items = putrafiber_build_gallery_items(array($featured_id), array(
+                                    'image_size'   => 'putrafiber-portfolio',
+                                    'thumb_size'   => 'thumbnail',
+                                    'fallback_alt' => $portfolio_title,
+                                ));
+                                if (!empty($featured_items)) {
+                                    $all_images[] = $featured_items[0];
                                 }
                             }
-                            
-                            // ===================================================================
-                            // END: BLOK KODE PERBAIKAN
-                            // ===================================================================
-                            
-                            if (!empty($all_images)): 
+
+                            if (!empty($gallery_ids) && function_exists('putrafiber_build_gallery_items')) {
+                                $gallery_items = putrafiber_build_gallery_items($gallery_ids, array(
+                                    'image_size'   => 'putrafiber-portfolio',
+                                    'thumb_size'   => 'thumbnail',
+                                    'fallback_alt' => $portfolio_title,
+                                ));
+                                if (!empty($gallery_items)) {
+                                    $all_images   = array_merge($all_images, $gallery_items);
+                                }
+                            }
+
+                            if (!empty($all_images)):
                             ?>
                                 <div class="gallery-container">
                                     <div class="swiper portfolio-gallery-slider">
                                         <div class="swiper-wrapper">
-                                            <?php foreach ($all_images as $image): ?>
+                                            <?php foreach ($all_images as $index => $image): ?>
                                                 <div class="swiper-slide">
                                                     <a href="<?php echo esc_url($image['full']); ?>"
                                                        data-lightbox="portfolio-<?php echo $portfolio_id; ?>"
@@ -133,7 +103,11 @@ get_header();
                                                         <img src="<?php echo esc_url($image['url']); ?>"
                                                              alt="<?php echo esc_attr($image['alt']); ?>"
                                                              class="gallery-image"
-                                                             loading="lazy">
+                                                             <?php if (!empty($image['width']) && !empty($image['height'])): ?>
+                                                                 width="<?php echo (int) $image['width']; ?>" height="<?php echo (int) $image['height']; ?>"
+                                                             <?php endif; ?>
+                                                             <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
+                                                             decoding="async">
                                                         <span class="zoom-icon">🔍</span>
                                                     </a>
                                                 </div>
@@ -150,8 +124,8 @@ get_header();
                                     <?php if (count($all_images) > 1): ?>
                                         <div class="swiper portfolio-gallery-thumbs">
                                             <div class="swiper-wrapper">
-                                                <?php foreach ($all_images as $image): 
-                                                    $thumb_url = wp_get_attachment_image_url($image['id'], 'thumbnail');
+                                                <?php foreach ($all_images as $image):
+                                                    $thumb_url = !empty($image['thumb']) ? $image['thumb'] : $image['url'];
                                                     if ($thumb_url):
                                                 ?>
                                                     <div class="swiper-slide">

@@ -108,6 +108,20 @@ function putrafiber_portfolio_meta_boxes() {
 add_action('add_meta_boxes', 'putrafiber_portfolio_meta_boxes');
 
 /**
+ * Ensure media and sortable assets are ready inside portfolio editor.
+ */
+function putrafiber_portfolio_admin_assets($hook_suffix) {
+    global $typenow;
+    if ($typenow !== 'portfolio') {
+        return;
+    }
+
+    wp_enqueue_media();
+    wp_enqueue_script('jquery-ui-sortable');
+}
+add_action('admin_enqueue_scripts', 'putrafiber_portfolio_admin_assets');
+
+/**
  * Portfolio Details Callback - ENHANCED WITH CTA SYSTEM
  */
 function putrafiber_portfolio_details_callback($post) {
@@ -345,17 +359,18 @@ function putrafiber_portfolio_details_callback($post) {
  * Portfolio Gallery Callback - ENHANCED (Similar to Product)
  */
 function putrafiber_portfolio_gallery_callback($post) {
-    $gallery = get_post_meta($post->ID, '_portfolio_gallery', true);
+    $gallery_raw   = get_post_meta($post->ID, '_portfolio_gallery', true);
+    $gallery_ids   = function_exists('putrafiber_extract_gallery_ids') ? putrafiber_extract_gallery_ids($gallery_raw) : array();
+    $gallery_value = !empty($gallery_ids) ? implode(',', $gallery_ids) : '';
     ?>
     <div class="portfolio-gallery-box">
-        <input type="hidden" id="portfolio_gallery" name="portfolio_gallery" value="<?php echo esc_attr($gallery); ?>">
+        <input type="hidden" id="portfolio_gallery" name="portfolio_gallery" value="<?php echo esc_attr($gallery_value); ?>">
         <button type="button" class="button button-primary button-large" id="upload-portfolio-gallery-button" style="width: 100%; margin-bottom: 15px;">
             <span class="dashicons dashicons-images-alt2" style="margin-top: 3px;"></span> <?php _e('Upload Gallery Images', 'putrafiber'); ?>
         </button>
         <div id="portfolio-gallery-preview" class="gallery-preview-grid">
             <?php
-            if ($gallery) {
-                $gallery_ids = explode(',', $gallery);
+            if (!empty($gallery_ids)) {
                 foreach ($gallery_ids as $img_id) {
                     if ($img_url = wp_get_attachment_image_url($img_id, 'thumbnail')) {
                         echo '<div class="gallery-item" data-id="'.esc_attr($img_id).'"><img src="'.esc_url($img_url).'" alt="Gallery image"><button type="button" class="remove-gallery-item" title="Remove">&times;</button></div>';
@@ -393,7 +408,7 @@ function putrafiber_portfolio_gallery_callback($post) {
             portfolioGalleryUploader.on('select', function(){
                 var attachments = portfolioGalleryUploader.state().get('selection').toJSON();
                 var existingIds = $('#portfolio_gallery').val() ? $('#portfolio_gallery').val().split(',') : [];
-                
+
                 attachments.forEach(function(attachment){
                     if ($.inArray(attachment.id.toString(), existingIds) === -1) {
                         existingIds.push(attachment.id);
@@ -410,7 +425,8 @@ function putrafiber_portfolio_gallery_callback($post) {
                         );
                     }
                 });
-                
+
+                existingIds = existingIds.filter(function(value){ return value && value !== '0'; });
                 $('#portfolio_gallery').val(existingIds.join(','));
             });
             
@@ -480,7 +496,10 @@ function putrafiber_save_portfolio_meta($post_id) {
             } elseif ($field === 'portfolio_video') {
                 update_post_meta($post_id, $meta_key, esc_url_raw($_POST[$field]));
             } elseif ($field === 'portfolio_gallery') {
-                $value = implode(',', array_filter(array_map('absint', explode(',', sanitize_text_field($_POST[$field])))));
+                $value = sanitize_text_field(wp_unslash($_POST[$field]));
+                $value = function_exists('putrafiber_prepare_gallery_meta_value')
+                    ? putrafiber_prepare_gallery_meta_value($value)
+                    : implode(',', array_filter(array_map('absint', explode(',', $value))));
                 update_post_meta($post_id, $meta_key, $value);
             } else {
                 update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$field]));
@@ -493,9 +512,9 @@ add_action('save_post_portfolio', 'putrafiber_save_portfolio_meta');
 /**
  * Flush Rewrite Rules on Activation
  */
-function putrafiber_rewrite_flush() {
+function putrafiber_portfolio_flush_rewrite_rules() {
     putrafiber_register_portfolio();
     putrafiber_register_portfolio_taxonomies();
     flush_rewrite_rules();
 }
-register_activation_hook(__FILE__, 'putrafiber_rewrite_flush');
+add_action('after_switch_theme', 'putrafiber_portfolio_flush_rewrite_rules');

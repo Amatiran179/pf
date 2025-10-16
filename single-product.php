@@ -33,15 +33,92 @@ while (have_posts()) : the_post();
   $features  = get_post_meta($product_id, '_product_features', true);
   $catalog_pdf = get_post_meta($product_id, '_product_catalog_pdf', true);
 
-  // Galeri (filter kosong/duplikat)
+  // Galeri (normalisasi & data attachment lengkap)
   $gallery_raw = get_post_meta($product_id, '_product_gallery', true);
-  $gallery_ids = array();
-  if (!empty($gallery_raw)) {
-    $tmp = array_map('trim', explode(',', $gallery_raw));
-    $tmp = array_filter($tmp, function($v){ return $v !== '' && ctype_digit($v); });
-    $tmp = array_map('intval', $tmp);
-    $gallery_ids = array_values(array_unique($tmp));
+  $featured_id = has_post_thumbnail() ? get_post_thumbnail_id($product_id) : 0;
+
+  if (function_exists('putrafiber_extract_gallery_ids')) {
+    $gallery_ids = putrafiber_extract_gallery_ids($gallery_raw);
+  } else {
+    $tmp = array_map('trim', explode(',', (string) $gallery_raw));
+    $tmp = array_filter($tmp, function ($v) { return $v !== '' && ctype_digit($v); });
+    $gallery_ids = array_values(array_unique(array_map('intval', $tmp)));
   }
+
+  if ($featured_id) {
+    $gallery_ids = array_values(array_filter($gallery_ids, function ($id) use ($featured_id) {
+      return (int) $id !== (int) $featured_id;
+    }));
+  }
+
+  $all_gallery_images = array();
+  $product_title      = get_the_title();
+
+  if (function_exists('putrafiber_build_gallery_items')) {
+    if ($featured_id) {
+      $featured_items = putrafiber_build_gallery_items(array($featured_id), array(
+        'image_size'   => 'putrafiber-product',
+        'thumb_size'   => 'thumbnail',
+        'fallback_alt' => $product_title,
+      ));
+      if (!empty($featured_items)) {
+        $all_gallery_images[] = $featured_items[0];
+      }
+    }
+
+    if (!empty($gallery_ids)) {
+      $additional_items = putrafiber_build_gallery_items($gallery_ids, array(
+        'image_size'   => 'putrafiber-product',
+        'thumb_size'   => 'thumbnail',
+        'fallback_alt' => $product_title,
+      ));
+      if (!empty($additional_items)) {
+        $all_gallery_images = array_merge($all_gallery_images, $additional_items);
+      }
+    }
+  } else {
+    if ($featured_id && has_post_thumbnail()) {
+      $featured_url  = get_the_post_thumbnail_url($product_id, 'putrafiber-product');
+      $featured_full = get_the_post_thumbnail_url($product_id, 'full');
+      $featured_thumb= get_the_post_thumbnail_url($product_id, 'thumbnail');
+      $feat_meta     = wp_get_attachment_image_src($featured_id, 'putrafiber-product');
+      $all_gallery_images[] = array(
+        'id'     => $featured_id,
+        'url'    => $featured_url,
+        'full'   => $featured_full ?: $featured_url,
+        'thumb'  => $featured_thumb ?: $featured_url,
+        'alt'    => $product_title,
+        'width'  => $feat_meta ? (int) $feat_meta[1] : 0,
+        'height' => $feat_meta ? (int) $feat_meta[2] : 0,
+      );
+    }
+
+    if (!empty($gallery_ids)) {
+      foreach ($gallery_ids as $img_id) {
+        $image_url   = wp_get_attachment_image_url($img_id, 'putrafiber-product');
+        $image_full  = wp_get_attachment_image_url($img_id, 'full');
+        $thumb_url   = wp_get_attachment_image_url($img_id, 'thumbnail');
+        if (!$image_url && !$image_full) {
+          continue;
+        }
+        $img_meta = wp_get_attachment_image_src($img_id, 'putrafiber-product');
+        $alt      = get_post_meta($img_id, '_wp_attachment_image_alt', true) ?: $product_title;
+        $all_gallery_images[] = array(
+          'id'     => $img_id,
+          'url'    => $image_url ?: $image_full,
+          'full'   => $image_full ?: $image_url,
+          'thumb'  => $thumb_url ?: ($image_url ?: $image_full),
+          'alt'    => $alt,
+          'width'  => $img_meta ? (int) $img_meta[1] : 0,
+          'height' => $img_meta ? (int) $img_meta[2] : 0,
+        );
+      }
+    }
+  }
+
+  $total_gallery_images = count(array_filter($all_gallery_images, function ($image) {
+    return !empty($image['url']);
+  }));
 
   $formatted_price = $price_display > 0 ? 'Rp ' . number_format($price_display, 0, ',', '.') : '';
 
@@ -74,75 +151,35 @@ while (have_posts()) : the_post();
 
         <!-- ====================== GALERI ====================== -->
         <div class="product-gallery">
-          <?php if (!empty($gallery_ids) || has_post_thumbnail()): ?>
+          <?php if ($total_gallery_images > 0): ?>
             <div class="gallery-container">
               <!-- Main slider -->
               <div class="swiper product-gallery-slider">
                 <div class="swiper-wrapper">
-                  <?php
-                  // Featured image first (jangan duplikasi dengan galeri jika sama)
-                  if (has_post_thumbnail()):
-                    $featured_id   = get_post_thumbnail_id($product_id);
-                    $featured_url  = get_the_post_thumbnail_url($product_id, 'putrafiber-product');
-                    $featured_full = get_the_post_thumbnail_url($product_id, 'full');
-
-                    // Dimensi untuk width/height (stabilkan layout)
-                    $feat_meta = wp_get_attachment_image_src($featured_id, 'putrafiber-product');
-                    $feat_w = $feat_meta ? (int)$feat_meta[1] : '';
-                    $feat_h = $feat_meta ? (int)$feat_meta[2] : '';
+                  <?php foreach ($all_gallery_images as $index => $image):
+                    if (empty($image['url'])) {
+                      continue;
+                    }
+                    $img_alt   = !empty($image['alt']) ? $image['alt'] : get_the_title();
+                    $img_width = !empty($image['width']) ? (int) $image['width'] : 0;
+                    $img_height= !empty($image['height']) ? (int) $image['height'] : 0;
                   ?>
                   <div class="swiper-slide">
-                    <a href="<?php echo esc_url($featured_full); ?>"
-                       data-lightbox="product-<?php echo (int)$product_id; ?>"
-                       data-title="<?php echo esc_attr(get_the_title()); ?>"
+                    <a href="<?php echo esc_url($image['full']); ?>"
+                       data-lightbox="product-<?php echo (int) $product_id; ?>"
+                       data-title="<?php echo esc_attr($img_alt); ?>"
                        class="gallery-item"
                        style="<?php echo esc_attr($anti_zoom_style); ?>">
                       <img
-                        src="<?php echo esc_url($featured_url); ?>"
-                        alt="<?php echo esc_attr(get_the_title()); ?>"
+                        src="<?php echo esc_url($image['url']); ?>"
+                        alt="<?php echo esc_attr($img_alt); ?>"
                         class="gallery-image"
-                        <?php if ($feat_w && $feat_h): ?>
-                          width="<?php echo (int)$feat_w; ?>" height="<?php echo (int)$feat_h; ?>"
+                        <?php if ($img_width && $img_height): ?>
+                          width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
                         <?php endif; ?>
-                        fetchpriority="high"
-                        loading="lazy"
+                        <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
                         style="<?php echo esc_attr($anti_zoom_style); ?>"
-                      />
-                      <span class="zoom-icon">🔍</span>
-                    </a>
-                  </div>
-                  <?php endif; ?>
-
-                  <?php
-                  // Gambar tambahan
-                  foreach ($gallery_ids as $img_id):
-                    if (has_post_thumbnail() && (int)$img_id === (int)get_post_thumbnail_id($product_id)) continue;
-
-                    $image_url  = wp_get_attachment_image_url($img_id, 'putrafiber-product');
-                    $image_full = wp_get_attachment_image_url($img_id, 'full');
-                    $image_alt  = get_post_meta($img_id, '_wp_attachment_image_alt', true) ?: get_the_title();
-
-                    // Dimensi
-                    $img_meta = wp_get_attachment_image_src($img_id, 'putrafiber-product');
-                    $img_w = $img_meta ? (int)$img_meta[1] : '';
-                    $img_h = $img_meta ? (int)$img_meta[2] : '';
-                    if (!$image_url || !$image_full) continue;
-                  ?>
-                  <div class="swiper-slide">
-                    <a href="<?php echo esc_url($image_full); ?>"
-                       data-lightbox="product-<?php echo (int)$product_id; ?>"
-                       data-title="<?php echo esc_attr($image_alt); ?>"
-                       class="gallery-item"
-                       style="<?php echo esc_attr($anti_zoom_style); ?>">
-                      <img
-                        src="<?php echo esc_url($image_url); ?>"
-                        alt="<?php echo esc_attr($image_alt); ?>"
-                        class="gallery-image"
-                        <?php if ($img_w && $img_h): ?>
-                          width="<?php echo (int)$img_w; ?>" height="<?php echo (int)$img_h; ?>"
-                        <?php endif; ?>
-                        loading="lazy"
-                        style="<?php echo esc_attr($anti_zoom_style); ?>"
+                        decoding="async"
                       />
                       <span class="zoom-icon">🔍</span>
                     </a>
@@ -150,36 +187,25 @@ while (have_posts()) : the_post();
                   <?php endforeach; ?>
                 </div>
 
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-pagination"></div>
+                <?php if ($total_gallery_images > 1): ?>
+                  <div class="swiper-button-next"></div>
+                  <div class="swiper-button-prev"></div>
+                  <div class="swiper-pagination"></div>
+                <?php endif; ?>
               </div>
 
-              <?php
-              // Tampilkan thumbs bila ada setidaknya 2 gambar total
-              $total_images = (int)has_post_thumbnail() + count($gallery_ids);
-              if ($total_images > 1): ?>
+              <?php if ($total_gallery_images > 1): ?>
                 <div class="swiper product-gallery-thumbs">
                   <div class="swiper-wrapper">
-                    <?php if (has_post_thumbnail()): ?>
-                      <div class="swiper-slide">
-                        <img
-                          src="<?php echo esc_url(get_the_post_thumbnail_url($product_id, 'thumbnail')); ?>"
-                          alt="<?php echo esc_attr(get_the_title()); ?>"
-                          loading="lazy"
-                        />
-                      </div>
-                    <?php endif; ?>
-
-                    <?php foreach ($gallery_ids as $img_id):
-                      if (has_post_thumbnail() && (int)$img_id === (int)get_post_thumbnail_id($product_id)) continue;
-                      $thumb_url = wp_get_attachment_image_url($img_id, 'thumbnail');
-                      $thumb_alt = get_post_meta($img_id, '_wp_attachment_image_alt', true) ?: get_the_title();
-                      if (!$thumb_url) continue;
+                    <?php foreach ($all_gallery_images as $image):
+                      if (empty($image['thumb'])) {
+                        continue;
+                      }
+                      $thumb_alt = !empty($image['alt']) ? $image['alt'] : get_the_title();
                     ?>
                       <div class="swiper-slide">
                         <img
-                          src="<?php echo esc_url($thumb_url); ?>"
+                          src="<?php echo esc_url($image['thumb']); ?>"
                           alt="<?php echo esc_attr($thumb_alt); ?>"
                           loading="lazy"
                         />

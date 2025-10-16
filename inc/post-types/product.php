@@ -324,18 +324,19 @@ function putrafiber_product_details_callback($post) {
  * Product Gallery Meta Box Callback - FIXED VERSION
  */
 function putrafiber_product_gallery_callback($post) {
-  $gallery = get_post_meta($post->ID, '_product_gallery', true);
+  $gallery_raw   = get_post_meta($post->ID, '_product_gallery', true);
+  $gallery_ids   = function_exists('putrafiber_extract_gallery_ids') ? putrafiber_extract_gallery_ids($gallery_raw) : array();
+  $gallery_value = !empty($gallery_ids) ? implode(',', $gallery_ids) : '';
   ?>
   <div class="product-gallery-box">
-    <input type="hidden" id="product_gallery" name="product_gallery" value="<?php echo esc_attr($gallery); ?>">
+    <input type="hidden" id="product_gallery" name="product_gallery" value="<?php echo esc_attr($gallery_value); ?>">
     <button type="button" class="button button-primary button-large" id="upload-gallery-button" style="width:100%;margin-bottom:15px;">
       <span class="dashicons dashicons-images-alt2" style="margin-top:3px;"></span> <?php _e('Upload Gambar Gallery', 'putrafiber'); ?>
     </button>
     <div id="gallery-preview" class="gallery-preview-grid">
       <?php
-      if ($gallery) {
-        $ids = array_filter(array_map('absint', explode(',', $gallery)));
-        foreach ($ids as $img_id) {
+      if (!empty($gallery_ids)) {
+        foreach ($gallery_ids as $img_id) {
           $img_url = wp_get_attachment_image_url($img_id, 'thumbnail');
           if ($img_url) {
             echo '<div class="gallery-item" data-id="'.esc_attr($img_id).'"><img src="'.esc_url($img_url).'" alt="Gallery image"><button type="button" class="remove-gallery-item" title="Hapus">&times;</button></div>';
@@ -378,6 +379,7 @@ function putrafiber_product_gallery_callback($post) {
             );
           }
         });
+        existingIds = existingIds.filter(function(value){ return value && value !== '0'; });
         $('#product_gallery').val(existingIds.join(','));
       });
 
@@ -449,9 +451,10 @@ function putrafiber_save_product_meta($post_id) {
       $value = absint($value);
       if ($value <= 0) $value = 1000; // fallback schema anti penalty
     } elseif ($post_field === 'product_gallery') {
-      $ids = array_filter(array_map('absint', explode(',', sanitize_text_field($value))));
-      $ids = array_values(array_unique($ids));
-      $value = implode(',', $ids);
+      $value = sanitize_text_field(wp_unslash($value));
+      $value = function_exists('putrafiber_prepare_gallery_meta_value')
+        ? putrafiber_prepare_gallery_meta_value($value)
+        : implode(',', array_filter(array_map('absint', explode(',', $value))));
     } else {
       $value = sanitize_text_field($value);
     }

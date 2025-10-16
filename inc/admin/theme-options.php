@@ -54,6 +54,69 @@ function putrafiber_settings_init() {
     add_settings_field('hero_description', __('Hero Description', 'putrafiber'), 'putrafiber_hero_description_render', 'putrafiber-landing', 'putrafiber_landing_section');
     add_settings_field('hero_image', __('Hero Background Image', 'putrafiber'), 'putrafiber_hero_image_render', 'putrafiber-landing', 'putrafiber_landing_section');
     add_settings_field('hero_cta_text', __('Hero CTA Button Text', 'putrafiber'), 'putrafiber_hero_cta_text_render', 'putrafiber-landing', 'putrafiber_landing_section');
+
+    add_settings_field('hero_highlight', __('Hero Highlight Text', 'putrafiber'), 'putrafiber_hero_highlight_render', 'putrafiber-landing', 'putrafiber_landing_section');
+    add_settings_field('hero_secondary_cta', __('Hero Secondary CTA Label', 'putrafiber'), 'putrafiber_hero_secondary_cta_render', 'putrafiber-landing', 'putrafiber_landing_section');
+    add_settings_field('hero_secondary_url', __('Hero Secondary CTA URL', 'putrafiber'), 'putrafiber_hero_secondary_url_render', 'putrafiber-landing', 'putrafiber_landing_section');
+
+    add_settings_section(
+        'putrafiber_landing_layout_section',
+        __('Layout & Effects', 'putrafiber'),
+        'putrafiber_landing_layout_section_callback',
+        'putrafiber-landing'
+    );
+
+    add_settings_field('enable_hero_section', __('Tampilkan Hero', 'putrafiber'), 'putrafiber_enable_hero_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_features_section', __('Tampilkan Features', 'putrafiber'), 'putrafiber_enable_features_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_services_section', __('Tampilkan Services', 'putrafiber'), 'putrafiber_enable_services_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_portfolio_section', __('Tampilkan Portfolio', 'putrafiber'), 'putrafiber_enable_portfolio_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_products_section', __('Tampilkan Products', 'putrafiber'), 'putrafiber_enable_products_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_blog_section', __('Tampilkan Blog', 'putrafiber'), 'putrafiber_enable_blog_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_cta_section', __('Tampilkan CTA', 'putrafiber'), 'putrafiber_enable_cta_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_testimonials_section', __('Tampilkan Testimonials', 'putrafiber'), 'putrafiber_enable_testimonials_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('enable_partners_section', __('Tampilkan Partners', 'putrafiber'), 'putrafiber_enable_partners_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+
+    add_settings_field('front_sections_order', __('Section Order', 'putrafiber'), 'putrafiber_front_sections_order_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_enable_parallax', __('Enable Hero Parallax', 'putrafiber'), 'putrafiber_front_enable_parallax_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_water_intensity', __('Water Bubble Intensity', 'putrafiber'), 'putrafiber_front_water_intensity_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_primary_color', __('Primary Accent Colour', 'putrafiber'), 'putrafiber_front_primary_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_gold_color', __('Gold Accent Colour', 'putrafiber'), 'putrafiber_front_gold_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_dark_color', __('Dark Accent Colour', 'putrafiber'), 'putrafiber_front_dark_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_water_color', __('Water Overlay Colour', 'putrafiber'), 'putrafiber_front_water_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+
+    add_settings_section(
+        'putrafiber_landing_copy_section',
+        __('Section Headlines & Content', 'putrafiber'),
+        'putrafiber_landing_copy_section_callback',
+        'putrafiber-landing'
+    );
+
+    add_settings_field('front_features_title', __('Features Title', 'putrafiber'), 'putrafiber_front_features_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_features_description', __('Features Description', 'putrafiber'), 'putrafiber_front_features_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_features_items', __('Feature Highlights', 'putrafiber'), 'putrafiber_front_features_items_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+
+    add_settings_field('front_services_title', __('Services Title', 'putrafiber'), 'putrafiber_front_services_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_services_description', __('Services Description', 'putrafiber'), 'putrafiber_front_services_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_services_items', __('Services Items', 'putrafiber'), 'putrafiber_front_services_items_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+
+    add_settings_field('front_portfolio_title', __('Portfolio Title', 'putrafiber'), 'putrafiber_front_portfolio_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_portfolio_description', __('Portfolio Description', 'putrafiber'), 'putrafiber_front_portfolio_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_portfolio_limit', __('Portfolio Items Limit', 'putrafiber'), 'putrafiber_front_portfolio_limit_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+
+    add_settings_field('front_products_title', __('Product Title', 'putrafiber'), 'putrafiber_front_products_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_products_description', __('Product Description', 'putrafiber'), 'putrafiber_front_products_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_products_limit', __('Product Items Limit', 'putrafiber'), 'putrafiber_front_products_limit_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+
+    add_settings_field('front_blog_title', __('Blog Title', 'putrafiber'), 'putrafiber_front_blog_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_blog_description', __('Blog Description', 'putrafiber'), 'putrafiber_front_blog_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_blog_limit', __('Blog Posts Limit', 'putrafiber'), 'putrafiber_front_blog_limit_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+
+    add_settings_field('front_cta_title', __('CTA Title', 'putrafiber'), 'putrafiber_front_cta_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_cta_description', __('CTA Description', 'putrafiber'), 'putrafiber_front_cta_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_cta_primary_text', __('CTA Primary Button Text', 'putrafiber'), 'putrafiber_front_cta_primary_text_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_cta_primary_url', __('CTA Primary Button URL', 'putrafiber'), 'putrafiber_front_cta_primary_url_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_cta_secondary_text', __('CTA Secondary Button Text', 'putrafiber'), 'putrafiber_front_cta_secondary_text_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_cta_secondary_url', __('CTA Secondary Button URL', 'putrafiber'), 'putrafiber_front_cta_secondary_url_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     
     // ===================================================================
     // CONTACT SECTION
@@ -100,6 +163,10 @@ function putrafiber_settings_init() {
     
     add_settings_field('enable_schema', __('Enable Schema.org', 'putrafiber'), 'putrafiber_enable_schema_render', 'putrafiber-seo', 'putrafiber_seo_section');
     add_settings_field('enable_aggregate_rating', __('Enable Aggregate Rating', 'putrafiber'), 'putrafiber_enable_rating_render', 'putrafiber-seo', 'putrafiber_seo_section');
+    add_settings_field('meta_description', __('Default Meta Description', 'putrafiber'), 'putrafiber_meta_description_render', 'putrafiber-seo', 'putrafiber_seo_section');
+    add_settings_field('meta_keywords', __('Default Meta Keywords', 'putrafiber'), 'putrafiber_meta_keywords_render', 'putrafiber-seo', 'putrafiber_seo_section');
+    add_settings_field('og_image', __('Default Social Share Image', 'putrafiber'), 'putrafiber_og_image_render', 'putrafiber-seo', 'putrafiber_seo_section');
+    add_settings_field('twitter_username', __('Twitter Username', 'putrafiber'), 'putrafiber_twitter_username_render', 'putrafiber-seo', 'putrafiber_seo_section');
     add_settings_field('company_rating', __('Company Rating (1-5)', 'putrafiber'), 'putrafiber_company_rating_render', 'putrafiber-seo', 'putrafiber_seo_section');
     add_settings_field('review_count', __('Review Count', 'putrafiber'), 'putrafiber_review_count_render', 'putrafiber-seo', 'putrafiber_seo_section');
     
@@ -154,45 +221,61 @@ function putrafiber_sanitize_options($input) {
     $output = array();
     
     // Text fields
-    $text_fields = array(
-        'hero_title', 'hero_description', 'hero_image', 'hero_cta_text',
-        'whatsapp_number', 'company_address', 'company_phone', 'company_email', 
-        'business_hours', 'google_maps_embed',
+    $url_fields = array(
+        'hero_image',
+        'hero_secondary_url',
+        'google_maps_embed',
         'facebook_url', 'instagram_url', 'youtube_url', 'linkedin_url', 'twitter_url',
-        'company_rating', 'review_count',
-        'pwa_name', 'pwa_short_name', 'pwa_icon',
-        'business_type', 'business_description', 'company_name',
-        'company_city', 'company_province', 'company_postal_code',
-        'company_latitude', 'company_longitude', 'price_range'
+        'pwa_icon',
+        'front_cta_primary_url', 'front_cta_secondary_url',
+        'og_image'
     );
-    
+
+    foreach ($url_fields as $field) {
+        $output[$field] = isset($input[$field]) ? esc_url_raw($input[$field]) : '';
+    }
+
+    $email_fields = array('company_email');
+    foreach ($email_fields as $field) {
+        $output[$field] = isset($input[$field]) ? sanitize_email($input[$field]) : '';
+    }
+
+    $textarea_fields = array(
+        'hero_description', 'company_address', 'business_description',
+        'front_features_description', 'front_services_description', 'front_portfolio_description',
+        'front_products_description', 'front_blog_description', 'front_cta_description',
+        'front_features_items', 'front_services_items', 'meta_description'
+    );
+    foreach ($textarea_fields as $field) {
+        $output[$field] = isset($input[$field]) ? sanitize_textarea_field($input[$field]) : '';
+    }
+
+    $color_fields = array('front_primary_color', 'front_gold_color', 'front_dark_color');
+    foreach ($color_fields as $field) {
+        $output[$field] = isset($input[$field]) ? sanitize_hex_color($input[$field]) : '';
+    }
+
+    $number_fields = array(
+        'company_rating', 'review_count', 'company_latitude', 'company_longitude',
+        'front_water_intensity', 'front_portfolio_limit', 'front_products_limit', 'front_blog_limit'
+    );
+    foreach ($number_fields as $field) {
+        $output[$field] = isset($input[$field]) ? sanitize_text_field($input[$field]) : '';
+    }
+
+    $text_fields = array(
+        'hero_title', 'hero_cta_text', 'hero_highlight', 'hero_secondary_cta',
+        'whatsapp_number', 'company_phone', 'business_hours',
+        'pwa_name', 'pwa_short_name',
+        'business_type', 'company_name', 'company_city', 'company_province', 'company_postal_code', 'price_range',
+        'front_sections_order',
+        'front_features_title', 'front_services_title', 'front_portfolio_title', 'front_products_title', 'front_blog_title', 'front_cta_title',
+        'front_cta_primary_text', 'front_cta_secondary_text',
+        'front_water_color', 'meta_keywords', 'twitter_username'
+    );
+
     foreach ($text_fields as $field) {
-        if (isset($input[$field])) {
-            $value = $input[$field];
-            
-            // URL fields
-            if (in_array($field, array('hero_image', 'pwa_icon', 'facebook_url', 'instagram_url', 'youtube_url', 'linkedin_url', 'twitter_url', 'google_maps_embed'))) {
-                $output[$field] = esc_url_raw($value);
-            }
-            // Email fields
-            elseif ($field === 'company_email') {
-                $output[$field] = sanitize_email($value);
-            }
-            // Textarea fields
-            elseif (in_array($field, array('hero_description', 'company_address', 'business_description'))) {
-                $output[$field] = sanitize_textarea_field($value);
-            }
-            // Number fields
-            elseif (in_array($field, array('company_rating', 'review_count', 'company_latitude', 'company_longitude'))) {
-                $output[$field] = sanitize_text_field($value);
-            }
-            // Regular text
-            else {
-                $output[$field] = sanitize_text_field($value);
-            }
-        } else {
-            $output[$field] = ''; // Set empty if not present
-        }
+        $output[$field] = isset($input[$field]) ? sanitize_text_field($input[$field]) : '';
     }
     
     // ===================================================================
@@ -203,7 +286,17 @@ function putrafiber_sanitize_options($input) {
         'enable_schema',
         'enable_aggregate_rating',
         'enable_pwa',
-        'enable_localbusiness'
+        'enable_localbusiness',
+        'front_enable_parallax',
+        'enable_hero_section',
+        'enable_features_section',
+        'enable_services_section',
+        'enable_portfolio_section',
+        'enable_products_section',
+        'enable_blog_section',
+        'enable_cta_section',
+        'enable_testimonials_section',
+        'enable_partners_section'
     );
     
     foreach ($checkbox_fields as $field) {
@@ -275,6 +368,14 @@ function putrafiber_landing_section_callback() {
     echo '<p>' . __('Customize your landing page hero section and main content.', 'putrafiber') . '</p>';
 }
 
+function putrafiber_landing_layout_section_callback() {
+    echo '<p>' . __('Control landing page ordering, parallax and signature colour palette.', 'putrafiber') . '</p>';
+}
+
+function putrafiber_landing_copy_section_callback() {
+    echo '<p>' . __('Update every headline, description, and repeater item that appears on the homepage sections.', 'putrafiber') . '</p>';
+}
+
 function putrafiber_contact_section_callback() {
     echo '<p>' . __('Enter your company contact information.', 'putrafiber') . '</p>';
 }
@@ -334,6 +435,379 @@ function putrafiber_hero_cta_text_render() {
     $value = isset($options['hero_cta_text']) ? $options['hero_cta_text'] : 'Konsultasi Gratis';
     ?>
     <input type="text" name="putrafiber_options[hero_cta_text]" value="<?php echo esc_attr($value); ?>" class="regular-text">
+    <?php
+}
+
+function putrafiber_hero_highlight_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['hero_highlight']) ? $options['hero_highlight'] : '20+ Tahun Menghadirkan Wahana Air Spektakuler';
+    ?>
+    <input type="text" name="putrafiber_options[hero_highlight]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <p class="description"><?php _e('Teks pendek untuk menonjolkan kredibilitas pada hero.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_hero_secondary_cta_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['hero_secondary_cta']) ? $options['hero_secondary_cta'] : __('Lihat Portofolio', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[hero_secondary_cta]" value="<?php echo esc_attr($value); ?>" class="regular-text">
+    <p class="description"><?php _e('Label tombol sekunder untuk mengarahkan pengunjung ke portofolio atau katalog.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_hero_secondary_url_render() {
+    $options = get_option('putrafiber_options', array());
+    $default = function_exists('get_post_type_archive_link') ? get_post_type_archive_link('portfolio') : home_url('/');
+    $value = isset($options['hero_secondary_url']) ? $options['hero_secondary_url'] : $default;
+    ?>
+    <input type="url" name="putrafiber_options[hero_secondary_url]" value="<?php echo esc_url($value); ?>" class="large-text">
+    <p class="description"><?php _e('URL tujuan tombol sekunder. Contoh: halaman portofolio.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_sections_order_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_sections_order']) ? $options['front_sections_order'] : 'hero,features,services,portfolio,cta,products,blog';
+    ?>
+    <input type="text" name="putrafiber_options[front_sections_order]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <p class="description"><?php _e('Masukkan slug section dipisah koma untuk menentukan urutan. Slug tersedia: hero, features, services, portfolio, cta, products, blog, testimonials, partners.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_enable_parallax_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_enable_parallax']) ? $options['front_enable_parallax'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[front_enable_parallax]" value="0">
+        <input type="checkbox" name="putrafiber_options[front_enable_parallax]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Aktifkan animasi parallax lembut pada hero untuk efek dinamis.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_hero_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_hero_section']) ? $options['enable_hero_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_hero_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_hero_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan section hero di landing page.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_features_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_features_section']) ? $options['enable_features_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_features_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_features_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan highlight keunggulan perusahaan.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_services_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_services_section']) ? $options['enable_services_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_services_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_services_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan daftar layanan utama.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_portfolio_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_portfolio_section']) ? $options['enable_portfolio_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_portfolio_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_portfolio_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan project portofolio terbaru.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_products_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_products_section']) ? $options['enable_products_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_products_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_products_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan katalog produk unggulan.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_blog_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_blog_section']) ? $options['enable_blog_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_blog_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_blog_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan artikel dan berita terbaru.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_cta_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_cta_section']) ? $options['enable_cta_section'] : '1';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_cta_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_cta_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Aktifkan call-to-action strategis.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_testimonials_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_testimonials_section']) ? $options['enable_testimonials_section'] : '0';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_testimonials_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_testimonials_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan testimoni pelanggan pada landing page.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_enable_partners_section_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['enable_partners_section']) ? $options['enable_partners_section'] : '0';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_partners_section]" value="0">
+        <input type="checkbox" name="putrafiber_options[enable_partners_section]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Tampilkan logo mitra/klien pada landing page.', 'putrafiber'); ?>
+    </label>
+    <?php
+}
+
+function putrafiber_front_water_intensity_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_water_intensity']) ? (int) $options['front_water_intensity'] : 8;
+    ?>
+    <input type="number" name="putrafiber_options[front_water_intensity]" value="<?php echo esc_attr($value); ?>" min="3" max="24" class="small-text">
+    <p class="description"><?php _e('Jumlah gelembung air dekoratif (3 - 24). Semakin besar semakin ramai.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_primary_color_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_primary_color']) ? $options['front_primary_color'] : '#0f4c81';
+    ?>
+    <input type="text" name="putrafiber_options[front_primary_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#0f4c81">
+    <p class="description"><?php _e('Warna biru utama untuk tone air.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_gold_color_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_gold_color']) ? $options['front_gold_color'] : '#f4c542';
+    ?>
+    <input type="text" name="putrafiber_options[front_gold_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#f4c542">
+    <p class="description"><?php _e('Aksen emas elegan untuk tombol dan garis dekoratif.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_dark_color_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_dark_color']) ? $options['front_dark_color'] : '#0b1320';
+    ?>
+    <input type="text" name="putrafiber_options[front_dark_color]" value="<?php echo esc_attr($value); ?>" class="color-picker" data-default-color="#0b1320">
+    <p class="description"><?php _e('Sentuhan gelap untuk menciptakan kedalaman dan kontras.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_water_color_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_water_color']) ? $options['front_water_color'] : 'rgba(15, 76, 129, 0.12)';
+    ?>
+    <input type="text" name="putrafiber_options[front_water_color]" value="<?php echo esc_attr($value); ?>" class="regular-text">
+    <p class="description"><?php _e('Nilai warna (menerima rgba) untuk overlay efek air.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_features_title_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_title']) ? $options['front_features_title'] : __('Kelebihan PutraFiber', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_features_title]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_features_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_description']) ? $options['front_features_description'] : __('Kami menggabungkan inovasi fiberglass dengan rekayasa konstruksi berkelas dunia.', 'putrafiber');
+    ?>
+    <textarea name="putrafiber_options[front_features_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_features_items_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_items']) ? $options['front_features_items'] : "Garansi 5 Tahun|Jaminan kualitas dan layanan purna jual responsif.|shield\nTim Berpengalaman|Didukung insinyur dan artisan fiberglass bersertifikat.|trophy\nTeknologi Mutakhir|Produksi modern dengan standar keamanan internasional.|gear";
+    ?>
+    <textarea name="putrafiber_options[front_features_items]" rows="6" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <p class="description"><?php _e('Gunakan format: Judul|Deskripsi|Icon. Icon opsional (shield, wave, spark, drop, star, globe, gear, trophy, compass). Satu item per baris.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_title_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_title']) ? $options['front_services_title'] : __('Solusi Water Attraction Lengkap', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_services_title]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_services_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_description']) ? $options['front_services_description'] : __('Dari masterplan, fabrikasi, hingga instalasi turn-key untuk wahana air dan playground.', 'putrafiber');
+    ?>
+    <textarea name="putrafiber_options[front_services_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_services_items_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_items']) ? $options['front_services_items'] : "Waterpark Design|Masterplan dan konsep kreatif wahana air.|wave\nPlayground Indoor|Area bermain aman dengan material premium.|drop\nFiberglass Custom|Produksi custom sesuai kebutuhan proyek Anda.|spark";
+    ?>
+    <textarea name="putrafiber_options[front_services_items]" rows="6" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <p class="description"><?php _e('Format sama dengan fitur: Judul|Deskripsi|Icon (opsional).', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_portfolio_title_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_portfolio_title']) ? $options['front_portfolio_title'] : __('Portofolio Unggulan', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_portfolio_title]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_portfolio_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_portfolio_description']) ? $options['front_portfolio_description'] : __('Lihat bagaimana kami mentransformasi area kosong menjadi destinasi air spektakuler.', 'putrafiber');
+    ?>
+    <textarea name="putrafiber_options[front_portfolio_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_portfolio_limit_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_portfolio_limit']) ? (int) $options['front_portfolio_limit'] : 6;
+    ?>
+    <input type="number" name="putrafiber_options[front_portfolio_limit]" value="<?php echo esc_attr($value); ?>" min="3" max="12" class="small-text">
+    <?php
+}
+
+function putrafiber_front_products_title_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_products_title']) ? $options['front_products_title'] : __('Produk Terlaris', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_products_title]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_products_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_products_description']) ? $options['front_products_description'] : __('Pilihan wahana dan perosotan fiberglass yang siap dikirim ke lokasi Anda.', 'putrafiber');
+    ?>
+    <textarea name="putrafiber_options[front_products_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_products_limit_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_products_limit']) ? (int) $options['front_products_limit'] : 6;
+    ?>
+    <input type="number" name="putrafiber_options[front_products_limit]" value="<?php echo esc_attr($value); ?>" min="3" max="12" class="small-text">
+    <?php
+}
+
+function putrafiber_front_blog_title_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_title']) ? $options['front_blog_title'] : __('Artikel & Insight Terbaru', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_blog_title]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_blog_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_description']) ? $options['front_blog_description'] : __('Strategi operasional waterpark, tips maintenance, dan berita terbaru industri rekreasi air.', 'putrafiber');
+    ?>
+    <textarea name="putrafiber_options[front_blog_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_blog_limit_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_limit']) ? (int) $options['front_blog_limit'] : 3;
+    ?>
+    <input type="number" name="putrafiber_options[front_blog_limit]" value="<?php echo esc_attr($value); ?>" min="3" max="9" class="small-text">
+    <?php
+}
+
+function putrafiber_front_cta_title_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_cta_title']) ? $options['front_cta_title'] : __('Siap Memulai Proyek Ikonik?', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_cta_title]" value="<?php echo esc_attr($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_cta_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_cta_description']) ? $options['front_cta_description'] : __('Tim konsultan kami siap membantu menghitung kebutuhan, estimasi biaya, hingga timeline pembangunan.', 'putrafiber');
+    ?>
+    <textarea name="putrafiber_options[front_cta_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_cta_primary_text_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_cta_primary_text']) ? $options['front_cta_primary_text'] : __('Konsultasi Sekarang', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_cta_primary_text]" value="<?php echo esc_attr($value); ?>" class="regular-text">
+    <?php
+}
+
+function putrafiber_front_cta_primary_url_render() {
+    $options = get_option('putrafiber_options', array());
+    $default = putrafiber_whatsapp_link();
+    $value = isset($options['front_cta_primary_url']) ? $options['front_cta_primary_url'] : $default;
+    ?>
+    <input type="url" name="putrafiber_options[front_cta_primary_url]" value="<?php echo esc_url($value); ?>" class="large-text">
+    <?php
+}
+
+function putrafiber_front_cta_secondary_text_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_cta_secondary_text']) ? $options['front_cta_secondary_text'] : __('Download Company Profile', 'putrafiber');
+    ?>
+    <input type="text" name="putrafiber_options[front_cta_secondary_text]" value="<?php echo esc_attr($value); ?>" class="regular-text">
+    <?php
+}
+
+function putrafiber_front_cta_secondary_url_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_cta_secondary_url']) ? $options['front_cta_secondary_url'] : home_url('/company-profile.pdf');
+    ?>
+    <input type="url" name="putrafiber_options[front_cta_secondary_url]" value="<?php echo esc_url($value); ?>" class="large-text">
     <?php
 }
 
@@ -457,6 +931,49 @@ function putrafiber_enable_rating_render() {
         <input type="checkbox" name="putrafiber_options[enable_aggregate_rating]" value="1" <?php checked($value, '1'); ?>>
         <?php _e('Show aggregate rating in Organization schema', 'putrafiber'); ?>
     </label>
+    <?php
+}
+
+function putrafiber_meta_description_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['meta_description']) ? $options['meta_description'] : get_bloginfo('description');
+    ?>
+    <textarea name="putrafiber_options[meta_description]" rows="4" class="large-text" maxlength="170"><?php echo esc_textarea($value); ?></textarea>
+    <p class="description"><?php _e('Fallback meta description used when individual content does not define one.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_meta_keywords_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['meta_keywords']) ? $options['meta_keywords'] : '';
+    ?>
+    <input type="text" name="putrafiber_options[meta_keywords]" value="<?php echo esc_attr($value); ?>" class="large-text" placeholder="waterpark, playground fiberglass, kontraktor waterboom">
+    <p class="description"><?php _e('Optional comma separated keywords as a global fallback. Individual content can override.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_og_image_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['og_image']) ? $options['og_image'] : '';
+    ?>
+    <input type="hidden" name="putrafiber_options[og_image]" id="og_image" value="<?php echo esc_url($value); ?>">
+    <button type="button" class="button putrafiber-upload-image"><?php _e('Choose Image', 'putrafiber'); ?></button>
+    <button type="button" class="button putrafiber-remove-image"><?php _e('Remove', 'putrafiber'); ?></button>
+    <div class="image-preview">
+        <?php if ($value): ?>
+            <img src="<?php echo esc_url($value); ?>" style="max-width: 300px; margin-top: 10px;" alt="<?php esc_attr_e('Default share image preview', 'putrafiber'); ?>">
+        <?php endif; ?>
+    </div>
+    <p class="description"><?php _e('Used as the default Open Graph/Twitter Card image when a post does not have its own.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_twitter_username_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['twitter_username']) ? $options['twitter_username'] : '';
+    ?>
+    <input type="text" name="putrafiber_options[twitter_username]" value="<?php echo esc_attr($value); ?>" class="regular-text" placeholder="@putrafiber">
+    <p class="description"><?php _e('Displayed in Twitter Card metadata. Include the @ symbol.', 'putrafiber'); ?></p>
     <?php
 }
 
