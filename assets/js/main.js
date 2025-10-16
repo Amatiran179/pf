@@ -163,18 +163,21 @@
             window.open(url, 'share', 'width=600,height=400');
         });
 
-        // Search Form Toggle
-        $('.search-toggle').on('click', function() {
-            $('.search-form').toggleClass('active');
-            $('.search-field').focus();
-        });
+        const hasSearchOverlay = $('.search-overlay').length > 0;
+        if (!hasSearchOverlay) {
+            // Search Form Toggle (fallback when overlay not available)
+            $('.search-toggle').on('click', function() {
+                $('.search-form').toggleClass('active');
+                $('.search-field').focus();
+            });
 
-        // Close search on ESC
-        $(document).on('keyup', function(e) {
-            if (e.key === 'Escape') {
-                $('.search-form').removeClass('active');
-            }
-        });
+            // Close search on ESC
+            $(document).on('keyup', function(e) {
+                if (e.key === 'Escape') {
+                    $('.search-form').removeClass('active');
+                }
+            });
+        }
 
         // Auto-hide messages
         setTimeout(function() {
@@ -196,8 +199,49 @@
         $('.copy-to-clipboard').on('click', function() {
             var text = $(this).data('text');
             navigator.clipboard.writeText(text).then(function() {
-                alert('Copied to clipboard!');
+                var message = (typeof putrafiber_vars !== 'undefined' && putrafiber_vars.copied_text)
+                    ? putrafiber_vars.copied_text
+                    : 'Copied to clipboard!';
+                alert(message);
             });
+        });
+
+        function putrafiberTrackWhatsAppClick(link) {
+            if (typeof putrafiber_vars === 'undefined' || !putrafiber_vars.ajax_url) {
+                return;
+            }
+
+            var params = new URLSearchParams();
+            params.append('action', 'putrafiber_track_wa_click');
+
+            if (putrafiber_vars.analytics_nonce) {
+                params.append('nonce', putrafiber_vars.analytics_nonce);
+            } else if (putrafiber_vars.nonce) {
+                params.append('nonce', putrafiber_vars.nonce);
+            }
+
+            params.append('source', window.location.href);
+            params.append('target', link);
+
+            if (navigator.sendBeacon) {
+                var blob = new Blob([params.toString()], { type: 'application/x-www-form-urlencoded; charset=UTF-8' });
+                navigator.sendBeacon(putrafiber_vars.ajax_url, blob);
+            } else {
+                fetch(putrafiber_vars.ajax_url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                    body: params.toString(),
+                    credentials: 'same-origin',
+                    keepalive: true
+                }).catch(function() {});
+            }
+        }
+
+        $(document).on('click', 'a[href*="wa.me"], a[href*="api.whatsapp.com"]', function() {
+            var href = $(this).attr('href');
+            if (href) {
+                putrafiberTrackWhatsAppClick(href);
+            }
         });
 
         // Print Page

@@ -6,15 +6,19 @@
  */
 
 $products_limit = putrafiber_frontpage_limit('products', 6);
+$products_page  = putrafiber_frontpage_section_paged('products');
 $products_title = putrafiber_frontpage_text('products', 'title', __('Produk Terlaris', 'putrafiber'));
 $products_desc  = putrafiber_frontpage_text('products', 'description', __('Pilihan wahana dan perosotan fiberglass yang siap dikirim ke lokasi Anda.', 'putrafiber'));
 
 $products_query = new WP_Query(array(
-    'post_type'      => 'post',
+    'post_type'      => 'product',
     'posts_per_page' => $products_limit,
-    'category_name'  => 'produk',
     'orderby'        => 'date',
     'order'          => 'DESC',
+    'paged'          => $products_page,
+    'post_status'    => 'publish',
+    'no_found_rows'  => false,
+    'ignore_sticky_posts' => true,
 ));
 ?>
 
@@ -23,7 +27,7 @@ $products_query = new WP_Query(array(
         <div class="section-title fade-in">
             <h2><?php echo esc_html($products_title); ?></h2>
             <?php if ($products_desc): ?>
-                <p><?php echo esc_html($products_desc); ?></p>
+                <div class="section-lead"><?php echo wp_kses_post($products_desc); ?></div>
             <?php endif; ?>
         </div>
 
@@ -77,12 +81,14 @@ $products_query = new WP_Query(array(
                 wp_reset_postdata();
                 ?>
             </div>
+
+            <?php echo putrafiber_frontpage_render_pagination('products', $products_query); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php else: ?>
             <p class="section-empty fade-in"><?php esc_html_e('Belum ada produk yang ditampilkan. Tambahkan artikel kategori produk melalui menu Blog.', 'putrafiber'); ?></p>
         <?php endif; ?>
 
         <div class="section-cta fade-in">
-            <a href="<?php echo esc_url(home_url('/category/produk/')); ?>" class="btn btn-outline btn-lg">
+            <a href="<?php echo esc_url(get_post_type_archive_link('product')); ?>" class="btn btn-outline btn-lg">
                 <?php esc_html_e('Lihat Semua Produk', 'putrafiber'); ?>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>

@@ -32,6 +32,7 @@ $pf_requires = array(
   '/inc/admin/theme-options.php',
   '/inc/schema/schema-generator.php',
   '/inc/metabox-schema.php',
+  '/inc/analytics.php',
   '/inc/seo-functions.php',
   '/inc/performance.php',
   '/inc/pwa.php',
@@ -47,6 +48,8 @@ foreach ($pf_requires as $rel) {
  * Theme Setup
  * ========================================================================== */
 function putrafiber_setup() {
+  load_theme_textdomain('putrafiber', get_template_directory() . '/languages');
+  add_theme_support('automatic-feed-links');
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
   add_theme_support('html5', array('search-form','comment-form','comment-list','gallery','caption','style','script'));

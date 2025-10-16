@@ -6,6 +6,7 @@
  */
 
 $portfolio_limit = putrafiber_frontpage_limit('portfolio', 6);
+$portfolio_page  = putrafiber_frontpage_section_paged('portfolio');
 $portfolio_title = putrafiber_frontpage_text('portfolio', 'title', __('Portofolio Unggulan', 'putrafiber'));
 $portfolio_desc  = putrafiber_frontpage_text('portfolio', 'description', __('Lihat bagaimana kami mentransformasi area kosong menjadi destinasi air spektakuler.', 'putrafiber'));
 
@@ -14,6 +15,10 @@ $portfolio_query = new WP_Query(array(
     'posts_per_page' => $portfolio_limit,
     'orderby'        => 'date',
     'order'          => 'DESC',
+    'paged'          => $portfolio_page,
+    'post_status'    => 'publish',
+    'no_found_rows'  => false,
+    'ignore_sticky_posts' => true,
 ));
 ?>
 
@@ -22,7 +27,7 @@ $portfolio_query = new WP_Query(array(
         <div class="section-title fade-in">
             <h2><?php echo esc_html($portfolio_title); ?></h2>
             <?php if ($portfolio_desc): ?>
-                <p><?php echo esc_html($portfolio_desc); ?></p>
+                <div class="section-lead"><?php echo wp_kses_post($portfolio_desc); ?></div>
             <?php endif; ?>
         </div>
 
@@ -80,6 +85,8 @@ $portfolio_query = new WP_Query(array(
                 wp_reset_postdata();
                 ?>
             </div>
+
+            <?php echo putrafiber_frontpage_render_pagination('portfolio', $portfolio_query); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php else: ?>
             <p class="section-empty fade-in"><?php esc_html_e('Belum ada portofolio yang ditampilkan. Tambahkan project pertama Anda melalui menu Portfolio.', 'putrafiber'); ?></p>
         <?php endif; ?>

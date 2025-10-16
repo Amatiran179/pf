@@ -25,6 +25,30 @@
 /* Slide utama: lebar aman */
 :is(.product-gallery-slider, .portfolio-gallery-slider) .swiper-slide { width: 100%; min-width: 100%; }
 
+.portfolio-gallery .portfolio-gallery-slider .swiper-slide {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.portfolio-gallery .portfolio-gallery-slider .gallery-item {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: var(--pf-portfolio-gallery-ratio, 16 / 9);
+  background: #0b1320;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+}
+
+.portfolio-gallery .portfolio-gallery-slider .gallery-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
 /* ====== ANTI ZOOM: target IMG saja, bukan wrapper/slide ====== */
 :is(.product-gallery, .portfolio-gallery) .swiper-slide img,
 :is(.product-gallery, .portfolio-gallery) .swiper-slide .gallery-image,
@@ -33,7 +57,7 @@
   width: 100% !important;
   height: auto !important;
   max-width: 100% !important;
-  object-fit: contain;
+  object-fit: cover;
 
   transform: none !important;
   -webkit-transform: none !important;

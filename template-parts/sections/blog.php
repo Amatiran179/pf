@@ -6,16 +6,30 @@
  */
 
 $blog_limit = putrafiber_frontpage_limit('blog', 3);
+$blog_page  = putrafiber_frontpage_section_paged('blog');
 $blog_title = putrafiber_frontpage_text('blog', 'title', __('Artikel & Insight Terbaru', 'putrafiber'));
-$blog_desc  = putrafiber_frontpage_text('blog', 'description', __('Strategi operasional waterpark, tips maintenance, dan berita terbaru industri rekreasi air.', 'putrafiber'));
+$blog_desc  = putrafiber_get_option('front_blog_description', __('Strategi operasional waterpark, tips maintenance, dan berita terbaru industri rekreasi air.', 'putrafiber'));
 
-$blog_query = new WP_Query(array(
-    'post_type'      => 'post',
-    'posts_per_page' => $blog_limit,
-    'category__not_in' => array(get_cat_ID('produk')),
-    'orderby'        => 'date',
-    'order'          => 'DESC'
-));
+$blog_args = array(
+    'post_type'           => 'post',
+    'posts_per_page'      => $blog_limit,
+    'orderby'             => 'date',
+    'order'               => 'DESC',
+    'paged'               => $blog_page,
+    'post_status'         => 'publish',
+    'no_found_rows'       => false,
+    'ignore_sticky_posts' => true,
+);
+
+$produk_category = get_cat_ID('produk');
+if ($produk_category > 0) {
+    $blog_args['category__not_in'] = array($produk_category);
+}
+
+$blog_query = new WP_Query($blog_args);
+
+$page_for_posts   = (int) get_option('page_for_posts');
+$blog_archive_url = $page_for_posts ? get_permalink($page_for_posts) : home_url('/');
 ?>
 
 <section class="blog-section section" id="blog">
@@ -23,7 +37,7 @@ $blog_query = new WP_Query(array(
         <div class="section-title fade-in">
             <h2><?php echo esc_html($blog_title); ?></h2>
             <?php if ($blog_desc): ?>
-                <p><?php echo esc_html($blog_desc); ?></p>
+                <div class="section-lead"><?php echo wp_kses_post($blog_desc); ?></div>
             <?php endif; ?>
         </div>
 
@@ -86,12 +100,14 @@ $blog_query = new WP_Query(array(
                 wp_reset_postdata();
                 ?>
             </div>
+
+            <?php echo putrafiber_frontpage_render_pagination('blog', $blog_query); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php else: ?>
             <p class="section-empty fade-in"><?php esc_html_e('Belum ada artikel yang diterbitkan. Mulai bagikan berita terbaru melalui menu Posts.', 'putrafiber'); ?></p>
         <?php endif; ?>
 
         <div class="section-cta fade-in">
-            <a href="<?php echo esc_url(home_url('/blog/')); ?>" class="btn btn-outline btn-lg">
+            <a href="<?php echo esc_url($blog_archive_url); ?>" class="btn btn-outline btn-lg">
                 <?php esc_html_e('Lihat Semua Artikel', 'putrafiber'); ?>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
