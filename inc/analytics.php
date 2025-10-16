@@ -254,114 +254,151 @@ function putrafiber_render_analytics_widget() {
 
     $last_updated = !empty($analytics['last_updated']) ? $analytics['last_updated'] : '';
     $last_updated_display = $last_updated ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($last_updated)) : __('Belum ada data', 'putrafiber');
+    $reset_nonce = wp_create_nonce('putrafiber_reset_analytics');
     ?>
-    <div class="putrafiber-analytics-overview">
-        <p><strong><?php esc_html_e('Total Kunjungan', 'putrafiber'); ?>:</strong> <?php echo number_format_i18n($total_visits); ?></p>
-        <p><strong><?php esc_html_e('Jumlah Link Dikunjungi', 'putrafiber'); ?>:</strong> <?php echo number_format_i18n($unique_links); ?></p>
-        <p><strong><?php esc_html_e('Total Klik WhatsApp', 'putrafiber'); ?>:</strong> <?php echo number_format_i18n($total_wa); ?></p>
-        <p><em><?php esc_html_e('Terakhir diperbarui', 'putrafiber'); ?>: <?php echo esc_html($last_updated_display); ?></em></p>
-    </div>
+    <div class="putrafiber-analytics-widget">
+        <div class="analytics-toolbar">
+            <div class="analytics-meta">
+                <h3><?php esc_html_e('Ringkasan Pengunjung & Interaksi', 'putrafiber'); ?></h3>
+                <span class="analytics-updated"><?php printf(esc_html__('Terakhir diperbarui: %s', 'putrafiber'), esc_html($last_updated_display)); ?></span>
+            </div>
+            <button type="button" class="button button-secondary putrafiber-reset-analytics" data-nonce="<?php echo esc_attr($reset_nonce); ?>" data-confirm="<?php esc_attr_e('Hapus seluruh data analytics? Tindakan ini tidak dapat dibatalkan.', 'putrafiber'); ?>" data-success="<?php esc_attr_e('Data analytics berhasil dihapus.', 'putrafiber'); ?>">
+                <?php esc_html_e('Reset Statistik', 'putrafiber'); ?>
+            </button>
+        </div>
 
-    <div class="putrafiber-analytics-tables">
-        <h4><?php esc_html_e('Link Teratas', 'putrafiber'); ?></h4>
-        <?php if (!empty($top_pages)) : ?>
-            <table class="widefat striped">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e('Link', 'putrafiber'); ?></th>
-                        <th><?php esc_html_e('Kunjungan', 'putrafiber'); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($top_pages as $url => $data) : ?>
-                        <tr>
-                            <td><a href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($url); ?></a></td>
-                            <td><?php echo number_format_i18n(isset($data['count']) ? $data['count'] : 0); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else : ?>
-            <p><?php esc_html_e('Belum ada data kunjungan.', 'putrafiber'); ?></p>
-        <?php endif; ?>
+        <div class="analytics-metric-grid">
+            <div class="analytics-metric">
+                <span class="metric-label"><?php esc_html_e('Total Kunjungan', 'putrafiber'); ?></span>
+                <span class="metric-value"><?php echo number_format_i18n($total_visits); ?></span>
+            </div>
+            <div class="analytics-metric">
+                <span class="metric-label"><?php esc_html_e('Link Dilihat', 'putrafiber'); ?></span>
+                <span class="metric-value"><?php echo number_format_i18n($unique_links); ?></span>
+            </div>
+            <div class="analytics-metric">
+                <span class="metric-label"><?php esc_html_e('Klik WhatsApp', 'putrafiber'); ?></span>
+                <span class="metric-value"><?php echo number_format_i18n($total_wa); ?></span>
+            </div>
+        </div>
 
-        <h4><?php esc_html_e('Referer Teratas', 'putrafiber'); ?></h4>
-        <?php if (!empty($top_referrers)) : ?>
-            <table class="widefat striped">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e('Referer', 'putrafiber'); ?></th>
-                        <th><?php esc_html_e('Jumlah', 'putrafiber'); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($top_referrers as $referrer => $count) : ?>
-                        <tr>
-                            <td>
-                                <?php if ($referrer === 'direct') : ?>
-                                    <?php esc_html_e('Direct / Tidak diketahui', 'putrafiber'); ?>
-                                <?php else : ?>
-                                    <a href="<?php echo esc_url($referrer); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($referrer); ?></a>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo number_format_i18n($count); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else : ?>
-            <p><?php esc_html_e('Belum ada data referer.', 'putrafiber'); ?></p>
-        <?php endif; ?>
+        <div class="analytics-card-grid">
+            <div class="analytics-card">
+                <h4><?php esc_html_e('Link Teratas', 'putrafiber'); ?></h4>
+                <?php if (!empty($top_pages)) : ?>
+                    <div class="analytics-table-wrapper">
+                        <table class="widefat striped analytics-table">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e('Link', 'putrafiber'); ?></th>
+                                    <th><?php esc_html_e('Kunjungan', 'putrafiber'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($top_pages as $url => $data) : ?>
+                                    <tr>
+                                        <td><a href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($url); ?></a></td>
+                                        <td><?php echo number_format_i18n(isset($data['count']) ? $data['count'] : 0); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else : ?>
+                    <p class="analytics-empty"><?php esc_html_e('Belum ada data kunjungan.', 'putrafiber'); ?></p>
+                <?php endif; ?>
+            </div>
 
-        <h4><?php esc_html_e('Sumber Klik WhatsApp', 'putrafiber'); ?></h4>
-        <?php if (!empty($wa_by_page)) : ?>
-            <table class="widefat striped">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e('Halaman', 'putrafiber'); ?></th>
-                        <th><?php esc_html_e('Klik', 'putrafiber'); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($wa_by_page as $page => $count) : ?>
-                        <tr>
-                            <td>
-                                <?php if ($page === 'direct') : ?>
-                                    <?php esc_html_e('Tidak diketahui', 'putrafiber'); ?>
-                                <?php else : ?>
-                                    <a href="<?php echo esc_url($page); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($page); ?></a>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo number_format_i18n($count); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else : ?>
-            <p><?php esc_html_e('Belum ada data klik WhatsApp berdasarkan halaman.', 'putrafiber'); ?></p>
-        <?php endif; ?>
+            <div class="analytics-card">
+                <h4><?php esc_html_e('Referer Teratas', 'putrafiber'); ?></h4>
+                <?php if (!empty($top_referrers)) : ?>
+                    <div class="analytics-table-wrapper">
+                        <table class="widefat striped analytics-table">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e('Referer', 'putrafiber'); ?></th>
+                                    <th><?php esc_html_e('Jumlah', 'putrafiber'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($top_referrers as $referrer => $count) : ?>
+                                    <tr>
+                                        <td>
+                                            <?php if ($referrer === 'direct') : ?>
+                                                <?php esc_html_e('Direct / Tidak diketahui', 'putrafiber'); ?>
+                                            <?php else : ?>
+                                                <a href="<?php echo esc_url($referrer); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($referrer); ?></a>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?php echo number_format_i18n($count); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else : ?>
+                    <p class="analytics-empty"><?php esc_html_e('Belum ada data referer.', 'putrafiber'); ?></p>
+                <?php endif; ?>
+            </div>
 
-        <h4><?php esc_html_e('Link WhatsApp Terpopuler', 'putrafiber'); ?></h4>
-        <?php if (!empty($wa_by_link)) : ?>
-            <table class="widefat striped">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e('Link', 'putrafiber'); ?></th>
-                        <th><?php esc_html_e('Klik', 'putrafiber'); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($wa_by_link as $link => $count) : ?>
-                        <tr>
-                            <td><a href="<?php echo esc_url($link); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($link); ?></a></td>
-                            <td><?php echo number_format_i18n($count); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else : ?>
-            <p><?php esc_html_e('Belum ada data klik WhatsApp.', 'putrafiber'); ?></p>
-        <?php endif; ?>
+            <div class="analytics-card">
+                <h4><?php esc_html_e('Sumber Klik WhatsApp', 'putrafiber'); ?></h4>
+                <?php if (!empty($wa_by_page)) : ?>
+                    <div class="analytics-table-wrapper">
+                        <table class="widefat striped analytics-table">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e('Halaman', 'putrafiber'); ?></th>
+                                    <th><?php esc_html_e('Klik', 'putrafiber'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($wa_by_page as $page => $count) : ?>
+                                    <tr>
+                                        <td>
+                                            <?php if ($page === 'direct') : ?>
+                                                <?php esc_html_e('Tidak diketahui', 'putrafiber'); ?>
+                                            <?php else : ?>
+                                                <a href="<?php echo esc_url($page); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($page); ?></a>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?php echo number_format_i18n($count); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else : ?>
+                    <p class="analytics-empty"><?php esc_html_e('Belum ada data klik WhatsApp berdasarkan halaman.', 'putrafiber'); ?></p>
+                <?php endif; ?>
+            </div>
+
+            <div class="analytics-card">
+                <h4><?php esc_html_e('Link WhatsApp Terpopuler', 'putrafiber'); ?></h4>
+                <?php if (!empty($wa_by_link)) : ?>
+                    <div class="analytics-table-wrapper">
+                        <table class="widefat striped analytics-table">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e('Link', 'putrafiber'); ?></th>
+                                    <th><?php esc_html_e('Klik', 'putrafiber'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($wa_by_link as $link => $count) : ?>
+                                    <tr>
+                                        <td><a href="<?php echo esc_url($link); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($link); ?></a></td>
+                                        <td><?php echo number_format_i18n($count); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else : ?>
+                    <p class="analytics-empty"><?php esc_html_e('Belum ada data klik WhatsApp.', 'putrafiber'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
     <?php
 }
@@ -377,3 +414,22 @@ function putrafiber_register_analytics_widget() {
     );
 }
 add_action('wp_dashboard_setup', 'putrafiber_register_analytics_widget');
+
+/**
+ * Allow administrators to reset analytics buckets from the dashboard.
+ */
+function putrafiber_reset_analytics() {
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => __('Anda tidak memiliki akses untuk menghapus data analytics.', 'putrafiber')), 403);
+    }
+
+    $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+    if (!$nonce || !wp_verify_nonce($nonce, 'putrafiber_reset_analytics')) {
+        wp_send_json_error(array('message' => __('Nonce analytics tidak valid.', 'putrafiber')), 403);
+    }
+
+    delete_option('putrafiber_analytics');
+
+    wp_send_json_success(array('message' => __('Data analytics berhasil dihapus.', 'putrafiber')));
+}
+add_action('wp_ajax_putrafiber_reset_analytics', 'putrafiber_reset_analytics');

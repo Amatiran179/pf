@@ -1,165 +1,74 @@
 # PutraFiber Enterprise Theme
 
-Premium WordPress theme untuk PutraFiber - Kontraktor Waterpark, Waterboom, dan Playground Fiberglass.
+Tema WordPress premium untuk brand PutraFiber, dikembangkan khusus untuk kebutuhan kontraktor waterpark, waterboom, dan playground fiberglass. Versi ini menghadirkan landing page modern bernuansa biru elektrik dengan aksen emas, pengalaman admin yang dipoles, serta fondasi SEO yang siap bersaing.
 
-## Features
+## Fitur Utama
 
-### Core Features
-- ✅ Custom Landing Page dengan Hero Section dinamis
-- ✅ Custom Post Type: Portfolio dengan CRUD lengkap
-- ✅ SEO Optimization dengan Schema.org JSON-LD
-- ✅ Progressive Web App (PWA) ready
-- ✅ WebP image converter otomatis
-- ✅ XML Sitemap generator
-- ✅ Lazy loading untuk performa maksimal
-- ✅ Dark mode toggle
-- ✅ Responsive design (mobile-first)
-- ✅ WhatsApp integration
+### Landing Page & UI
+- Desain hero parallax dengan efek air, gradien elektrik, dan animasi berbeda pada setiap elemen penting.
+- Kartu fitur, layanan, produk, portofolio, dan blog dengan glassmorphism, highlight emas, serta animasi yang dapat diatur.
+- Grid blog tanpa paginasi dengan slot artikel manual (Artikel 1, Artikel 2, dst) yang dapat dikurasi dari Theme Options.
+- CTA section baru dengan latar dramatis, badge interaktif, dan tombol ganda yang konsisten.
+- Navigasi mobile yang berpindah otomatis ke sisi kanan pada tablet & smartphone agar akses menu lebih intuitif.
 
-### SEO Features
-- Auto schema injection (Organization, Product, Article, BreadcrumbList)
-- Open Graph meta tags
-- Twitter Card support
-- Auto city detection untuk ServiceArea schema
-- Custom meta title & description per post
-- Sitemap.xml otomatis
-- Robots.txt generator
+### Manajemen Konten & CRUD
+- Custom Post Type: **Portfolio** & **Product** lengkap dengan uploader galeri, PDF, dan meta SEO.
+- Pengaturan landing page fleksibel: urutan section, copywriting, warna, CTA, hero, layanan, dan produk.
+- Editor deskripsi blog menggunakan TinyMCE mini (teeny) untuk copy yang tetap bersih.
+- Dukungan dark mode di front end.
 
-### Performance
-- Lazy load images
-- WebP conversion
-- Minified assets
-- Browser caching
-- Gzip compression
-- Preload critical resources
-- Defer JavaScript
+### SEO & Schema.org
+- Output schema otomatis (Organization, WebSite, Article, Product, LocalBusiness, BreadcrumbList) dengan toggle per konten.
+- Penambahan schema baru untuk menjaga struktur SEO modern:
+  - `WPHeader`
+  - `SiteNavigationElement`
+  - `WebPage` (landing page & halaman umum)
+- Konfigurasi warna & struktur HTML tetap kompatibel dengan plugin SEO populer; bisa dinonaktifkan melalui Theme Options jika dibutuhkan.
+- Meta box SEO dengan penghitung karakter realtime untuk judul dan deskripsi.
 
-### Admin Features
-- Theme Options panel
-- Portfolio CRUD dengan gallery upload
-- SEO meta box dengan character counter
-- Media uploader terintegrasi
-- Tab navigation
+### Analitik & Dashboard
+- Widget statistik dashboard diperbarui dengan tampilan kartu metrik, tabel responsif, dan tombol **Reset Statistik**.
+- Tombol reset terhubung ke AJAX aman (nonce + capability check) agar data pengunjung dan klik WhatsApp dapat dibersihkan kapan saja.
+- Highlight cepat: Total kunjungan, link dilihat, dan klik WhatsApp langsung pada header widget.
 
-## Installation
+### Performa & PWA
+- Lazy loading gambar, konversi WebP otomatis, dan preloading resource penting untuk produk & portofolio.
+- Paket PWA opsional (manifest, service worker, icon) dengan toggle satu klik.
+- Pengaturan warna kustom memanfaatkan CSS variables untuk meminimalkan stylesheet tambahan.
 
-1. Upload folder `putrafiber-enterprise` ke `/wp-content/themes/`
-2. Aktivasi theme dari WordPress admin
-3. Pergi ke **Theme Options** untuk konfigurasi
-4. Setup menu di **Appearance > Menus**
-5. Buat kategori "produk" untuk produk post
+## Pengalaman Admin
+- Theme Options panel dengan tab, color picker, uploader, dan validasi otomatis.
+- Library media terintegrasi untuk logo, hero image, ikon schema, hingga dokumen PDF.
+- Dukungan sortable untuk galeri produk serta section-section tertentu.
+- Tombol reset analytics dengan status loading, pesan konfirmasi, dan alert keberhasilan.
 
-## Theme Options
+## Cara Memulai
+1. Unggah folder `putrafiber-enterprise` ke `/wp-content/themes/`.
+2. Aktifkan tema melalui **Appearance → Themes**.
+3. Buka **Theme Options** untuk mengatur warna, konten landing page, kontak, dan opsi SEO.
+4. Atur menu utama di **Appearance → Menus** dan hubungkan ke lokasi *Primary Menu*.
+5. Tambahkan konten Portfolio dan Product melalui Custom Post Type yang tersedia.
+6. Tentukan slot blog manual di **Theme Options → Landing Page** untuk mengatur urutan Artikel 1, Artikel 2, dst.
 
-Konfigurasi tersedia di **Theme Options**:
+## Kustomisasi Schema Penting
+- **WPHeader**: menggambarkan header situs beserta relasi ke organisasi.
+- **SiteNavigationElement**: mengekspor struktur menu primary untuk crawler.
+- **WebPage**: tersedia untuk landing page & halaman standar; terhubung dengan WebSite/Organization schema.
+- Filter `putrafiber_schema_skip_common` dapat digunakan untuk menonaktifkan schema core jika plugin SEO eksternal mengambil alih.
 
-### Landing Page
-- Hero title
-- Hero description
-- Hero background image
-- CTA button text
+## Potensi Pengembangan Berikutnya
+- Builder visual untuk section landing page (drag & drop, pratinjau real-time).
+- Sistem preset warna/tema agar admin bisa menyimpan beberapa kombinasi palet.
+- Integrasi analytics tambahan (mis. data device/OS) dan ekspor CSV.
+- Widget dashboard tambahan untuk konversi WhatsApp per halaman.
+- Mode multi-bahasa (WPML/Polylang) dengan string siap diterjemahkan penuh.
+- Komponen blok Gutenberg khusus (hero, CTA, layanan) agar konsisten di halaman lain.
 
-### Contact
-- WhatsApp number
-- Company address
-- Phone number
-- Email
-- Business hours
-- Google Maps embed URL
+## Struktur Folder Penting
+- `assets/css/` – stylesheet utama (global, komponen, header, responsive, admin).
+- `assets/js/` – skrip front end (animasi, lazyload, PWA) dan admin.
+- `template-parts/` – partial template untuk section landing page dan konten.
+- `inc/` – helper PHP: schema generator, analytics, enqueue, options, dsb.
 
-### Social Media
-- Facebook URL
-- Instagram URL
-- YouTube URL
-- LinkedIn URL
-- Twitter URL
-
-### SEO
-- Enable Schema.org
-- Enable Aggregate Rating
-- Company rating
-- Review count
-
-### PWA
-- Enable PWA
-- App name
-- App short name
-- PWA icon (512x512)
-
-## Custom Post Types
-
-### Portfolio
-**Permalink**: `/portofolio`
-
-**Fields**:
-- Title
-- Description (editor)
-- Featured image
-- Location
-- Project date
-- Client name
-- Video URL (optional)
-- Gallery images
-- Category
-
-**SEO Fields**:
-- Meta title
-- Meta description
-- Tourist Attraction schema toggle
-- Service area override
-
-## Shortcodes
-
-Tidak ada shortcode - semua built-in dengan template parts.
-
-## Widgets
-
-- Sidebar
-- Footer Column 1
-- Footer Column 2
-- Footer Column 3
-
-## Menus
-
-- Primary Menu (header)
-- Footer Menu
-
-## Page Templates
-
-- Default Template
-- Full Width (coming soon)
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers
-
-## Requirements
-
-- WordPress 6.0+
-- PHP 7.4+
-- MySQL 5.7+
-
-## Support
-
-Untuk support, hubungi tim development PutraFiber.
-
-## Changelog
-
-### Version 1.0.0
-- Initial release
-- Full feature set implemented
-
-## Credits
-
-- Font: Poppins (Google Fonts)
-- Icons: SVG inline
-- Developed by: PutraFiber Development Team
-
-## License
-
-Proprietary - For PutraFiber use only
-
+## Lisensi
+Tema ini bersifat proprietary untuk internal PutraFiber. Silakan hubungi tim pengembang PutraFiber apabila memerlukan dukungan tambahan atau penyesuaian lebih lanjut.

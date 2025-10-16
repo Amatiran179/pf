@@ -184,6 +184,11 @@ add_action('admin_enqueue_scripts', 'putrafiber_admin_styles');
 function putrafiber_admin_scripts() {
     wp_enqueue_script('wp-color-picker');
     wp_enqueue_script('putrafiber-admin-js', PUTRAFIBER_URI . '/assets/js/admin.js', array('jquery'), PUTRAFIBER_VERSION, true);
+    wp_localize_script('putrafiber-admin-js', 'putrafiberAdminVars', array(
+        'ajax_url'               => admin_url('admin-ajax.php'),
+        'analyticsResetError'    => esc_html__('Terjadi kesalahan saat menghapus data analytics.', 'putrafiber'),
+        'analyticsResetSuccess'  => esc_html__('Data analytics berhasil dihapus.', 'putrafiber'),
+    ));
 }
 add_action('admin_enqueue_scripts', 'putrafiber_admin_scripts');
 

@@ -52,7 +52,7 @@ if (!empty($sections)) {
     </div>
 
     <div class="container">
-        <div class="hero-content fade-in">
+        <div class="hero-content fade-in animate-rise" style="--animation-delay: 0.05s;">
             <?php if ($hero_highlight): ?>
                 <span class="hero-highlight"><?php echo esc_html($hero_highlight); ?></span>
             <?php endif; ?>
@@ -81,8 +81,9 @@ if (!empty($sections)) {
             </div>
 
             <div class="hero-badges">
-                <?php foreach ($hero_badges as $badge): ?>
-                    <div class="hero-badge">
+                <?php foreach ($hero_badges as $badge_index => $badge): ?>
+                    <?php $badge_delay = number_format(0.18 + ($badge_index * 0.12), 2, '.', ''); ?>
+                    <div class="hero-badge fade-in animate-tilt-in" style="--animation-delay: <?php echo esc_attr($badge_delay); ?>s;">
                         <?php if (!empty($badge['icon'])): ?>
                             <span class="hero-badge-icon">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
