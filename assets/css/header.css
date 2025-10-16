@@ -486,11 +486,20 @@
    =================================== */
 
 @media (max-width: 992px) {
+    .header-inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 16px;
+    }
+
     .menu-toggle {
         display: flex;
         flex-direction: column;
+        order: 3;
+        margin-left: auto;
     }
-    
+
     .main-navigation {
         position: fixed;
         top: 0;
@@ -503,8 +512,9 @@
         padding: 80px 30px 30px;
         transition: right 0.3s ease;
         overflow-y: auto;
+        order: 4;
     }
-    
+
     .main-navigation.active {
         right: 0;
     }
@@ -541,7 +551,13 @@
     .nav-menu li.active > .sub-menu {
         display: block;
     }
-    
+
+    .header-actions {
+        order: 2;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
     .header-cta span {
         display: none;
     }

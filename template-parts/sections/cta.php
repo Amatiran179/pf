@@ -19,7 +19,7 @@ $cta_secondary_url  = putrafiber_get_option('front_cta_secondary_url', home_url(
     </div>
 
     <div class="container">
-        <div class="cta-content fade-in">
+        <div class="cta-content fade-in animate-zoom-in" style="--animation-delay: 0.2s;">
             <div class="cta-icon">
                 <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>

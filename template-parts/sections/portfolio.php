@@ -6,7 +6,6 @@
  */
 
 $portfolio_limit = putrafiber_frontpage_limit('portfolio', 6);
-$portfolio_page  = putrafiber_frontpage_section_paged('portfolio');
 $portfolio_title = putrafiber_frontpage_text('portfolio', 'title', __('Portofolio Unggulan', 'putrafiber'));
 $portfolio_desc  = putrafiber_frontpage_text('portfolio', 'description', __('Lihat bagaimana kami mentransformasi area kosong menjadi destinasi air spektakuler.', 'putrafiber'));
 
@@ -15,9 +14,8 @@ $portfolio_query = new WP_Query(array(
     'posts_per_page' => $portfolio_limit,
     'orderby'        => 'date',
     'order'          => 'DESC',
-    'paged'          => $portfolio_page,
     'post_status'    => 'publish',
-    'no_found_rows'  => false,
+    'no_found_rows'  => true,
     'ignore_sticky_posts' => true,
 ));
 ?>
@@ -42,13 +40,16 @@ $portfolio_query = new WP_Query(array(
         <?php if ($portfolio_query->have_posts()): ?>
             <div class="portfolio-grid">
                 <?php
-                $delay = 0;
+                $index      = 0;
+                $animations = array('animate-zoom-in', 'animate-rise', 'animate-slide-left', 'animate-tilt-in');
                 while ($portfolio_query->have_posts()):
                     $portfolio_query->the_post();
                     $location    = get_post_meta(get_the_ID(), '_portfolio_location', true);
                     $projectDate = get_post_meta(get_the_ID(), '_portfolio_date', true);
+                    $animation_class = $animations[$index % count($animations)];
+                    $delay_value     = $index * 0.1;
                     ?>
-                    <article class="portfolio-item fade-in" style="animation-delay: <?php echo esc_attr($delay); ?>s;">
+                    <article class="portfolio-item fade-in <?php echo esc_attr($animation_class); ?>" style="--animation-delay: <?php echo esc_attr(number_format($delay_value, 2, '.', '')); ?>s;">
                         <div class="portfolio-image">
                             <?php if (has_post_thumbnail()): ?>
                                 <?php the_post_thumbnail('putrafiber-portfolio'); ?>
@@ -88,13 +89,11 @@ $portfolio_query = new WP_Query(array(
                         </div>
                     </article>
                     <?php
-                    $delay += 0.1;
+                    $index++;
                 endwhile;
                 wp_reset_postdata();
                 ?>
             </div>
-
-            <?php echo putrafiber_frontpage_render_pagination('portfolio', $portfolio_query); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php else: ?>
             <p class="section-empty fade-in"><?php esc_html_e('Belum ada portofolio yang ditampilkan. Tambahkan project pertama Anda melalui menu Portfolio.', 'putrafiber'); ?></p>
         <?php endif; ?>
