@@ -1,0 +1,87 @@
+/* ==========================================================================
+   PUTRAFIBER — PRODUCT GALLERY FIX (v1.4)
+   Fokus:
+   - Matikan efek zoom/scale HANYA pada IMG (anti "autozoom")
+   - Pastikan Swiper wrapper selalu flex & slides tidak menyusut
+   - Thumbnails selalu terlihat (height dikunci)
+   - TANPA override transform wrapper/slide (autoplay aman)
+   -------------------------------------------------------------------------- */
+
+/* Area galeri dasar */
+.product-gallery { position: relative; width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box; }
+.product-gallery .swiper { width: 100%; max-width: 100%; box-sizing: border-box; }
+
+/* ====== CORE SWIPER SAFETY (jangan biarkan theme override) ====== */
+.product-gallery .swiper-wrapper {
+  display: flex !important;          /* Swiper butuh flex */
+  align-items: stretch;
+}
+
+.product-gallery .swiper-slide {
+  flex-shrink: 0 !important;         /* jangan menyusut, biar bisa scroll horizontal */
+  box-sizing: border-box;
+}
+
+/* Slide utama: lebar aman */
+.product-gallery-slider .swiper-slide { width: 100%; min-width: 100%; }
+
+/* ====== ANTI ZOOM: target IMG saja, bukan wrapper/slide ====== */
+.product-gallery .swiper-slide img,
+.product-gallery .swiper-slide .gallery-image,
+.product-gallery .gallery-image {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: contain;
+
+  transform: none !important;
+  -webkit-transform: none !important;
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+
+/* Jika parent melakukan hover-zoom ke IMG anak, netralkan juga */
+.product-gallery :is(.gallery-item, .swiper-slide, figure, a, div):hover > img,
+.product-gallery :is(.gallery-item, .swiper-slide, figure, a, div):hover .gallery-image {
+  transform: none !important;
+  -webkit-transform: none !important;
+  animation: none !important;
+}
+
+/* Tangkal utilitas scale-* di IMG */
+.product-gallery img[class*="scale"],
+.product-gallery img[class*="hover:scale"],
+.product-gallery .gallery-image[class*="scale"],
+.product-gallery .gallery-image[class*="hover:scale"] {
+  transform: none !important;
+}
+
+/* ====== THUMBNAIL BAR — selalu tampil ====== */
+.product-gallery-thumbs { margin-top: 12px; padding: 4px 0; }
+.product-gallery-thumbs .swiper-wrapper { align-items: center; }
+
+.product-gallery-thumbs .swiper-slide {
+  width: auto !important;            /* biar bisa muat beberapa thumb */
+  flex: 0 0 auto !important;         /* jangan melebar atau menyusut */
+  opacity: 0.6;
+  transition: opacity .2s ease;
+  cursor: pointer;
+}
+
+.product-gallery-thumbs .swiper-slide-thumb-active,
+.product-gallery-thumbs .swiper-slide:hover { opacity: 1; }
+
+/* Ukuran thumbnail konsisten (anti-collapse) */
+.product-gallery-thumbs .swiper-slide img {
+  display: block;
+  height: 72px;                      /* kunci tinggi agar container punya tinggi */
+  width: auto;
+  object-fit: cover;
+}
+@media (max-width: 640px) { .product-gallery-thumbs .swiper-slide img { height: 56px; } }
+
+/* Perlindungan dasar */
+.product-gallery img { max-width: 100% !important; height: auto !important; }
+.product-gallery .gallery-item { display: block; width: 100%; }

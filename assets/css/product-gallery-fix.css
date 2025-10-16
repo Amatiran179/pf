@@ -1,0 +1,107 @@
+/* ==========================================================================
+   PUTRAFIBER — PRODUCT GALLERY FIX (SQUARE VARIANT – FINAL)
+   - Anti auto-zoom (IMG/anchor saja)
+   - Slider utama aman (autoplay/loop normal)
+   - Thumbnails SELALU KOTAK (84×84 desktop, 72×72 mobile)
+   -------------------------------------------------------------------------- */
+
+/* Area galeri dasar */
+.product-gallery { position: relative; width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box; }
+.product-gallery .swiper { width: 100%; max-width: 100%; box-sizing: border-box; }
+
+/* ===== Core Swiper Safety ===== */
+.product-gallery .swiper-wrapper { display: flex !important; align-items: stretch; }
+.product-gallery .swiper-slide  { flex-shrink: 0 !important; box-sizing: border-box; }
+
+/* Slide utama: lebar penuh aman */
+.product-gallery-slider .swiper-slide { width: 100%; min-width: 100%; }
+
+/* ===== Anti Zoom (hanya IMG/anchor) ===== */
+.product-gallery .gallery-item,
+.product-gallery .gallery-image,
+.product-gallery .gallery-item:active,
+.product-gallery .gallery-image:active {
+  transform: none !important;
+  -webkit-transform: none !important;
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+.product-gallery .swiper-slide img,
+.product-gallery .swiper-slide .gallery-image {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: contain;
+}
+
+/* ===== Thumbnail Bar (dasar) ===== */
+.product-gallery-thumbs { width: 100% !important; max-width: 100% !important; padding: 8px 0; overflow: hidden; box-sizing: border-box; }
+.product-gallery-thumbs .swiper-wrapper { display: flex !important; align-items: center; }
+
+/* ===== THUMB KOTAK (SELALU 84×84 / 72×72) ===== */
+/* Frame slide dipaksa kotak & centered */
+.product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide {
+  width: 84px !important;                  /* override inline width Swiper */
+  min-width: 84px !important;
+  height: 84px !important;
+  flex: 0 0 84px !important;
+  margin-right: 8px !important;
+  box-sizing: content-box !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  opacity: .9;
+  transition: opacity .2s ease, transform .2s ease;
+  cursor: pointer;
+}
+.product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide:last-child { margin-right: 0 !important; }
+.product-gallery .product-gallery-thumbs .swiper-slide-thumb-active { opacity: 1; outline: 2px solid rgba(0,0,0,.12); outline-offset: 2px; }
+
+/* Gambar di dalam frame kotak: cover (rapi, tanpa distorsi) */
+.product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide img {
+  display: block;
+  width: 84px !important;
+  height: 84px !important;
+  object-fit: cover;              /* penuh kotak, crop tengah */
+  border-radius: 6px;
+  max-width: none !important;     /* lawan img{max-width:100%} global */
+}
+
+/* Mobile: 72×72 */
+@media (max-width: 640px) {
+  .product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide {
+    width: 72px !important;
+    min-width: 72px !important;
+    height: 72px !important;
+    flex: 0 0 72px !important;
+    margin-right: 6px !important;
+  }
+  .product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+}
+
+/* Perlindungan dasar */
+.product-gallery img { max-width: 100% !important; height: auto !important; }
+.product-gallery .gallery-item { display: block; width: 100%; }
+
+/* Mobile hard-fix slider utama (hindari lebar “meledak”) */
+@media (max-width: 768px) {
+  .product-gallery,
+  .product-gallery .swiper,
+  .product-gallery .product-gallery-slider {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  .product-gallery .product-gallery-slider .swiper-slide {
+    width: 100% !important;
+    min-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
