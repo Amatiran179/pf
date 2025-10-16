@@ -21,7 +21,7 @@
     "seo"
   ],
   "author": "PutraFiber Development Team",
-  "license": "Proprietary",
+  "license": "GPL-2.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/putrafiber/enterprise-theme.git"

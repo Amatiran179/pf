@@ -97,6 +97,8 @@ function putrafiber_enqueue_scripts() {
     // Main JavaScript
     wp_enqueue_script('putrafiber-main-js', PUTRAFIBER_URI . '/assets/js/main.js', array('jquery'), PUTRAFIBER_VERSION, true);
 
+    wp_enqueue_script('putrafiber-search', PUTRAFIBER_URI . '/assets/js/search.js', array(), PUTRAFIBER_VERSION, true);
+
     // Lazy Load
     wp_enqueue_script('putrafiber-lazyload', PUTRAFIBER_URI . '/assets/js/lazyload.js', array(), PUTRAFIBER_VERSION, true);
 
@@ -138,6 +140,9 @@ function putrafiber_enqueue_scripts() {
             'slideSpeed'    => 600,
             'enableLoop'    => true,
             'enableAutoplay'=> true,
+            'lightboxAutoplay' => true,
+            'lightboxAutoplayDelay' => 5200,
+            'lightboxAnimationSpeed' => 280,
             'debug'         => defined('WP_DEBUG') && WP_DEBUG,
         ));
     }
@@ -150,8 +155,10 @@ function putrafiber_enqueue_scripts() {
     wp_localize_script('putrafiber-main-js', 'putrafiber_vars', array(
         'ajax_url'        => admin_url('admin-ajax.php'),
         'nonce'           => wp_create_nonce('putrafiber_nonce'),
+        'analytics_nonce' => wp_create_nonce('putrafiber_analytics'),
         'theme_url'       => PUTRAFIBER_URI,
         'whatsapp_number' => putrafiber_whatsapp_number(),
+        'copied_text'     => esc_html__('Copied to clipboard!', 'putrafiber'),
     ));
 
     // Comment Reply

@@ -16,6 +16,30 @@
 /* Slide utama: lebar penuh aman */
 .product-gallery-slider .swiper-slide { width: 100%; min-width: 100%; }
 
+.product-gallery .product-gallery-slider .swiper-slide {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-gallery .product-gallery-slider .gallery-item {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: var(--pf-product-gallery-ratio, 4 / 3);
+  background: #f7f9fc;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.product-gallery .product-gallery-slider .gallery-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
 /* ===== Anti Zoom (hanya IMG/anchor) ===== */
 .product-gallery .gallery-item,
 .product-gallery .gallery-image,
@@ -33,7 +57,7 @@
   width: 100% !important;
   height: auto !important;
   max-width: 100% !important;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 /* ===== Thumbnail Bar (dasar) ===== */
