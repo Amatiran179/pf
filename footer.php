@@ -143,5 +143,69 @@
 </div><!-- #page -->
 
 <?php wp_footer(); ?>
+
+<!-- SEARCH OVERLAY INLINE SCRIPT -->
+<script>
+(function() {
+    'use strict';
+    
+    function initSearch() {
+        var searchToggle = document.querySelector('.search-toggle');
+        var searchOverlay = document.querySelector('.search-overlay');
+        var searchClose = document.querySelector('.search-close');
+        var searchBg = document.querySelector('.search-overlay-bg');
+        var searchField = document.querySelector('.search-overlay .search-field');
+        
+        console.log('=== SEARCH INIT ===');
+        console.log('Toggle:', searchToggle);
+        console.log('Overlay:', searchOverlay);
+        
+        if (!searchToggle || !searchOverlay) {
+            console.error('ELEMENTS NOT FOUND!');
+            return;
+        }
+        
+        searchOverlay.style.display = 'none';
+        searchOverlay.classList.remove('active');
+        
+        searchToggle.onclick = function(e) {
+            e.preventDefault();
+            console.log('CLICKED!');
+            searchOverlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            setTimeout(function() {
+                searchOverlay.classList.add('active');
+                if (searchField) searchField.focus();
+            }, 50);
+        };
+        
+        function closeSearch() {
+            searchOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(function() {
+                searchOverlay.style.display = 'none';
+            }, 300);
+        }
+        
+        if (searchClose) searchClose.onclick = closeSearch;
+        if (searchBg) searchBg.onclick = closeSearch;
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchOverlay.classList.contains('active')) {
+                closeSearch();
+            }
+        });
+        
+        console.log('READY!');
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearch);
+    } else {
+        initSearch();
+    }
+})();
+</script>
+
 </body>
 </html>

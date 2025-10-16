@@ -1,8 +1,9 @@
 <?php
 /**
  * Product Archive Template
- * 
+ *
  * @package PutraFiber
+ * @version 1.1.0 - FIXED (Sorting form optimized for backend logic)
  * @since 1.0.0
  */
 
@@ -10,72 +11,65 @@ get_header();
 ?>
 
 <main class="product-archive-page">
-    
-    <!-- Page Header -->
+
     <section class="page-header">
         <div class="container">
             <div class="header-content">
                 <h1 class="page-title">
                     <?php
-                    if (is_tax('product_category')) {
-                        single_term_title();
-                    } elseif (is_tax('product_tag')) {
-                        echo 'Tag: ';
+                    if (is_tax()) {
                         single_term_title();
                     } else {
-                        echo 'Semua Produk';
+                        post_type_archive_title();
                     }
                     ?>
                 </h1>
-                
-                <?php if (is_tax()): ?>
-                    <?php $term_description = term_description(); ?>
-                    <?php if ($term_description): ?>
-                        <div class="archive-description">
-                            <?php echo $term_description; ?>
-                        </div>
-                    <?php endif; ?>
-                <?php else: ?>
+
+                <?php if (is_tax() && term_description()): ?>
+                    <div class="archive-description">
+                        <?php echo term_description(); ?>
+                    </div>
+                <?php elseif (!is_tax()): ?>
                     <p class="archive-subtitle">Katalog produk fiberglass berkualitas tinggi</p>
                 <?php endif; ?>
             </div>
-            
-            <!-- Breadcrumbs -->
+
             <?php putrafiber_breadcrumbs(); ?>
         </div>
     </section>
-    
-    <!-- Products Grid -->
+
     <section class="products-archive-section">
         <div class="container">
-            
-            <!-- Filter & Sorting -->
+
             <div class="archive-controls">
                 <div class="showing-results">
                     <span>Menampilkan <?php echo $wp_query->post_count; ?> dari <?php echo $wp_query->found_posts; ?> produk</span>
                 </div>
-                
+
                 <div class="archive-filter">
                     <form method="get" class="filter-form">
+                        <?php
+                        // PERBAIKAN: Menyimpan nilai orderby saat ini untuk kemudahan
+                        $current_orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : '';
+                        ?>
                         <select name="orderby" onchange="this.form.submit()">
-                            <option value="">Urutkan</option>
-                            <option value="date" <?php selected(isset($_GET['orderby']) && $_GET['orderby'] === 'date'); ?>>Terbaru</option>
-                            <option value="title" <?php selected(isset($_GET['orderby']) && $_GET['orderby'] === 'title'); ?>>Nama: A-Z</option>
-                            <option value="title_desc" <?php selected(isset($_GET['orderby']) && $_GET['orderby'] === 'title_desc'); ?>>Nama: Z-A</option>
-                            <option value="popular" <?php selected(isset($_GET['orderby']) && $_GET['orderby'] === 'popular'); ?>>Populer</option>
+                            <option value="date" <?php selected($current_orderby, ''); ?><?php selected($current_orderby, 'date'); ?>>Urutkan berdasarkan terbaru</option>
+                            <option value="popularity" <?php selected($current_orderby, 'popularity'); ?>>Urutkan berdasarkan popularitas</option>
+                            <option value="title_asc" <?php selected($current_orderby, 'title_asc'); ?>>Urutkan berdasarkan nama: A-Z</option>
+                            <option value="title_desc" <?php selected($current_orderby, 'title_desc'); ?>>Urutkan berdasarkan nama: Z-A</option>
                         </select>
+                        <noscript><button type="submit">Urutkan</button></noscript>
                     </form>
                 </div>
             </div>
-            
+
             <?php if (have_posts()): ?>
                 <div class="products-grid">
                     <?php while (have_posts()): the_post(); ?>
                         <?php get_template_part('template-parts/content', 'product-card'); ?>
                     <?php endwhile; ?>
                 </div>
-                
-                <!-- Pagination -->
+
                 <div class="archive-pagination">
                     <?php
                     the_posts_pagination(array(
@@ -85,36 +79,35 @@ get_header();
                     ));
                     ?>
                 </div>
-                
+
             <?php else: ?>
                 <div class="no-products-found">
                     <div class="no-products-content">
                         <span class="no-products-icon">📦</span>
                         <h3>Produk Tidak Ditemukan</h3>
-                        <p>Maaf, tidak ada produk yang tersedia saat ini.</p>
-                        <a href="<?php echo home_url('/'); ?>" class="btn-primary">Kembali ke Beranda</a>
+                        <p>Maaf, tidak ada produk yang cocok dengan kriteria Anda.</p>
+                        <a href="<?php echo get_post_type_archive_link('product'); ?>" class="btn-primary">Lihat Semua Produk</a>
                     </div>
                 </div>
             <?php endif; ?>
-            
+
         </div>
     </section>
-    
-    <!-- CTA Section -->
+
     <section class="archive-cta-section">
         <div class="container">
             <div class="cta-box">
                 <h2>Butuh Produk Custom?</h2>
                 <p>Kami menerima pembuatan produk fiberglass sesuai kebutuhan Anda</p>
-                <a href="<?php echo putrafiber_whatsapp_link('Halo, saya ingin konsultasi produk custom'); ?>" 
-                   class="btn-whatsapp-large" 
-                   target="_blank">
+                <a href="<?php echo putrafiber_whatsapp_link('Halo, saya ingin konsultasi produk custom'); ?>"
+                   class="btn-whatsapp-large"
+                   target="_blank" rel="noopener">
                     Konsultasi Gratis
                 </a>
             </div>
         </div>
     </section>
-    
+
 </main>
 
 <?php get_footer(); ?>
