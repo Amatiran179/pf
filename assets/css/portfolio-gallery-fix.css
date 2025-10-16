@@ -37,19 +37,16 @@
   justify-content: center;
   width: 100%;
   aspect-ratio: var(--pf-portfolio-gallery-ratio, 16 / 9);
-  background: linear-gradient(140deg, rgba(5, 13, 28, 0.92) 0%, rgba(21, 46, 68, 0.85) 40%, rgba(13, 30, 52, 0.8) 100%);
+  background: #0b1320;
   border-radius: 18px;
   overflow: hidden;
   position: relative;
-  max-height: clamp(260px, 52vw, 620px);
 }
 
 .portfolio-gallery .portfolio-gallery-slider .gallery-image {
   width: 100% !important;
   height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
 }
 
 /* ====== ANTI ZOOM: target IMG saja, bukan wrapper/slide ====== */
@@ -60,8 +57,7 @@
   width: 100% !important;
   height: 100% !important;
   max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain;
+  object-fit: cover;
 
   transform: none !important;
   -webkit-transform: none !important;

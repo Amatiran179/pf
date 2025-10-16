@@ -74,29 +74,8 @@
     var anchors = root.querySelectorAll("a.gallery-item");
     if (!anchors || anchors.length === 0) return null;
 
-    var anchorArray = nodeListToArray(anchors);
-    if (anchorArray.length === 0) return null;
-
-    var groupId = root.getAttribute("data-gallery-group");
-    if (!groupId && anchorArray[0]) {
-      groupId = anchorArray[0].getAttribute("data-gallery-group");
-    }
-    if (!groupId) {
-      groupId = "pf-gallery-" + Math.random().toString(36).slice(2, 10);
-      root.setAttribute("data-gallery-group", groupId);
-    }
-
-    anchorArray.forEach(function (anchor, index) {
-      if (!anchor.getAttribute("data-gallery-group")) {
-        anchor.setAttribute("data-gallery-group", groupId);
-      }
-      anchor.setAttribute("data-slb-group", groupId);
-      if (!anchor.getAttribute("data-gallery-index")) {
-        anchor.setAttribute("data-gallery-index", String(index));
-      }
-    });
-
-    var selector = 'a.gallery-item[data-gallery-group="' + groupId + '"]';
+    var elements = nodeListToArray(anchors);
+    if (elements.length === 0) return null;
 
     var lightbox = null;
     var lightboxOptions = {
@@ -112,17 +91,10 @@
     };
 
     try {
-      lightbox = new SimpleLightbox(selector, lightboxOptions);
+      lightbox = new SimpleLightbox(elements, lightboxOptions);
     } catch (e) {
       try {
-        lightbox = new SimpleLightbox(
-          Object.assign(
-            {
-              elements: selector,
-            },
-            lightboxOptions
-          )
-        );
+        lightbox = new SimpleLightbox(Object.assign({ elements: elements }, lightboxOptions));
       } catch (err) {
         return null;
       }

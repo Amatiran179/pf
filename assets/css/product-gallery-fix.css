@@ -28,21 +28,16 @@
   justify-content: center;
   width: 100%;
   aspect-ratio: var(--pf-product-gallery-ratio, 4 / 3);
-  background: radial-gradient(120% 120% at 50% 50%, rgba(222, 244, 255, 0.9) 0%, rgba(227, 236, 245, 0.85) 48%, rgba(208, 224, 239, 0.75) 100%);
+  background: #f7f9fc;
   border-radius: 14px;
   overflow: hidden;
   position: relative;
-  max-height: clamp(260px, 48vw, 540px);
 }
 
 .product-gallery .product-gallery-slider .gallery-image {
   width: 100% !important;
   height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
-  background-color: transparent;
-  mix-blend-mode: normal;
+  object-fit: cover !important;
 }
 
 /* ===== Anti Zoom (hanya IMG/anchor) ===== */
@@ -60,10 +55,9 @@
 .product-gallery .swiper-slide .gallery-image {
   display: block;
   width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
   max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 /* ===== Thumbnail Bar (dasar) ===== */

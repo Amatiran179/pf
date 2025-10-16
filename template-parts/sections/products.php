@@ -96,7 +96,7 @@ $products_query = new WP_Query(array(
         <?php endif; ?>
 
         <div class="section-cta fade-in">
-            <a href="<?php echo esc_url(home_url('/produk/')); ?>" class="btn btn-outline btn-lg">
+            <a href="<?php echo esc_url(get_post_type_archive_link('product')); ?>" class="btn btn-outline btn-lg">
                 <?php esc_html_e('Lihat Semua Produk', 'putrafiber'); ?>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>

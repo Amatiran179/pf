@@ -21,9 +21,15 @@ $blog_args = array(
     'ignore_sticky_posts' => true,
 );
 
+$produk_category = get_cat_ID('produk');
+if ($produk_category > 0) {
+    $blog_args['category__not_in'] = array($produk_category);
+}
+
 $blog_query = new WP_Query($blog_args);
 
-$blog_archive_url = home_url('/');
+$page_for_posts   = (int) get_option('page_for_posts');
+$blog_archive_url = $page_for_posts ? get_permalink($page_for_posts) : home_url('/');
 ?>
 
 <section class="blog-section section section--glass" id="blog">
