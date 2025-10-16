@@ -20,7 +20,10 @@ $categories = get_the_terms($product_id, 'product_category');
         <!-- Thumbnail -->
         <div class="product-thumbnail">
             <?php if (has_post_thumbnail()): ?>
-                <?php the_post_thumbnail('putrafiber-product', ['alt' => get_the_title()]); ?>
+                <?php the_post_thumbnail('putrafiber-product', [
+                    'alt' => get_the_title(),
+                    'loading' => 'lazy'
+                ]); ?>
             <?php else: ?>
                 <img src="<?php echo PUTRAFIBER_URI; ?>/assets/images/no-image.svg" alt="No Image">
             <?php endif; ?>

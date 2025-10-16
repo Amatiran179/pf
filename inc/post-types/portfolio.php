@@ -1,8 +1,9 @@
 <?php
 /**
- * Portfolio Custom Post Type
+ * Portfolio Custom Post Type - ENHANCED VERSION WITH CTA SYSTEM
  * 
  * @package PutraFiber
+ * @version 2.1.0 - Enhanced with CTA system similar to products
  */
 
 if (!defined('ABSPATH')) exit;
@@ -16,7 +17,8 @@ function putrafiber_register_portfolio() {
         'singular_name'      => _x('Portofolio', 'post type singular name', 'putrafiber'),
         'menu_name'          => _x('Portofolio', 'admin menu', 'putrafiber'),
         'name_admin_bar'     => _x('Portofolio', 'add new on admin bar', 'putrafiber'),
-        'add_new'            => _x('Add New', 'portofolio', 'putrafiber'),        'add_new_item'       => __('Add New Portofolio', 'putrafiber'),
+        'add_new'            => _x('Add New', 'portofolio', 'putrafiber'),
+        'add_new_item'       => __('Add New Portofolio', 'putrafiber'),
         'new_item'           => __('New Portofolio', 'putrafiber'),
         'edit_item'          => __('Edit Portofolio', 'putrafiber'),
         'view_item'          => __('View Portofolio', 'putrafiber'),
@@ -41,7 +43,7 @@ function putrafiber_register_portfolio() {
         'hierarchical'       => false,
         'menu_position'      => 5,
         'menu_icon'          => 'dashicons-portfolio',
-        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt'),
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'comments'),
         'show_in_rest'       => true,
     );
 
@@ -87,7 +89,7 @@ add_action('init', 'putrafiber_register_portfolio_taxonomies');
 function putrafiber_portfolio_meta_boxes() {
     add_meta_box(
         'putrafiber_portfolio_details',
-        __('Portfolio Details', 'putrafiber'),
+        __('📋 Project Information', 'putrafiber'),
         'putrafiber_portfolio_details_callback',
         'portfolio',
         'normal',
@@ -95,122 +97,356 @@ function putrafiber_portfolio_meta_boxes() {
     );
     
     add_meta_box(
-        'putrafiber_portfolio_schema',
-        __('SEO & Schema Settings', 'putrafiber'),
-        'putrafiber_portfolio_schema_callback',
+        'putrafiber_portfolio_gallery',
+        __('🖼️ Project Gallery', 'putrafiber'),
+        'putrafiber_portfolio_gallery_callback',
         'portfolio',
-        'normal',
+        'side',
         'default'
     );
 }
 add_action('add_meta_boxes', 'putrafiber_portfolio_meta_boxes');
 
 /**
- * Portfolio Details Callback
+ * Portfolio Details Callback - ENHANCED WITH CTA SYSTEM
  */
 function putrafiber_portfolio_details_callback($post) {
     wp_nonce_field('putrafiber_portfolio_nonce', 'putrafiber_portfolio_nonce_field');
     
+    // Get meta values
+    $cta_type = get_post_meta($post->ID, '_portfolio_cta_type', true) ?: 'detail';
     $location = get_post_meta($post->ID, '_portfolio_location', true);
     $project_date = get_post_meta($post->ID, '_portfolio_date', true);
+    $completion_date = get_post_meta($post->ID, '_portfolio_completion_date', true);
     $client = get_post_meta($post->ID, '_portfolio_client', true);
+    $project_value = get_post_meta($post->ID, '_portfolio_value', true);
+    $project_duration = get_post_meta($post->ID, '_portfolio_duration', true);
+    $project_size = get_post_meta($post->ID, '_portfolio_size', true);
+    $project_type = get_post_meta($post->ID, '_portfolio_type', true);
+    $services = get_post_meta($post->ID, '_portfolio_services', true);
+    $materials = get_post_meta($post->ID, '_portfolio_materials', true);
+    $team_size = get_post_meta($post->ID, '_portfolio_team_size', true);
+    $challenges = get_post_meta($post->ID, '_portfolio_challenges', true);
+    $solutions = get_post_meta($post->ID, '_portfolio_solutions', true);
     $video_url = get_post_meta($post->ID, '_portfolio_video', true);
-    $gallery = get_post_meta($post->ID, '_portfolio_gallery', true);
     ?>
-    <table class="form-table">
+    
+    <style>
+    .portfolio-meta-table { width: 100%; border-collapse: collapse; }
+    .portfolio-meta-table th { width: 200px; text-align: left; padding: 15px 10px; font-weight: 600; vertical-align: top; background: #f9f9f9; }
+    .portfolio-meta-table td { padding: 15px 10px; }
+    .portfolio-meta-table tr { border-bottom: 1px solid #e0e0e0; }
+    .portfolio-meta-input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+    .portfolio-meta-textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+    .help-text { font-size: 12px; color: #666; margin-top: 5px; font-style: italic; }
+    .section-header { background: #0073aa; color: white; padding: 10px 15px; font-weight: 600; margin: 20px 0 0 0; }
+    
+    /* CTA Type Toggle Styles */
+    .cta-type-toggle { display: flex; gap: 20px; margin-bottom: 15px; }
+    .cta-type-toggle label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .cta-detail-wrapper { display: none; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-top: 10px; }
+    .cta-detail-wrapper.active { display: block; }
+    </style>
+    
+    <table class="portfolio-meta-table">
+        
+        <!-- CTA Configuration -->
         <tr>
-            <th><label for="portfolio_location"><?php _e('Project Location', 'putrafiber'); ?></label></th>
-            <td>
-                <input type="text" id="portfolio_location" name="portfolio_location" value="<?php echo esc_attr($location); ?>" class="regular-text">
-                <p class="description"><?php _e('e.g., Jakarta, Bandung, Surabaya', 'putrafiber'); ?></p>
-            </td>
+            <td colspan="2" class="section-header">🎯 Call-to-Action Configuration</td>
         </tr>
+        
         <tr>
-            <th><label for="portfolio_date"><?php _e('Project Date', 'putrafiber'); ?></label></th>
+            <th><label><?php _e('CTA Type', 'putrafiber'); ?></label></th>
             <td>
-                <input type="date" id="portfolio_date" name="portfolio_date" value="<?php echo esc_attr($project_date); ?>">
-            </td>
-        </tr>
-        <tr>
-            <th><label for="portfolio_client"><?php _e('Client Name', 'putrafiber'); ?></label></th>
-            <td>
-                <input type="text" id="portfolio_client" name="portfolio_client" value="<?php echo esc_attr($client); ?>" class="regular-text">
-            </td>
-        </tr>
-        <tr>
-            <th><label for="portfolio_video"><?php _e('Video URL (Optional)', 'putrafiber'); ?></label></th>
-            <td>
-                <input type="url" id="portfolio_video" name="portfolio_video" value="<?php echo esc_url($video_url); ?>" class="regular-text">
-                <p class="description"><?php _e('YouTube or Vimeo URL', 'putrafiber'); ?></p>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="portfolio_gallery"><?php _e('Gallery Images', 'putrafiber'); ?></label></th>
-            <td>
-                <input type="hidden" id="portfolio_gallery" name="portfolio_gallery" value="<?php echo esc_attr($gallery); ?>">
-                <button type="button" class="button portfolio-gallery-upload"><?php _e('Upload Gallery', 'putrafiber'); ?></button>
-                <div class="portfolio-gallery-preview">
-                    <?php
-                    if ($gallery) {
-                        $gallery_ids = explode(',', $gallery);
-                        foreach ($gallery_ids as $img_id) {
-                            echo wp_get_attachment_image($img_id, 'thumbnail');
-                        }
-                    }
-                    ?>
+                <div class="cta-type-toggle">
+                    <label>
+                        <input type="radio" name="portfolio_cta_type" value="detail" <?php checked($cta_type, 'detail'); ?>>
+                        <strong><?php _e('Lihat Detail Project', 'putrafiber'); ?></strong>
+                    </label>
+                    <label>
+                        <input type="radio" name="portfolio_cta_type" value="whatsapp" <?php checked($cta_type, 'whatsapp'); ?>>
+                        <strong><?php _e('Konsultasi Langsung (WhatsApp)', 'putrafiber'); ?></strong>
+                    </label>
+                </div>
+                
+                <div class="cta-detail-wrapper <?php echo ($cta_type === 'detail') ? 'active' : ''; ?>" id="detail-cta-box">
+                    <p style="color: #00BCD4; font-weight: 600;">✅ <?php _e('Tombol "Lihat Detail Project" akan tampil', 'putrafiber'); ?></p>
+                    <p class="help-text"><?php _e('Pengunjung akan melihat detail project lengkap terlebih dahulu', 'putrafiber'); ?></p>
+                </div>
+                
+                <div class="cta-detail-wrapper <?php echo ($cta_type === 'whatsapp') ? 'active' : ''; ?>" id="whatsapp-cta-box">
+                    <p style="color: #25D366; font-weight: 600;">📞 <?php _e('Tombol "Konsultasi Project Serupa" akan tampil langsung', 'putrafiber'); ?></p>
+                    <p class="help-text"><?php _e('Pengunjung langsung diarahkan ke WhatsApp untuk konsultasi', 'putrafiber'); ?></p>
                 </div>
             </td>
         </tr>
+        
+        <!-- Basic Information -->
+        <tr>
+            <td colspan="2" class="section-header">📍 Basic Information</td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_location"><?php _e('Project Location', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="portfolio_location" name="portfolio_location" value="<?php echo esc_attr($location); ?>" class="portfolio-meta-input" placeholder="Jakarta, Bandung, Surabaya">
+                <p class="help-text"><?php _e('City or location where the project is located', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_client"><?php _e('Client Name', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="portfolio_client" name="portfolio_client" value="<?php echo esc_attr($client); ?>" class="portfolio-meta-input" placeholder="PT. Example Company">
+                <p class="help-text"><?php _e('Client or company name (optional if confidential)', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_type"><?php _e('Project Type', 'putrafiber'); ?></label></th>
+            <td>
+                <select id="portfolio_type" name="portfolio_type" class="portfolio-meta-input">
+                    <option value="">-- Select Type --</option>
+                    <option value="Waterpark" <?php selected($project_type, 'Waterpark'); ?>>Waterpark</option>
+                    <option value="Waterboom" <?php selected($project_type, 'Waterboom'); ?>>Waterboom</option>
+                    <option value="Playground Indoor" <?php selected($project_type, 'Playground Indoor'); ?>>Playground Indoor</option>
+                    <option value="Playground Outdoor" <?php selected($project_type, 'Playground Outdoor'); ?>>Playground Outdoor</option>
+                    <option value="Kolam Renang" <?php selected($project_type, 'Kolam Renang'); ?>>Kolam Renang</option>
+                    <option value="Perosotan Fiberglass" <?php selected($project_type, 'Perosotan Fiberglass'); ?>>Perosotan Fiberglass</option>
+                    <option value="Custom Fiberglass" <?php selected($project_type, 'Custom Fiberglass'); ?>>Custom Fiberglass</option>
+                    <option value="Renovasi" <?php selected($project_type, 'Renovasi'); ?>>Renovasi</option>
+                </select>
+            </td>
+        </tr>
+        
+        <!-- Project Timeline -->
+        <tr>
+            <td colspan="2" class="section-header">📅 Timeline</td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_date"><?php _e('Start Date', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="date" id="portfolio_date" name="portfolio_date" value="<?php echo esc_attr($project_date); ?>" class="portfolio-meta-input">
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_completion_date"><?php _e('Completion Date', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="date" id="portfolio_completion_date" name="portfolio_completion_date" value="<?php echo esc_attr($completion_date); ?>" class="portfolio-meta-input">
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_duration"><?php _e('Project Duration', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="portfolio_duration" name="portfolio_duration" value="<?php echo esc_attr($project_duration); ?>" class="portfolio-meta-input" placeholder="e.g., 3 Bulan, 6 Minggu">
+                <p class="help-text"><?php _e('Duration from start to completion', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <!-- Project Details -->
+        <tr>
+            <td colspan="2" class="section-header">📊 Project Details</td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_size"><?php _e('Project Size/Area', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="portfolio_size" name="portfolio_size" value="<?php echo esc_attr($project_size); ?>" class="portfolio-meta-input" placeholder="e.g., 500 m², 1 Hektar">
+                <p class="help-text"><?php _e('Total project area or size', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_value"><?php _e('Project Value (Optional)', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="portfolio_value" name="portfolio_value" value="<?php echo esc_attr($project_value); ?>" class="portfolio-meta-input" placeholder="e.g., Rp 500 Juta - Rp 1 Miliar">
+                <p class="help-text"><?php _e('Project budget range (optional)', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_team_size"><?php _e('Team Size', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="text" id="portfolio_team_size" name="portfolio_team_size" value="<?php echo esc_attr($team_size); ?>" class="portfolio-meta-input" placeholder="e.g., 15 People">
+                <p class="help-text"><?php _e('Number of team members involved', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_services"><?php _e('Services Provided', 'putrafiber'); ?></label></th>
+            <td>
+                <textarea id="portfolio_services" name="portfolio_services" class="portfolio-meta-textarea" placeholder="e.g., Design, Fabrication, Installation, Maintenance"><?php echo esc_textarea($services); ?></textarea>
+                <p class="help-text"><?php _e('Services provided for this project (comma separated)', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_materials"><?php _e('Materials Used', 'putrafiber'); ?></label></th>
+            <td>
+                <textarea id="portfolio_materials" name="portfolio_materials" class="portfolio-meta-textarea" placeholder="e.g., Fiberglass Premium, Resin Polyester, Gelcoat"><?php echo esc_textarea($materials); ?></textarea>
+                <p class="help-text"><?php _e('Key materials used in this project', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
+        <!-- Challenges & Solutions -->
+        <tr>
+            <td colspan="2" class="section-header">💡 Challenges & Solutions</td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_challenges"><?php _e('Challenges Faced', 'putrafiber'); ?></label></th>
+            <td>
+                <textarea id="portfolio_challenges" name="portfolio_challenges" class="portfolio-meta-textarea" placeholder="Describe main challenges..."><?php echo esc_textarea($challenges); ?></textarea>
+            </td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_solutions"><?php _e('Solutions Implemented', 'putrafiber'); ?></label></th>
+            <td>
+                <textarea id="portfolio_solutions" name="portfolio_solutions" class="portfolio-meta-textarea" placeholder="Describe solutions..."><?php echo esc_textarea($solutions); ?></textarea>
+            </td>
+        </tr>
+        
+        <!-- Media -->
+        <tr>
+            <td colspan="2" class="section-header">🎥 Media</td>
+        </tr>
+        
+        <tr>
+            <th><label for="portfolio_video"><?php _e('Video URL (Optional)', 'putrafiber'); ?></label></th>
+            <td>
+                <input type="url" id="portfolio_video" name="portfolio_video" value="<?php echo esc_url($video_url); ?>" class="portfolio-meta-input" placeholder="https://youtube.com/watch?v=...">
+                <p class="help-text"><?php _e('YouTube or Vimeo URL', 'putrafiber'); ?></p>
+            </td>
+        </tr>
+        
     </table>
+    
+    <script>
+    jQuery(document).ready(function($){
+        // CTA Type toggle
+        $('input[name="portfolio_cta_type"]').on('change', function(){
+            $('.cta-detail-wrapper').removeClass('active');
+            if ($(this).val() === 'detail') { 
+                $('#detail-cta-box').addClass('active'); 
+            } else { 
+                $('#whatsapp-cta-box').addClass('active'); 
+            }
+        });
+    });
+    </script>
     <?php
 }
 
 /**
- * Portfolio Schema Callback
+ * Portfolio Gallery Callback - ENHANCED (Similar to Product)
  */
-function putrafiber_portfolio_schema_callback($post) {
-    $enable_tourist = get_post_meta($post->ID, '_enable_tourist_schema', true);
-    $service_area = get_post_meta($post->ID, '_service_area', true);
-    $meta_title = get_post_meta($post->ID, '_meta_title', true);
-    $meta_desc = get_post_meta($post->ID, '_meta_description', true);
+function putrafiber_portfolio_gallery_callback($post) {
+    $gallery = get_post_meta($post->ID, '_portfolio_gallery', true);
     ?>
-    <table class="form-table">
-        <tr>
-            <th><label for="meta_title"><?php _e('Meta Title', 'putrafiber'); ?></label></th>
-            <td>
-                <input type="text" id="meta_title" name="meta_title" value="<?php echo esc_attr($meta_title); ?>" class="large-text">
-                <p class="description"><?php _e('Leave empty to use post title', 'putrafiber'); ?></p>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="meta_description"><?php _e('Meta Description', 'putrafiber'); ?></label></th>
-            <td>
-                <textarea id="meta_description" name="meta_description" rows="3" class="large-text"><?php echo esc_textarea($meta_desc); ?></textarea>
-                <p class="description"><?php _e('Recommended: 150-160 characters', 'putrafiber'); ?></p>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="enable_tourist_schema"><?php _e('Tourist Attraction Schema', 'putrafiber'); ?></label></th>
-            <td>
-                <label>
-                    <input type="checkbox" id="enable_tourist_schema" name="enable_tourist_schema" value="1" <?php checked($enable_tourist, '1'); ?>>
-                    <?php _e('Enable Tourist Attraction Schema for this project', 'putrafiber'); ?>
-                </label>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="service_area"><?php _e('Service Area Override', 'putrafiber'); ?></label></th>
-            <td>
-                <input type="text" id="service_area" name="service_area" value="<?php echo esc_attr($service_area); ?>" class="regular-text">
-                <p class="description"><?php _e('Auto-detected from location. Override if needed.', 'putrafiber'); ?></p>
-            </td>
-        </tr>
-    </table>
+    <div class="portfolio-gallery-box">
+        <input type="hidden" id="portfolio_gallery" name="portfolio_gallery" value="<?php echo esc_attr($gallery); ?>">
+        <button type="button" class="button button-primary button-large" id="upload-portfolio-gallery-button" style="width: 100%; margin-bottom: 15px;">
+            <span class="dashicons dashicons-images-alt2" style="margin-top: 3px;"></span> <?php _e('Upload Gallery Images', 'putrafiber'); ?>
+        </button>
+        <div id="portfolio-gallery-preview" class="gallery-preview-grid">
+            <?php
+            if ($gallery) {
+                $gallery_ids = explode(',', $gallery);
+                foreach ($gallery_ids as $img_id) {
+                    if ($img_url = wp_get_attachment_image_url($img_id, 'thumbnail')) {
+                        echo '<div class="gallery-item" data-id="'.esc_attr($img_id).'"><img src="'.esc_url($img_url).'" alt="Gallery image"><button type="button" class="remove-gallery-item" title="Remove">&times;</button></div>';
+                    }
+                }
+            }
+            ?>
+        </div>
+    </div>
+    <style>
+    .gallery-preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+    .gallery-item { position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; aspect-ratio: 1; cursor: move; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-item .remove-gallery-item { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; background: #dc3545; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: none; }
+    .gallery-item:hover .remove-gallery-item { display: block; }
+    </style>
+    <script>
+    jQuery(document).ready(function($){
+        var portfolioGalleryUploader;
+        
+        $('#upload-portfolio-gallery-button').on('click', function(e){
+            e.preventDefault();
+            
+            if (portfolioGalleryUploader) { 
+                portfolioGalleryUploader.open(); 
+                return; 
+            }
+            
+            portfolioGalleryUploader = wp.media({ 
+                title: 'Select Portfolio Gallery Images', 
+                button: { text: 'Add to Gallery' }, 
+                multiple: true 
+            });
+            
+            portfolioGalleryUploader.on('select', function(){
+                var attachments = portfolioGalleryUploader.state().get('selection').toJSON();
+                var existingIds = $('#portfolio_gallery').val() ? $('#portfolio_gallery').val().split(',') : [];
+                
+                attachments.forEach(function(attachment){
+                    if ($.inArray(attachment.id.toString(), existingIds) === -1) {
+                        existingIds.push(attachment.id);
+                        
+                        var thumbUrl = attachment.sizes && attachment.sizes.thumbnail 
+                            ? attachment.sizes.thumbnail.url 
+                            : attachment.url;
+                        
+                        $('#portfolio-gallery-preview').append(
+                            '<div class="gallery-item" data-id="'+attachment.id+'">' +
+                                '<img src="'+thumbUrl+'" alt="Gallery image">' +
+                                '<button type="button" class="remove-gallery-item" title="Remove">&times;</button>' +
+                            '</div>'
+                        );
+                    }
+                });
+                
+                $('#portfolio_gallery').val(existingIds.join(','));
+            });
+            
+            portfolioGalleryUploader.open();
+        });
+        
+        $(document).on('click', '.remove-gallery-item', function(){
+            var item = $(this).closest('.gallery-item');
+            var id = item.data('id');
+            var ids = $('#portfolio_gallery').val().split(',').filter(function(value){ 
+                return value && value != id; 
+            });
+            $('#portfolio_gallery').val(ids.join(','));
+            item.fadeOut(200, function(){ $(this).remove(); });
+        });
+        
+        if($.fn.sortable){
+            $('#portfolio-gallery-preview').sortable({
+                placeholder: 'gallery-item-placeholder',
+                cursor: 'move',
+                update:function(){
+                    var ids=[];
+                    $('.gallery-item').each(function(){
+                        ids.push($(this).data('id'));
+                    });
+                    $('#portfolio_gallery').val(ids.join(','));
+                }
+            });
+        }
+    });
+    </script>
     <?php
 }
 
 /**
- * Save Portfolio Meta
+ * Save Portfolio Meta - ENHANCED WITH CTA TYPE
  */
 function putrafiber_save_portfolio_meta($post_id) {
     if (!isset($_POST['putrafiber_portfolio_nonce_field'])) return;
@@ -219,24 +455,38 @@ function putrafiber_save_portfolio_meta($post_id) {
     if (!current_user_can('edit_post', $post_id)) return;
 
     $fields = array(
+        'portfolio_cta_type' => '_portfolio_cta_type',
         'portfolio_location' => '_portfolio_location',
         'portfolio_date' => '_portfolio_date',
+        'portfolio_completion_date' => '_portfolio_completion_date',
         'portfolio_client' => '_portfolio_client',
+        'portfolio_value' => '_portfolio_value',
+        'portfolio_duration' => '_portfolio_duration',
+        'portfolio_size' => '_portfolio_size',
+        'portfolio_type' => '_portfolio_type',
+        'portfolio_services' => '_portfolio_services',
+        'portfolio_materials' => '_portfolio_materials',
+        'portfolio_team_size' => '_portfolio_team_size',
+        'portfolio_challenges' => '_portfolio_challenges',
+        'portfolio_solutions' => '_portfolio_solutions',
         'portfolio_video' => '_portfolio_video',
         'portfolio_gallery' => '_portfolio_gallery',
-        'meta_title' => '_meta_title',
-        'meta_description' => '_meta_description',
-        'service_area' => '_service_area',
     );
 
     foreach ($fields as $field => $meta_key) {
         if (isset($_POST[$field])) {
-            update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$field]));
+            if (in_array($field, array('portfolio_services', 'portfolio_materials', 'portfolio_challenges', 'portfolio_solutions'))) {
+                update_post_meta($post_id, $meta_key, sanitize_textarea_field($_POST[$field]));
+            } elseif ($field === 'portfolio_video') {
+                update_post_meta($post_id, $meta_key, esc_url_raw($_POST[$field]));
+            } elseif ($field === 'portfolio_gallery') {
+                $value = implode(',', array_filter(array_map('absint', explode(',', sanitize_text_field($_POST[$field])))));
+                update_post_meta($post_id, $meta_key, $value);
+            } else {
+                update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$field]));
+            }
         }
     }
-    
-    $enable_tourist = isset($_POST['enable_tourist_schema']) ? '1' : '0';
-    update_post_meta($post_id, '_enable_tourist_schema', $enable_tourist);
 }
 add_action('save_post_portfolio', 'putrafiber_save_portfolio_meta');
 

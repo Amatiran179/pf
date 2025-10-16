@@ -3,68 +3,186 @@
 
     $(document).ready(function() {
 
-        // Media Upload
-        var mediaUploader;
+        console.log('🚀 PutraFiber Admin JS Initializing...');
+        console.log('   - jQuery:', typeof jQuery !== 'undefined' ? '✅' : '❌');
+        console.log('   - WP Media:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined' ? '✅' : '❌');
 
-        $('.putrafiber-upload-image, .putrafiber-upload-icon').on('click', function(e) {
+        // ===================================================================
+        // PRODUCT GALLERY UPLOADER
+        // Selector: #upload-gallery-button (for Product CPT)
+        // ===================================================================
+        var productGalleryUploader;
+
+        $(document).on('click', '#upload-gallery-button', function(e) {
             e.preventDefault();
             
-            var button = $(this);
-            var inputField = button.siblings('input[type="hidden"]');
-            var previewContainer = button.siblings('.image-preview, .icon-preview');
+            console.log('🖼️ Product gallery button clicked');
 
-            if (mediaUploader) {
-                mediaUploader.open();
+            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+                alert('WordPress Media library not loaded. Please refresh the page.');
+                console.error('❌ wp.media not available');
                 return;
             }
 
-            mediaUploader = wp.media({
-                title: 'Select Image',
-                button: {
-                    text: 'Use this image'
-                },
-                multiple: false
+            if (productGalleryUploader) {
+                productGalleryUploader.open();
+                return;
+            }
+
+            productGalleryUploader = wp.media({
+                title: 'Select Gallery Images',
+                button: { text: 'Add to Gallery' },
+                multiple: true
             });
 
-            mediaUploader.on('select', function() {
-                var attachment = mediaUploader.state().get('selection').first().toJSON();
-                inputField.val(attachment.url);
-                previewContainer.html('<img src="' + attachment.url + '" style="max-width: 300px;">');
+            productGalleryUploader.on('select', function() {
+                var attachments = productGalleryUploader.state().get('selection').toJSON();
+                var existingIds = $('#product_gallery').val() ? $('#product_gallery').val().split(',') : [];
+                
+                console.log('✅ Selected ' + attachments.length + ' images');
+
+                attachments.forEach(function(attachment) {
+                    if ($.inArray(attachment.id.toString(), existingIds) === -1) {
+                        existingIds.push(attachment.id);
+                        
+                        var thumbnailUrl = attachment.sizes && attachment.sizes.thumbnail 
+                            ? attachment.sizes.thumbnail.url 
+                            : attachment.url;
+                        
+                        $('#gallery-preview').append(
+                            '<div class="gallery-item" data-id="' + attachment.id + '">' +
+                                '<img src="' + thumbnailUrl + '" alt="Gallery image">' +
+                                '<button type="button" class="remove-gallery-item" title="Hapus">&times;</button>' +
+                            '</div>'
+                        );
+                    }
+                });
+
+                $('#product_gallery').val(existingIds.join(','));
+                console.log('✅ Product gallery updated');
             });
 
-            mediaUploader.open();
+            productGalleryUploader.open();
         });
 
-        // Remove Image
-        $('.putrafiber-remove-image, .putrafiber-remove-icon').on('click', function(e) {
+        // ===================================================================
+        // REMOVE PRODUCT GALLERY ITEM
+        // ===================================================================
+        $(document).on('click', '.remove-gallery-item', function(e) {
             e.preventDefault();
-            $(this).siblings('input[type="hidden"]').val('');
-            $(this).siblings('.image-preview, .icon-preview').html('');
+            
+            var $item = $(this).closest('.gallery-item');
+            var itemId = $item.data('id');
+            
+            $item.fadeOut(200, function() {
+                $(this).remove();
+            });
+            
+            var currentIds = $('#product_gallery').val().split(',').filter(function(id) {
+                return id && id != itemId;
+            });
+            $('#product_gallery').val(currentIds.join(','));
+            
+            console.log('🗑️ Removed gallery item:', itemId);
         });
 
-        // Gallery Upload
-        var galleryUploader;
+        // ===================================================================
+        // PRODUCT GALLERY SORTABLE
+        // ===================================================================
+        if ($.fn.sortable && $('#gallery-preview').length > 0) {
+            $('#gallery-preview').sortable({
+                placeholder: 'gallery-item-placeholder',
+                cursor: 'move',
+                update: function() {
+                    var ids = [];
+                    $('.gallery-item').each(function() {
+                        ids.push($(this).data('id'));
+                    });
+                    $('#product_gallery').val(ids.join(','));
+                    console.log('🔄 Product gallery reordered');
+                }
+            });
+        }
+
+        // ===================================================================
+        // PRODUCT PDF UPLOAD
+        // ===================================================================
+        var pdfUploader;
+        
+        $(document).on('click', '.upload-pdf-button', function(e) {
+            e.preventDefault();
+            
+            console.log('📄 PDF upload button clicked');
+
+            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+                alert('WordPress Media library not loaded. Please refresh the page.');
+                return;
+            }
+
+            if (pdfUploader) {
+                pdfUploader.open();
+                return;
+            }
+
+            pdfUploader = wp.media({
+                title: 'Select PDF File',
+                button: { text: 'Use this PDF' },
+                multiple: false,
+                library: { type: 'application/pdf' }
+            });
+
+            pdfUploader.on('select', function() {
+                var attachment = pdfUploader.state().get('selection').first().toJSON();
+                $('#product_catalog_pdf').val(attachment.url);
+                console.log('✅ PDF selected:', attachment.filename);
+            });
+
+            pdfUploader.open();
+        });
+
+        // ===================================================================
+        // PRODUCT PRICE TYPE TOGGLE
+        // ===================================================================
+        $('input[name="product_price_type"]').on('change', function() {
+            $('.price-input-wrapper').removeClass('active');
+            if ($(this).val() === 'price') {
+                $('#price-input-box').addClass('active');
+            } else {
+                $('#whatsapp-cta-box').addClass('active');
+            }
+            console.log('💰 Price type changed to:', $(this).val());
+        });
+
+        // ===================================================================
+        // PORTFOLIO GALLERY UPLOADER - LEGACY SUPPORT
+        // Selector: .portfolio-gallery-upload (for Portfolio CPT)
+        // KEPT AS-IS to prevent breaking existing functionality
+        // ===================================================================
+        var portfolioGalleryUploader;
 
         $('.portfolio-gallery-upload').on('click', function(e) {
             e.preventDefault();
             
-            var button = $(this);
+            console.log('🎨 Portfolio gallery button clicked');
 
-            if (galleryUploader) {
-                galleryUploader.open();
+            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+                alert('WordPress Media library not loaded. Please refresh the page.');
                 return;
             }
 
-            galleryUploader = wp.media({
+            if (portfolioGalleryUploader) {
+                portfolioGalleryUploader.open();
+                return;
+            }
+
+            portfolioGalleryUploader = wp.media({
                 title: 'Select Gallery Images',
-                button: {
-                    text: 'Add to Gallery'
-                },
+                button: { text: 'Add to Gallery' },
                 multiple: true
             });
 
-            galleryUploader.on('select', function() {
-                var attachments = galleryUploader.state().get('selection').toJSON();
+            portfolioGalleryUploader.on('select', function() {
+                var attachments = portfolioGalleryUploader.state().get('selection').toJSON();
                 var ids = [];
                 var html = '';
 
@@ -75,12 +193,65 @@
 
                 $('#portfolio_gallery').val(ids.join(','));
                 $('.portfolio-gallery-preview').html(html);
+                
+                console.log('✅ Portfolio gallery updated with ' + ids.length + ' images');
             });
 
-            galleryUploader.open();
+            portfolioGalleryUploader.open();
         });
 
-        // Tab Navigation
+        // ===================================================================
+        // GENERIC MEDIA UPLOAD
+        // For other meta boxes (featured images, icons, etc.)
+        // ===================================================================
+        var mediaUploader;
+
+        $('.putrafiber-upload-image, .putrafiber-upload-icon').on('click', function(e) {
+            e.preventDefault();
+            
+            var button = $(this);
+            var inputField = button.siblings('input[type="hidden"]');
+            var previewContainer = button.siblings('.image-preview, .icon-preview');
+
+            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+                alert('WordPress Media library not loaded. Please refresh the page.');
+                return;
+            }
+
+            if (mediaUploader) {
+                mediaUploader.open();
+                return;
+            }
+
+            mediaUploader = wp.media({
+                title: 'Select Image',
+                button: { text: 'Use this image' },
+                multiple: false
+            });
+
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                inputField.val(attachment.url);
+                previewContainer.html('<img src="' + attachment.url + '" style="max-width: 300px;">');
+                console.log('✅ Image selected');
+            });
+
+            mediaUploader.open();
+        });
+
+        // ===================================================================
+        // REMOVE IMAGE
+        // ===================================================================
+        $('.putrafiber-remove-image, .putrafiber-remove-icon').on('click', function(e) {
+            e.preventDefault();
+            $(this).siblings('input[type="hidden"]').val('');
+            $(this).siblings('.image-preview, .icon-preview').html('');
+            console.log('🗑️ Image removed');
+        });
+
+        // ===================================================================
+        // TAB NAVIGATION
+        // ===================================================================
         $('.nav-tab').on('click', function(e) {
             e.preventDefault();
             
@@ -91,17 +262,28 @@
             
             $('.tab-content').removeClass('active');
             $(tabId).addClass('active');
+            
+            console.log('📑 Tab switched to:', tabId);
         });
 
-        // Character Counter for SEO
+        // ===================================================================
+        // SEO CHARACTER COUNTER
+        // ===================================================================
         function updateCharacterCount() {
-            var titleLength = $('#meta_title').val().length;
-            var descLength = $('#meta_description').val().length;
+            var $titleInput = $('#meta_title');
+            var $descInput = $('#meta_description');
+            
+            if ($titleInput.length === 0 || $descInput.length === 0) {
+                return; // SEO fields not present on this page
+            }
+            
+            var titleLength = $titleInput.val().length;
+            var descLength = $descInput.val().length;
             
             $('#title-length').text(titleLength);
             $('#desc-length').text(descLength);
             
-            // Color coding
+            // Color coding for title
             if (titleLength > 60) {
                 $('#title-length').css('color', '#dc3545');
             } else if (titleLength > 50) {
@@ -110,6 +292,7 @@
                 $('#title-length').css('color', '#28a745');
             }
             
+            // Color coding for description
             if (descLength > 160) {
                 $('#desc-length').css('color', '#dc3545');
             } else if (descLength > 150) {
@@ -122,15 +305,21 @@
         $('#meta_title, #meta_description').on('keyup', updateCharacterCount);
         updateCharacterCount();
 
-        // Form Validation
-        $('form').on('submit', function() {
+        // ===================================================================
+        // FORM VALIDATION
+        // ===================================================================
+        $('form').on('submit', function(e) {
             var isValid = true;
+            var $form = $(this);
             
-            $(this).find('[required]').each(function() {
+            $form.find('[required]').each(function() {
                 if (!$(this).val()) {
                     isValid = false;
                     $(this).addClass('error');
-                    $(this).after('<span class="error-message">This field is required</span>');
+                    
+                    if ($(this).siblings('.error-message').length === 0) {
+                        $(this).after('<span class="error-message" style="color: #dc3545; font-size: 12px;">This field is required</span>');
+                    }
                 } else {
                     $(this).removeClass('error');
                     $(this).siblings('.error-message').remove();
@@ -139,49 +328,75 @@
             
             if (!isValid) {
                 alert('Please fill in all required fields');
+                return false;
             }
             
-            return isValid;
+            return true;
         });
 
-        // Color Picker
+        // ===================================================================
+        // COLOR PICKER
+        // ===================================================================
         if ($.fn.wpColorPicker) {
             $('.color-picker').wpColorPicker();
+            console.log('🎨 Color picker initialized');
         }
 
-        // Sortable
+        // ===================================================================
+        // SORTABLE LISTS
+        // ===================================================================
         if ($.fn.sortable) {
             $('.sortable-list').sortable({
                 placeholder: 'sortable-placeholder',
+                cursor: 'move',
                 update: function(event, ui) {
                     var order = $(this).sortable('toArray');
-                    console.log('New order:', order);
+                    console.log('🔄 List reordered:', order);
                 }
             });
         }
 
-        // Confirm Delete
+        // ===================================================================
+        // CONFIRM DELETE
+        // ===================================================================
         $('.delete-item').on('click', function(e) {
-            if (!confirm('Are you sure you want to delete this item?')) {
+            var itemName = $(this).data('item-name') || 'this item';
+            if (!confirm('Are you sure you want to delete ' + itemName + '?')) {
                 e.preventDefault();
+                return false;
             }
         });
 
-        // Auto-save Draft
+        // ===================================================================
+        // AUTO-SAVE DRAFT
+        // ===================================================================
         var autoSaveTimer;
         $('.auto-save-field').on('input', function() {
             clearTimeout(autoSaveTimer);
             
             autoSaveTimer = setTimeout(function() {
-                // Auto-save logic here
-                console.log('Auto-saving...');
+                console.log('💾 Auto-saving...');
+                // Auto-save logic can be implemented here
             }, 2000);
         });
 
-        // Tooltips
+        // ===================================================================
+        // TOOLTIPS
+        // ===================================================================
         if ($.fn.tooltip) {
             $('[data-tooltip]').tooltip();
+            console.log('💬 Tooltips initialized');
         }
+
+        // ===================================================================
+        // INITIALIZATION COMPLETE
+        // ===================================================================
+        console.log('✅ PutraFiber Admin JS fully loaded');
+        console.log('   Handlers registered:');
+        console.log('   - Product Gallery Upload: #upload-gallery-button');
+        console.log('   - Portfolio Gallery Upload: .portfolio-gallery-upload');
+        console.log('   - Generic Media Upload: .putrafiber-upload-image');
+        console.log('   - PDF Upload: .upload-pdf-button');
 
     });
 
