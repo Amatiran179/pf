@@ -25,6 +25,8 @@ $parallax_on   = putrafiber_get_option('front_enable_parallax', '1');
 
     <div class="frontpage-water-overlay" aria-hidden="true">
         <div class="frontpage-water-layer"></div>
+        <div class="frontpage-water-wave frontpage-water-wave--top"></div>
+        <div class="frontpage-water-wave frontpage-water-wave--bottom"></div>
         <div class="frontpage-water-bubbles"></div>
     </div>
 

@@ -40,7 +40,17 @@ if (!empty($sections)) {
     <?php else: ?>
         <div class="hero-background hero-gradient"></div>
     <?php endif; ?>
-    
+
+    <div class="hero-ornaments" aria-hidden="true">
+        <?php for ($i = 0; $i < 6; $i++):
+            $particle_index = $i + 1;
+            ?>
+            <span class="hero-particle hero-particle-<?php echo (int) $particle_index; ?>"></span>
+        <?php endfor; ?>
+        <span class="hero-wave hero-wave--one"></span>
+        <span class="hero-wave hero-wave--two"></span>
+    </div>
+
     <div class="container">
         <div class="hero-content fade-in">
             <?php if ($hero_highlight): ?>

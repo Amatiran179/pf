@@ -22,9 +22,17 @@ $portfolio_query = new WP_Query(array(
 ));
 ?>
 
-<section class="portfolio-section section" id="portfolio">
-    <div class="container-wide">
+<section class="portfolio-section section section--glass" id="portfolio">
+    <div class="section-background" aria-hidden="true">
+        <span class="section-ripple"></span>
+        <span class="section-ripple section-ripple--alt"></span>
+        <span class="section-spark section-spark--left"></span>
+        <span class="section-spark section-spark--right"></span>
+    </div>
+
+    <div class="container-wide section-content">
         <div class="section-title fade-in">
+            <div class="section-pretitle"><?php esc_html_e('Project Ikonik', 'putrafiber'); ?></div>
             <h2><?php echo esc_html($portfolio_title); ?></h2>
             <?php if ($portfolio_desc): ?>
                 <div class="section-lead"><?php echo wp_kses_post($portfolio_desc); ?></div>
@@ -92,7 +100,7 @@ $portfolio_query = new WP_Query(array(
         <?php endif; ?>
 
         <div class="section-cta fade-in">
-            <a href="<?php echo esc_url(get_post_type_archive_link('portfolio')); ?>" class="btn btn-outline btn-lg">
+            <a href="<?php echo esc_url(home_url('/portfolio/')); ?>" class="btn btn-outline btn-lg">
                 <?php esc_html_e('Lihat Semua Portofolio', 'putrafiber'); ?>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>

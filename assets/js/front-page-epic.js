@@ -66,6 +66,77 @@
     requestUpdate();
   }
 
+  function initHeroParticles() {
+    var particles = document.querySelectorAll('.hero-ornaments .hero-particle');
+    if (!particles.length) {
+      return;
+    }
+
+    particles.forEach(function (particle, index) {
+      var delay = Math.random() * 6;
+      var offsetX = (index % 2 === 0 ? 1 : -1) * (5 + Math.random() * 12);
+      var offsetY = (Math.random() * 18) - 9;
+      particle.style.animationDelay = delay.toFixed(2) + 's';
+      particle.style.setProperty('--pf-drift-x', offsetX.toFixed(2) + 'px');
+      particle.style.setProperty('--pf-drift-y', offsetY.toFixed(2) + 'px');
+    });
+  }
+
+  function initSectionObserver() {
+    var sections = document.querySelectorAll('.section--glass');
+    if (!sections.length || !('IntersectionObserver' in window)) {
+      sections.forEach(function (section) {
+        section.classList.add('is-visible');
+      });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.25
+    });
+
+    sections.forEach(function (section) {
+      observer.observe(section);
+    });
+  }
+
+  function initSectionTilt() {
+    var sections = document.querySelectorAll('.section--glass');
+    if (!sections.length) {
+      return;
+    }
+
+    sections.forEach(function (section) {
+      var background = section.querySelector('.section-background');
+      if (!background) {
+        return;
+      }
+
+      section.addEventListener('mousemove', function (event) {
+        var rect = section.getBoundingClientRect();
+        var relX = (event.clientX - rect.left) / rect.width;
+        var relY = (event.clientY - rect.top) / rect.height;
+        var tiltX = (relY - 0.5) * 6;
+        var tiltY = (relX - 0.5) * -6;
+
+        section.style.setProperty('--pf-tilt-x', tiltX.toFixed(2) + 'deg');
+        section.style.setProperty('--pf-tilt-y', tiltY.toFixed(2) + 'deg');
+      });
+
+      section.addEventListener('mouseleave', function () {
+        section.style.setProperty('--pf-tilt-x', '0deg');
+        section.style.setProperty('--pf-tilt-y', '0deg');
+      });
+    });
+  }
+
   function initSmoothScroll() {
     $(document).on('click', '.scroll-to', function (event) {
       var target = this.getAttribute('href');
@@ -84,6 +155,9 @@
   $(document).ready(function () {
     initBubbles();
     initParallax();
+    initHeroParticles();
+    initSectionObserver();
+    initSectionTilt();
     initSmoothScroll();
   });
 })(jQuery);

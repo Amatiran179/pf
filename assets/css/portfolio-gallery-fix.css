@@ -55,7 +55,7 @@
 :is(.product-gallery, .portfolio-gallery) .gallery-image {
   display: block;
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   max-width: 100% !important;
   object-fit: cover;
 
@@ -107,5 +107,5 @@
 @media (max-width: 640px) { :is(.product-gallery-thumbs, .portfolio-gallery-thumbs) .swiper-slide img { height: 56px; } }
 
 /* Perlindungan dasar */
-:is(.product-gallery, .portfolio-gallery) img { max-width: 100% !important; height: auto !important; }
+:is(.product-gallery, .portfolio-gallery) img { max-width: 100% !important; height: auto; }
 :is(.product-gallery, .portfolio-gallery) .gallery-item { display: block; width: 100%; }

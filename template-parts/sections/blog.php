@@ -32,9 +32,17 @@ $page_for_posts   = (int) get_option('page_for_posts');
 $blog_archive_url = $page_for_posts ? get_permalink($page_for_posts) : home_url('/');
 ?>
 
-<section class="blog-section section" id="blog">
-    <div class="container-wide">
+<section class="blog-section section section--glass" id="blog">
+    <div class="section-background" aria-hidden="true">
+        <span class="section-ripple"></span>
+        <span class="section-ripple section-ripple--delay"></span>
+        <span class="section-spark section-spark--left"></span>
+        <span class="section-spark section-spark--right"></span>
+    </div>
+
+    <div class="container-wide section-content">
         <div class="section-title fade-in">
+            <div class="section-pretitle"><?php esc_html_e('Wawasan Terbaru', 'putrafiber'); ?></div>
             <h2><?php echo esc_html($blog_title); ?></h2>
             <?php if ($blog_desc): ?>
                 <div class="section-lead"><?php echo wp_kses_post($blog_desc); ?></div>

@@ -110,7 +110,7 @@
 }
 
 /* Perlindungan dasar */
-.product-gallery img { max-width: 100% !important; height: auto !important; }
+.product-gallery img { max-width: 100% !important; height: auto; }
 .product-gallery .gallery-item { display: block; width: 100%; }
 
 /* Mobile hard-fix slider utama (hindari lebar “meledak”) */

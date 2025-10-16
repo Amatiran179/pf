@@ -1,6 +1,20 @@
 (function($) {
     'use strict';
 
+    function checkFadeIn() {
+        $('.fade-in').each(function() {
+            var $element = $(this);
+            var elementTop = $element.offset().top;
+            var elementBottom = elementTop + $element.outerHeight();
+            var viewportTop = $(window).scrollTop();
+            var viewportBottom = viewportTop + $(window).height();
+
+            if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                $element.addClass('visible');
+            }
+        });
+    }
+
     // Document Ready
     $(document).ready(function() {
         
@@ -77,20 +91,6 @@
             $('html, body').animate({ scrollTop: 0 }, 600);
             return false;
         });
-
-        // Fade In Animation on Scroll
-        function checkFadeIn() {
-            $('.fade-in').each(function() {
-                var elementTop = $(this).offset().top;
-                var elementBottom = elementTop + $(this).outerHeight();
-                var viewportTop = $(window).scrollTop();
-                var viewportBottom = viewportTop + $(window).height();
-
-                if (elementBottom > viewportTop && elementTop < viewportBottom) {
-                    $(this).addClass('visible');
-                }
-            });
-        }
 
         $(window).on('scroll resize', checkFadeIn);
         checkFadeIn();
@@ -372,7 +372,7 @@
     $(window).on('load', function() {
         // Remove preloader if exists
         $('.preloader').fadeOut();
-        
+
         // Trigger animations
         checkFadeIn();
     });

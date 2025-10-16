@@ -22,9 +22,17 @@ $products_query = new WP_Query(array(
 ));
 ?>
 
-<section class="products-section section bg-light" id="products">
-    <div class="container-wide">
+<section class="products-section section section--glass" id="products">
+    <div class="section-background" aria-hidden="true">
+        <span class="section-ripple"></span>
+        <span class="section-ripple section-ripple--delay"></span>
+        <span class="section-spark section-spark--left"></span>
+        <span class="section-spark section-spark--right"></span>
+    </div>
+
+    <div class="container-wide section-content">
         <div class="section-title fade-in">
+            <div class="section-pretitle"><?php esc_html_e('Pilihan Unggulan', 'putrafiber'); ?></div>
             <h2><?php echo esc_html($products_title); ?></h2>
             <?php if ($products_desc): ?>
                 <div class="section-lead"><?php echo wp_kses_post($products_desc); ?></div>
