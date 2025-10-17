@@ -4,10 +4,7 @@
  *
  * @package PutraFiber
  */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 if (!class_exists('PutraFiber_Schema_Manager')) {
     class PutraFiber_Schema_Manager
@@ -124,6 +121,10 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
                 if (defined($constant)) {
                     return true;
                 }
+            }
+
+            if (did_action('putrafiber_schema_legacy_rendered')) {
+                return true;
             }
 
             return false;

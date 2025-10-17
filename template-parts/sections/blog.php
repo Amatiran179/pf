@@ -4,6 +4,7 @@
  *
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $blog_limit = putrafiber_frontpage_limit('blog', 3);
 $blog_title = putrafiber_frontpage_text('blog', 'title', __('Artikel & Insight Terbaru', 'putrafiber'));
@@ -110,7 +111,10 @@ $blog_archive_url = $page_for_posts ? get_permalink($page_for_posts) : home_url(
                         <?php if (has_post_thumbnail()): ?>
                             <div class="blog-image">
                                 <a href="<?php the_permalink(); ?>">
-                                    <?php the_post_thumbnail('putrafiber-thumb'); ?>
+                                    <?php the_post_thumbnail('putrafiber-thumb', array(
+                                        'loading' => 'lazy',
+                                        'decoding' => 'async'
+                                    )); ?>
                                 </a>
                                 <?php if (!empty($slot_labels[get_the_ID()])): ?>
                                     <span class="blog-slot-badge"><?php echo esc_html($slot_labels[get_the_ID()]); ?></span>

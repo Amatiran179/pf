@@ -4,10 +4,7 @@
  *
  * @package PutraFiber
  */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 if (!function_exists('pf_schema_sanitize_text')) {
     /**

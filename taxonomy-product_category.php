@@ -5,6 +5,7 @@
  * @package PutraFiber
  * @since 1.0.0
  */
+if (!defined('ABSPATH')) exit;
 
 // Gunakan archive-product.php sebagai template
 get_template_part('archive', 'product');

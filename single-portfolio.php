@@ -5,6 +5,7 @@
  * @package PutraFiber
  * @version 2.2.1 - Patched gallery logic for robust data handling
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 ?>
@@ -475,7 +476,10 @@ get_header();
                                         <?php if (has_post_thumbnail()): ?>
                                             <div class="portfolio-thumbnail">
                                                 <a href="<?php the_permalink(); ?>">
-                                                    <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                                    <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                                        'loading' => 'lazy',
+                                                        'decoding' => 'async'
+                                                    )); ?>
                                                 </a>
                                                 <?php if ($rel_type): ?>
                                                     <span class="portfolio-type-badge"><?php echo pf_output_html($rel_type); ?></span>

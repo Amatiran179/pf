@@ -136,7 +136,10 @@ function putrafiber_portfolio_grid_shortcode($atts) {
                     <?php if (has_post_thumbnail()): ?>
                         <div class="portfolio-thumbnail">
                             <a href="<?php the_permalink(); ?>">
-                                <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                    'loading' => 'lazy',
+                                    'decoding' => 'async'
+                                )); ?>
                             </a>
                         </div>
                     <?php endif; ?>
@@ -208,7 +211,10 @@ function putrafiber_recent_posts_shortcode($atts) {
                 <?php if ($atts['show_image'] === 'yes' && has_post_thumbnail()): ?>
                     <div class="recent-post-thumbnail">
                         <a href="<?php the_permalink(); ?>">
-                            <?php the_post_thumbnail('thumbnail'); ?>
+                            <?php the_post_thumbnail('thumbnail', array(
+                                'loading' => 'lazy',
+                                'decoding' => 'async'
+                            )); ?>
                         </a>
                     </div>
                 <?php endif; ?>

@@ -4,10 +4,7 @@
  *
  * @package PutraFiber
  */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 if (!class_exists('PutraFiber_Schema_Registry')) {
     class PutraFiber_Schema_Registry

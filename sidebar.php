@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 if (!is_active_sidebar('sidebar-1')) {
     return;
@@ -49,7 +50,10 @@ if (!is_active_sidebar('sidebar-1')) {
                             <?php if (has_post_thumbnail()): ?>
                                 <div class="recent-post-thumbnail">
                                     <a href="<?php the_permalink(); ?>">
-                                        <?php the_post_thumbnail('thumbnail'); ?>
+                                        <?php the_post_thumbnail('thumbnail', array(
+                                            'loading' => 'lazy',
+                                            'decoding' => 'async'
+                                        )); ?>
                                     </a>
                                 </div>
                             <?php endif; ?>

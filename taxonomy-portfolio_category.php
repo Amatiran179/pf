@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 
@@ -91,7 +92,10 @@ $term = get_queried_object();
                                 <?php if (has_post_thumbnail()): ?>
                                     <div class="masonry-image">
                                         <a href="<?php the_permalink(); ?>">
-                                            <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                            <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                                'loading' => 'lazy',
+                                                'decoding' => 'async'
+                                            )); ?>
                                         </a>
                                         
                                         <div class="masonry-overlay">

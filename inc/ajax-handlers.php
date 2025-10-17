@@ -21,8 +21,8 @@ if (!defined('ABSPATH')) exit;
  */
 function putrafiber_ajax_load_more_posts() {
     check_ajax_referer('pf_ajax_nonce', 'security');
-    if (!current_user_can('edit_posts')) {
-        wp_send_json_error('Unauthorized', 403);
+    if (is_user_logged_in() && !current_user_can('edit_posts')) {
+        wp_send_json_error(__('Unauthorized', 'putrafiber'), 403);
     }
 
     $page = isset($_POST['page']) ? max(1, pf_clean_int($_POST['page'])) : 1;
@@ -81,8 +81,8 @@ add_action('wp_ajax_nopriv_load_more_posts', 'putrafiber_ajax_load_more_posts');
  */
 function putrafiber_ajax_filter_portfolio() {
     check_ajax_referer('pf_ajax_nonce', 'security');
-    if (!current_user_can('edit_posts')) {
-        wp_send_json_error('Unauthorized', 403);
+    if (is_user_logged_in() && !current_user_can('edit_posts')) {
+        wp_send_json_error(__('Unauthorized', 'putrafiber'), 403);
     }
 
     $category = isset($_POST['category']) ? pf_clean_text($_POST['category']) : '';
@@ -125,7 +125,10 @@ function putrafiber_ajax_filter_portfolio() {
                     <?php if (has_post_thumbnail()): ?>
                         <div class="portfolio-image">
                             <a href="<?php the_permalink(); ?>">
-                                <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                    'loading' => 'lazy',
+                                    'decoding' => 'async'
+                                )); ?>
                             </a>
                             <div class="portfolio-overlay">
                                 <a href="<?php the_permalink(); ?>" class="view-btn">
@@ -168,8 +171,8 @@ add_action('wp_ajax_nopriv_filter_portfolio', 'putrafiber_ajax_filter_portfolio'
  */
 function putrafiber_ajax_contact_form() {
     check_ajax_referer('pf_ajax_nonce', 'security');
-    if (!current_user_can('edit_posts')) {
-        wp_send_json_error('Unauthorized', 403);
+    if (is_user_logged_in() && !current_user_can('edit_posts')) {
+        wp_send_json_error(__('Unauthorized', 'putrafiber'), 403);
     }
 
     $name = isset($_POST['name']) ? pf_clean_text($_POST['name']) : '';
@@ -265,8 +268,8 @@ add_action('wp_ajax_nopriv_contact_form', 'putrafiber_ajax_contact_form');
  */
 function putrafiber_ajax_search_suggestions() {
     check_ajax_referer('pf_ajax_nonce', 'security');
-    if (!current_user_can('edit_posts')) {
-        wp_send_json_error('Unauthorized', 403);
+    if (is_user_logged_in() && !current_user_can('edit_posts')) {
+        wp_send_json_error(__('Unauthorized', 'putrafiber'), 403);
     }
 
     $search_term = isset($_POST['search']) ? pf_clean_text($_POST['search']) : '';
@@ -495,7 +498,10 @@ function putrafiber_ajax_get_related_posts() {
                 <?php if (has_post_thumbnail()): ?>
                     <div class="related-post-thumb">
                         <a href="<?php the_permalink(); ?>">
-                            <?php the_post_thumbnail('thumbnail'); ?>
+                            <?php the_post_thumbnail('thumbnail', array(
+                                'loading' => 'lazy',
+                                'decoding' => 'async'
+                            )); ?>
                         </a>
                     </div>
                 <?php endif; ?>

@@ -8,6 +8,7 @@
  * - Tidak menyentuh transform wrapper/slide (Swiper autoplay aman)
  * - Struktur galeri sinkron dengan product-gallery.js
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 

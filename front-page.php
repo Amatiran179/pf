@@ -8,6 +8,7 @@
  * @package PutraFiber
  * @since 1.0.0
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 

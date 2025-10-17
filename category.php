@@ -5,6 +5,7 @@
  * @package PutraFiber
  * @since 1.0.0
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 
@@ -89,7 +90,10 @@ $category = get_queried_object();
                                     <?php if (has_post_thumbnail()): ?>
                                         <div class="post-thumbnail">
                                             <a href="<?php the_permalink(); ?>">
-                                                <?php the_post_thumbnail('putrafiber-thumb'); ?>
+                                                <?php the_post_thumbnail('putrafiber-thumb', array(
+                                                    'loading' => 'lazy',
+                                                    'decoding' => 'async'
+                                                )); ?>
                                             </a>
                                             
                                             <?php

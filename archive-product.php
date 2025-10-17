@@ -6,6 +6,7 @@
  * @version 1.1.0 - FIXED (Sorting form optimized for backend logic)
  * @since 1.0.0
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 ?>

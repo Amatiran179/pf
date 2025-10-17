@@ -4,6 +4,7 @@
  *
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $products_limit = putrafiber_frontpage_limit('products', 6);
 $products_title = putrafiber_frontpage_text('products', 'title', __('Produk Terlaris', 'putrafiber'));
@@ -54,7 +55,10 @@ $products_query = new WP_Query(array(
                         <?php if (has_post_thumbnail()): ?>
                             <div class="product-image">
                                 <a href="<?php the_permalink(); ?>">
-                                    <?php the_post_thumbnail('putrafiber-product'); ?>
+                                    <?php the_post_thumbnail('putrafiber-product', array(
+                                        'loading' => 'lazy',
+                                        'decoding' => 'async'
+                                    )); ?>
                                 </a>
                                 <?php if ($stock === 'pre-order'): ?>
                                     <span class="product-badge badge-preorder"><?php esc_html_e('Pre-Order', 'putrafiber'); ?></span>

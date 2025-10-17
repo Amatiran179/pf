@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 if (post_password_required()) {
     return;

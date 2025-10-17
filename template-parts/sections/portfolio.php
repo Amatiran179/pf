@@ -4,6 +4,7 @@
  *
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $portfolio_limit = putrafiber_frontpage_limit('portfolio', 6);
 $portfolio_title = putrafiber_frontpage_text('portfolio', 'title', __('Portofolio Unggulan', 'putrafiber'));
@@ -52,7 +53,10 @@ $portfolio_query = new WP_Query(array(
                     <article class="portfolio-item fade-in <?php echo pf_output_attr($animation_class); ?>" style="--animation-delay: <?php echo pf_output_attr(number_format($delay_value, 2, '.', '')); ?>s;">
                         <div class="portfolio-image">
                             <?php if (has_post_thumbnail()): ?>
-                                <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                    'loading' => 'lazy',
+                                    'decoding' => 'async'
+                                )); ?>
                             <?php endif; ?>
                             <div class="portfolio-overlay">
                                 <div class="portfolio-info">

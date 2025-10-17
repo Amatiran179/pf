@@ -1,4 +1,5 @@
 <section class="hero-waterpark">
+if (!defined('ABSPATH')) exit;
     <!-- Water Waves Background -->
     <div class="water-waves">
         <div class="wave"></div>

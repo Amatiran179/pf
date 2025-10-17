@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $hero_title         = putrafiber_get_option('hero_title', 'Kontraktor Waterpark & Playground Fiberglass Terpercaya');
 $hero_desc          = putrafiber_get_option('hero_description', 'Spesialis pembuatan waterpark, waterboom, playground indoor & outdoor, perosotan fiberglass, kolam renang, dan berbagai produk fiberglass berkualitas tinggi.');

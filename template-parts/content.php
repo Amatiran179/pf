@@ -4,13 +4,17 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class('post-item'); ?>>
     <?php if (has_post_thumbnail()): ?>
         <div class="post-thumbnail">
             <a href="<?php the_permalink(); ?>">
-                <?php the_post_thumbnail('putrafiber-thumb'); ?>
+                <?php the_post_thumbnail('putrafiber-thumb', array(
+                    'loading' => 'lazy',
+                    'decoding' => 'async'
+                )); ?>
             </a>
         </div>
     <?php endif; ?>

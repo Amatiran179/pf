@@ -75,6 +75,13 @@ function putrafiber_output_schema() {
     // OUTPUT ALL SCHEMAS
     // ===================================================================
     if (!empty($schemas)) {
+        /**
+         * Signal that the legacy schema layer has rendered output.
+         *
+         * @param array $schemas Rendered schema graph collection.
+         */
+        do_action('putrafiber_schema_legacy_rendered', $schemas);
+
         echo '<script type="application/ld+json">' . "\n";
         echo json_encode(
             array('@graph' => array_filter($schemas)),

@@ -91,7 +91,6 @@ require_once get_template_directory() . '/inc/schema/schema-manager.php';
 require_once get_template_directory() . '/inc/admin/cta-validator.php';
 
 add_action('after_setup_theme', function () {
-  load_theme_textdomain('putrafiber', get_template_directory() . '/languages');
   add_theme_support('editor-styles');
   add_theme_support('wp-block-styles');
   add_theme_support('responsive-embeds');
@@ -192,7 +191,12 @@ function putrafiber_breadcrumbs() {
 
   $items = array(array('title' => 'Home', 'url' => home_url('/')));
 
-  if (is_post_type_archive('product')) {
+  if (is_search()) {
+    $search_query = wp_strip_all_tags(get_search_query());
+    $items[] = array('title' => sprintf(__('Search results for "%s"', 'putrafiber'), $search_query));
+  } elseif (is_404()) {
+    $items[] = array('title' => __('Not Found', 'putrafiber'));
+  } elseif (is_post_type_archive('product')) {
     $items[] = array('title' => 'Semua Produk');
   } elseif (is_tax('product_category')) {
     $items[] = array('title' => 'Semua Produk', 'url' => get_post_type_archive_link('product'));
@@ -212,6 +216,8 @@ function putrafiber_breadcrumbs() {
     $items[] = array('title' => get_the_title());
   } elseif (is_page()) {
     $items[] = array('title' => get_the_title());
+  } elseif (is_archive()) {
+    $items[] = array('title' => wp_strip_all_tags(get_the_archive_title()));
   }
 
   echo '<div class="breadcrumbs">';
@@ -234,7 +240,7 @@ function putrafiber_product_archive_sorting($query) {
   if (is_admin() || !$query->is_main_query()) return;
 
   if (is_post_type_archive('product') || is_tax(array('product_category','product_tag'))) {
-    $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'date';
+    $orderby = isset($_GET['orderby']) ? pf_clean_text($_GET['orderby']) : 'date';
     switch ($orderby) {
       case 'popularity':
         $query->set('orderby', 'comment_count');

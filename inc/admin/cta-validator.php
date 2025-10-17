@@ -4,10 +4,7 @@
  *
  * @package PutraFiber
  */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 if (!class_exists('PutraFiber_CTA_Validator')) {
     class PutraFiber_CTA_Validator
