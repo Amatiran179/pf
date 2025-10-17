@@ -113,15 +113,6 @@ function putrafiber_product_admin_assets($hook) {
   // Drag & drop urutan galeri
   wp_enqueue_script('jquery-ui-sortable');
 
-  // Sedikit CSS perapihan grid pratinjau (cadangan bila admin.css tidak memuat)
-  $css = '
-  .gallery-preview-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
-  .gallery-item{position:relative;border:2px solid #ddd;border-radius:8px;overflow:hidden;aspect-ratio:1;cursor:move}
-  .gallery-item img{width:100%;height:100%;object-fit:cover}
-  .gallery-item .remove-gallery-item{position:absolute;top:5px;right:5px;width:24px;height:24px;background:#dc3545;color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:18px;line-height:1;display:none}
-  .gallery-item:hover .remove-gallery-item{display:block}
-  ';
-  wp_add_inline_style('wp-admin', $css);
 }
 add_action('admin_enqueue_scripts', 'putrafiber_product_admin_assets');
 
@@ -348,69 +339,6 @@ function putrafiber_product_gallery_callback($post) {
       ?>
     </div>
   </div>
-  <script>
-  jQuery(function($){
-    var galleryUploader;
-
-    $('#upload-gallery-button').on('click', function(e){
-      e.preventDefault();
-
-      if (galleryUploader) { galleryUploader.open(); return; }
-
-      galleryUploader = wp.media({
-        title: 'Select Gallery Images',
-        button: { text: 'Add to Gallery' },
-        multiple: true
-      });
-
-      galleryUploader.on('select', function(){
-        var attachments = galleryUploader.state().get('selection').toJSON();
-        var existingIds = $('#product_gallery').val() ? $('#product_gallery').val().split(',') : [];
-
-        attachments.forEach(function(att){
-          var id = (att && att.id) ? String(att.id) : null;
-          if (!id) return;
-          if (existingIds.indexOf(id) === -1) {
-            existingIds.push(id);
-            var thumbUrl = (att.sizes && att.sizes.thumbnail) ? att.sizes.thumbnail.url : att.url;
-            $('#gallery-preview').append(
-              '<div class="gallery-item" data-id="'+id+'">' +
-                '<img src="'+thumbUrl+'" alt="Gallery image">' +
-                '<button type="button" class="remove-gallery-item" title="Hapus">&times;</button>' +
-              '</div>'
-            );
-          }
-        });
-        existingIds = existingIds.filter(function(value){ return value && value !== '0'; });
-        $('#product_gallery').val(existingIds.join(','));
-      });
-
-      galleryUploader.open();
-    });
-
-    // Hapus item
-    $(document).on('click', '.remove-gallery-item', function(){
-      var $item = $(this).closest('.gallery-item');
-      var id = String($item.data('id'));
-      var ids = $('#product_gallery').val().split(',').filter(function(v){ return v && v !== id; });
-      $('#product_gallery').val(ids.join(','));
-      $item.remove();
-    });
-
-    // Sortable (urutan galeri)
-    if ($.fn.sortable) {
-      $('#gallery-preview').sortable({
-        placeholder: 'gallery-item-placeholder',
-        cursor: 'move',
-        update: function(){
-          var ids = [];
-          $('.gallery-item').each(function(){ ids.push($(this).data('id')); });
-          $('#product_gallery').val(ids.join(','));
-        }
-      });
-    }
-  });
-  </script>
   <?php
 }
 
@@ -453,7 +381,9 @@ function putrafiber_save_product_meta($post_id) {
       $value = pf_clean_url($raw_value);
     } elseif ($post_field === 'product_price') {
       // Simpan harga asli, biarkan schema/display logic yang handle fallback
-      $value = pf_clean_float($raw_value);
+      $cleaned_price = pf_clean_float($raw_value);
+      // Pastikan nilai yang disimpan tidak pernah negatif.
+      $value = max(0.0, $cleaned_price);
     } elseif ($post_field === 'product_gallery') {
       $gallery_raw = pf_clean_text($raw_value);
       $value = function_exists('putrafiber_prepare_gallery_meta_value')

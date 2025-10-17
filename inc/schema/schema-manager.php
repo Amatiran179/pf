@@ -231,11 +231,11 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
             }
 
             if ($context['page_title'] === '') {
-                $context['page_title'] = $context['site_name'];
+                $context['page_title'] = wp_get_document_title();
             }
 
             if ($context['page_description'] === '') {
-                $context['page_description'] = $context['site_description'];
+                $context['page_description'] = !empty($context['site_description']) ? $context['site_description'] : __('Informasi lebih lanjut tentang ' . $context['site_name'], 'putrafiber');
             }
 
             if ($context['primary_image'] === '' && !empty($options['og_image'])) {
@@ -703,20 +703,25 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
 
             $post_id = $context['post_id'];
             $allowed_pages = isset($options['localbusiness_pages']) ? (array) $options['localbusiness_pages'] : array();
-
-            // If no pages are selected in theme options, do not output the schema.
-            if (empty($allowed_pages)) {
-                return array();
-            }
+            $display_mode = isset($options['localbusiness_display_mode']) ? $options['localbusiness_display_mode'] : 'all'; // 'all' or 'selected'
 
             $is_on_allowed_page = false;
-            if (is_front_page()) {
-                if (in_array('homepage', $allowed_pages, true)) {
-                    $is_on_allowed_page = true;
+            if ($display_mode === 'all') {
+                $is_on_allowed_page = true;
+            } else { // $display_mode === 'selected'
+                // If no pages are selected in theme options, do not output the schema.
+                if (empty($allowed_pages)) {
+                    return array();
                 }
-            } elseif ($post_id) {
-                if (in_array((string) $post_id, $allowed_pages, true)) {
-                    $is_on_allowed_page = true;
+
+                if (is_front_page()) {
+                    if (in_array('homepage', $allowed_pages, true)) {
+                        $is_on_allowed_page = true;
+                    }
+                } elseif ($post_id) {
+                    if (in_array((string) $post_id, $allowed_pages, true)) {
+                        $is_on_allowed_page = true;
+                    }
                 }
             }
 
@@ -768,6 +773,15 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
                 'name'     => 'Home',
                 'item'     => home_url('/'),
             );
+
+            // Handle Post Type Archives
+            if (is_post_type_archive()) {
+                $items[] = array(
+                    '@type'    => 'ListItem',
+                    'position' => $position++,
+                    'name'     => post_type_archive_title('', false),
+                );
+            }
 
             $post = isset($context['post']) ? $context['post'] : null;
             if (is_singular()) { // Handle singular pages
@@ -825,6 +839,20 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
                     'item'     => get_permalink($post),
                 );
             } elseif (is_category() || is_tag() || is_tax()) { // Handle taxonomy archives
+                $term_archive_post_type = get_queried_object()->taxonomy === 'product_category' ? 'product' : 'post';
+                $post_type_obj = get_post_type_object($term_archive_post_type);
+                if ($post_type_obj) {
+                    $archive_link = get_post_type_archive_link($term_archive_post_type);
+                    if ($archive_link) {
+                        $items[] = array(
+                            '@type'    => 'ListItem',
+                            'position' => $position++,
+                            'name'     => $post_type_obj->labels->name,
+                            'item'     => $archive_link,
+                        );
+                    }
+                }
+
                 $term = get_queried_object();
                 if ($term) {
                     if ($term->parent) {

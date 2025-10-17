@@ -8,15 +8,18 @@
         console.log('   - WP Media:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined' ? '✅' : '❌');
 
         // ===================================================================
-        // PRODUCT GALLERY UPLOADER
-        // Selector: #upload-gallery-button (for Product CPT)
+        // GENERIC GALLERY UPLOADER (for Product & Portfolio)
         // ===================================================================
-        var productGalleryUploader;
+        var galleryUploader;
 
-        $(document).on('click', '#upload-gallery-button', function(e) {
+        $(document).on('click', '[id^="upload-"][id$="-gallery-button"]', function(e) {
             e.preventDefault();
-            
-            console.log('🖼️ Product gallery button clicked');
+            var $button = $(this);
+            var galleryType = $button.attr('id').includes('portfolio') ? 'portfolio' : 'product';
+            var $hiddenInput = $('#' + galleryType + '_gallery');
+            var $previewContainer = $('#' + galleryType + '-gallery-preview');
+
+            console.log('🖼️ Gallery upload triggered for:', galleryType);
 
             if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
                 alert('WordPress Media library not loaded. Please refresh the page.');
@@ -24,94 +27,96 @@
                 return;
             }
 
-            if (productGalleryUploader) {
-                productGalleryUploader.open();
+            if (galleryUploader) {
+                galleryUploader.open();
                 return;
             }
 
-            productGalleryUploader = wp.media({
-                title: 'Select Gallery Images',
+            galleryUploader = wp.media({
+                title: 'Select ' + (galleryType.charAt(0).toUpperCase() + galleryType.slice(1)) + ' Gallery Images',
                 button: { text: 'Add to Gallery' },
                 multiple: true
             });
 
-            productGalleryUploader.on('select', function() {
-                var attachments = productGalleryUploader.state().get('selection').toJSON();
-                var existingIds = $('#product_gallery').val() ? $('#product_gallery').val().split(',') : [];
-                
+            galleryUploader.on('select', function() {
+                var attachments = galleryUploader.state().get('selection').toJSON();
+                var existingIds = $hiddenInput.val() ? $hiddenInput.val().split(',') : [];
+
                 console.log('✅ Selected ' + attachments.length + ' images');
 
                 attachments.forEach(function(attachment) {
                     if ($.inArray(attachment.id.toString(), existingIds) === -1) {
                         existingIds.push(attachment.id);
-                        
-                        var thumbnailUrl = attachment.sizes && attachment.sizes.thumbnail 
-                            ? attachment.sizes.thumbnail.url 
-                            : attachment.url;
-                        
-                        $('#gallery-preview').append(
-                            '<div class="gallery-item" data-id="' + attachment.id + '">' +
-                                '<img src="' + thumbnailUrl + '" alt="Gallery image">' +
-                                '<button type="button" class="remove-gallery-item" title="Hapus">&times;</button>' +
-                            '</div>'
-                        );
+                        var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
+                        var itemHtml = '<div class="gallery-item" data-id="' + attachment.id + '"><img src="' + thumbUrl + '" alt="Gallery image"><button type="button" class="remove-gallery-item" title="Remove">&times;</button></div>';
+                        $previewContainer.append(itemHtml);
                     }
                 });
 
-                $('#product_gallery').val(existingIds.join(','));
-                console.log('✅ Product gallery updated');
+                $hiddenInput.val(existingIds.join(','));
+                console.log('✅ ' + galleryType + ' gallery updated');
             });
 
-            productGalleryUploader.open();
+            galleryUploader.open();
         });
 
         // ===================================================================
         // REMOVE PRODUCT GALLERY ITEM
+        // -- GENERIC: Works for both Product & Portfolio --
         // ===================================================================
         $(document).on('click', '.remove-gallery-item', function(e) {
             e.preventDefault();
-            
+
             var $item = $(this).closest('.gallery-item');
+            var $previewContainer = $item.parent();
+            var $hiddenInput = $previewContainer.siblings('input[type="hidden"]');
             var itemId = $item.data('id');
-            
+
             $item.fadeOut(200, function() {
                 $(this).remove();
             });
-            
-            var currentIds = $('#product_gallery').val().split(',').filter(function(id) {
+
+            if (!$hiddenInput.length) return;
+
+            var currentIds = $hiddenInput.val().split(',').filter(function(id) {
                 return id && id != itemId;
             });
-            $('#product_gallery').val(currentIds.join(','));
-            
-            console.log('🗑️ Removed gallery item:', itemId);
+
+            $hiddenInput.val(currentIds.join(','));
+
+            var galleryType = $hiddenInput.attr('id').includes('portfolio') ? 'Portfolio' : 'Product';
+            console.log('🗑️ Removed ' + galleryType + ' gallery item:', itemId);
         });
 
         // ===================================================================
         // PRODUCT GALLERY SORTABLE
         // ===================================================================
-        if ($.fn.sortable && $('#gallery-preview').length > 0) {
-            $('#gallery-preview').sortable({
+        if ($.fn.sortable && $('.gallery-preview-grid').length > 0) {
+            $('.gallery-preview-grid').sortable({
                 placeholder: 'gallery-item-placeholder',
                 cursor: 'move',
                 update: function() {
+                    var $previewContainer = $(this);
+                    var $hiddenInput = $previewContainer.siblings('input[type="hidden"]');
                     var ids = [];
-                    $('.gallery-item').each(function() {
+                    $previewContainer.find('.gallery-item').each(function() {
                         ids.push($(this).data('id'));
                     });
-                    $('#product_gallery').val(ids.join(','));
-                    console.log('🔄 Product gallery reordered');
+                    $hiddenInput.val(ids.join(','));
+                    var galleryType = $hiddenInput.attr('id').includes('portfolio') ? 'Portfolio' : 'Product';
+                    console.log('🔄 ' + galleryType + ' gallery reordered');
                 }
-            });
+            }).disableSelection();
         }
 
         // ===================================================================
         // PRODUCT PDF UPLOAD
         // ===================================================================
         var pdfUploader;
-        
+
         $(document).on('click', '.upload-pdf-button', function(e) {
             e.preventDefault();
-            
+
             console.log('📄 PDF upload button clicked');
 
             if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
@@ -151,53 +156,6 @@
                 $('#whatsapp-cta-box').addClass('active');
             }
             console.log('💰 Price type changed to:', $(this).val());
-        });
-
-        // ===================================================================
-        // PORTFOLIO GALLERY UPLOADER - LEGACY SUPPORT
-        // Selector: .portfolio-gallery-upload (for Portfolio CPT)
-        // KEPT AS-IS to prevent breaking existing functionality
-        // ===================================================================
-        var portfolioGalleryUploader;
-
-        $('.portfolio-gallery-upload').on('click', function(e) {
-            e.preventDefault();
-            
-            console.log('🎨 Portfolio gallery button clicked');
-
-            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
-                alert('WordPress Media library not loaded. Please refresh the page.');
-                return;
-            }
-
-            if (portfolioGalleryUploader) {
-                portfolioGalleryUploader.open();
-                return;
-            }
-
-            portfolioGalleryUploader = wp.media({
-                title: 'Select Gallery Images',
-                button: { text: 'Add to Gallery' },
-                multiple: true
-            });
-
-            portfolioGalleryUploader.on('select', function() {
-                var attachments = portfolioGalleryUploader.state().get('selection').toJSON();
-                var ids = [];
-                var html = '';
-
-                attachments.forEach(function(attachment) {
-                    ids.push(attachment.id);
-                    html += '<img src="' + attachment.url + '" style="width: 100px; height: 100px; object-fit: cover; margin: 5px;">';
-                });
-
-                $('#portfolio_gallery').val(ids.join(','));
-                $('.portfolio-gallery-preview').html(html);
-                
-                console.log('✅ Portfolio gallery updated with ' + ids.length + ' images');
-            });
-
-            portfolioGalleryUploader.open();
         });
 
         // ===================================================================
@@ -303,15 +261,15 @@
         // ===================================================================
         $('.nav-tab').on('click', function(e) {
             e.preventDefault();
-            
+
             var tabId = $(this).attr('href');
-            
+
             $('.nav-tab').removeClass('nav-tab-active');
             $(this).addClass('nav-tab-active');
-            
+
             $('.tab-content').removeClass('active');
             $(tabId).addClass('active');
-            
+
             console.log('📑 Tab switched to:', tabId);
         });
 
@@ -321,17 +279,17 @@
         function updateCharacterCount() {
             var $titleInput = $('#meta_title');
             var $descInput = $('#meta_description');
-            
+
             if ($titleInput.length === 0 || $descInput.length === 0) {
                 return; // SEO fields not present on this page
             }
-            
+
             var titleLength = $titleInput.val().length;
             var descLength = $descInput.val().length;
-            
+
             $('#title-length').text(titleLength);
             $('#desc-length').text(descLength);
-            
+
             // Color coding for title
             if (titleLength > 60) {
                 $('#title-length').css('color', '#dc3545');
@@ -340,7 +298,7 @@
             } else {
                 $('#title-length').css('color', '#28a745');
             }
-            
+
             // Color coding for description
             if (descLength > 160) {
                 $('#desc-length').css('color', '#dc3545');
@@ -360,12 +318,12 @@
         $('form').on('submit', function(e) {
             var isValid = true;
             var $form = $(this);
-            
+
             $form.find('[required]').each(function() {
                 if (!$(this).val()) {
                     isValid = false;
                     $(this).addClass('error');
-                    
+
                     if ($(this).siblings('.error-message').length === 0) {
                         $(this).after('<span class="error-message" style="color: #dc3545; font-size: 12px;">This field is required</span>');
                     }
@@ -374,12 +332,12 @@
                     $(this).siblings('.error-message').remove();
                 }
             });
-            
+
             if (!isValid) {
                 alert('Please fill in all required fields');
                 return false;
             }
-            
+
             return true;
         });
 
@@ -422,7 +380,7 @@
         var autoSaveTimer;
         $('.auto-save-field').on('input', function() {
             clearTimeout(autoSaveTimer);
-            
+
             autoSaveTimer = setTimeout(function() {
                 console.log('💾 Auto-saving...');
                 // Auto-save logic can be implemented here
@@ -488,8 +446,8 @@
         // ===================================================================
         console.log('✅ PutraFiber Admin JS fully loaded');
         console.log('   Handlers registered:');
-        console.log('   - Product Gallery Upload: #upload-gallery-button');
-        console.log('   - Portfolio Gallery Upload: .portfolio-gallery-upload');
+        console.log('   - Generic Gallery Upload: [id^="upload-"][id$="-gallery-button"]');
+        console.log('   - Generic Gallery Sort/Remove: .gallery-preview-grid, .remove-gallery-item');
         console.log('   - Generic Media Upload: .putrafiber-upload-image');
         console.log('   - PDF Upload: .upload-pdf-button');
 

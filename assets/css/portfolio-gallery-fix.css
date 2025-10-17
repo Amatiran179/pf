@@ -76,6 +76,7 @@
   transform: none !important;
   -webkit-transform: none !important;
   animation: none !important;
+  transition: none !important; /* Ensure no transition on hover */
 }
 
 /* Tangkal utilitas scale-* di IMG */

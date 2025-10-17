@@ -50,6 +50,28 @@ function pf_enqueue_assets() {
           wp_script_add_data('pf-main', 'type', 'module');
         }
 
+        // KONSOLIDASI & OPTIMALISASI FINAL: Muat semua aset galeri dalam satu blok kondisional.
+        if (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag')) || is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
+            // Swiper + SimpleLightbox (CDN)
+            wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
+            wp_enqueue_style('simplelightbox-css', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
+
+            wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.5', true);
+            wp_enqueue_script('simplelightbox-js', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js', array('jquery'), '2.14.2', true);
+
+            // Enqueue skrip galeri utama dengan dependensi yang benar.
+            // Ini memastikan Swiper & SimpleLightbox dimuat SEBELUM gallery-unified.js.
+            wp_enqueue_script(
+                'pf-gallery-unified',
+                PUTRAFIBER_URI . '/assets/js/gallery-unified.js',
+                array('jquery', 'swiper-js', 'simplelightbox-js'), // Dependensi eksplisit
+                PUTRAFIBER_VERSION,
+                true
+            );
+            // Tambahkan atribut defer untuk performa yang lebih baik.
+            wp_script_add_data('simplelightbox-js', 'defer', true);
+            wp_script_add_data('swiper-js', 'defer', true);
+        }
         return;
       }
     }
@@ -64,7 +86,7 @@ add_action('wp_enqueue_scripts', 'pf_enqueue_assets', 5);
  * ========================================================================== */
 $pf_requires = array(
   '/inc/theme-setup.php',
-  '/inc/enqueue.php',
+  // '/inc/enqueue.php', // DINONAKTIFKAN: Logika telah dipindah ke fungsi pf_enqueue_assets()
   '/inc/helpers-gallery.php',
   '/inc/helpers-frontpage.php',
   '/inc/customizer.php',
@@ -199,8 +221,23 @@ function putrafiber_breadcrumbs() {
   } elseif (is_post_type_archive()) {
     $items[] = array('title' => post_type_archive_title('', false));
   } elseif (is_tax('product_category')) {
-    $items[] = array('title' => post_type_archive_title('', false), 'url' => get_post_type_archive_link('product'));
+    $items[] = array('title' => get_post_type_object('product')->labels->name, 'url' => get_post_type_archive_link('product'));
+    $term = get_queried_object();
+    if ($term && $term->parent) {
+        $ancestors = get_ancestors($term->term_id, 'product_category');
+        $ancestors = array_reverse($ancestors);
+        foreach ($ancestors as $ancestor_id) {
+            $ancestor = get_term($ancestor_id, 'product_category');
+            if ($ancestor && !is_wp_error($ancestor)) {
+                $items[] = array('title' => $ancestor->name, 'url' => get_term_link($ancestor));
+            }
+        }
+    }
     $items[] = array('title' => single_term_title('', false));
+  } elseif (is_singular('portfolio')) {
+    $items[] = array('title' => get_post_type_object('portfolio')->labels->name, 'url' => get_post_type_archive_link('portfolio'));
+    // Bisa ditambahkan logika taksonomi portofolio di sini jika ada
+    $items[] = array('title' => get_the_title());
   } elseif (is_singular('product')) {
     $items[] = array('title' => post_type_archive_title('', false), 'url' => get_post_type_archive_link('product'));
     $terms = get_the_terms(get_the_ID(), 'product_category');
@@ -297,16 +334,6 @@ remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('wp_print_styles', 'print_emoji_styles');
 
 /** ==========================================================================
- * (Opsional) Hilangkan ?ver= di static resources
- * ========================================================================== */
-function putrafiber_remove_query_strings($src) {
-  if (strpos($src, '?ver=')) $src = remove_query_arg('ver', $src);
-  return $src;
-}
-add_filter('script_loader_src', 'putrafiber_remove_query_strings', 15);
-add_filter('style_loader_src',  'putrafiber_remove_query_strings', 15);
-
-/** ==========================================================================
  * Ekstrak kota dari judul (untuk schema)
  * ========================================================================== */
 function putrafiber_extract_city($title) {
@@ -337,8 +364,8 @@ function putrafiber_reading_time() {
  * Async/Defer injector
  * ========================================================================== */
 function putrafiber_add_async_defer($tag, $handle) {
-  $async = array('putrafiber-main-js');
-  $defer = array('putrafiber-animations');
+  $async = array('pf-main');
+  $defer = array(); // 'putrafiber-animations' tidak lagi di-enqueue secara terpisah.
   if (in_array($handle, $async, true)) return str_replace(' src', ' async src', $tag);
   if (in_array($handle, $defer, true)) return str_replace(' src', ' defer src', $tag);
   return $tag;

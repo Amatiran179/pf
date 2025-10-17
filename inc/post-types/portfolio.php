@@ -1,7 +1,7 @@
 <?php
 /**
  * Portfolio Custom Post Type - ENHANCED VERSION WITH CTA SYSTEM
- * 
+ *
  * @package PutraFiber
  * @version 2.1.0 - Enhanced with CTA system similar to products
  */
@@ -95,7 +95,7 @@ function putrafiber_portfolio_meta_boxes() {
         'normal',
         'high'
     );
-    
+
     add_meta_box(
         'putrafiber_portfolio_gallery',
         __('🖼️ Project Gallery', 'putrafiber'),
@@ -145,7 +145,7 @@ function putrafiber_portfolio_details_callback($post) {
     $solutions = get_post_meta($post->ID, '_portfolio_solutions', true);
     $video_url = get_post_meta($post->ID, '_portfolio_video', true);
     ?>
-    
+
     <style>
     .portfolio-meta-table { width: 100%; border-collapse: collapse; }
     .portfolio-meta-table th { width: 200px; text-align: left; padding: 15px 10px; font-weight: 600; vertical-align: top; background: #f9f9f9; }
@@ -155,21 +155,21 @@ function putrafiber_portfolio_details_callback($post) {
     .portfolio-meta-textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
     .help-text { font-size: 12px; color: #666; margin-top: 5px; font-style: italic; }
     .section-header { background: #0073aa; color: white; padding: 10px 15px; font-weight: 600; margin: 20px 0 0 0; }
-    
+
     /* CTA Type Toggle Styles */
     .cta-type-toggle { display: flex; gap: 20px; margin-bottom: 15px; }
     .cta-type-toggle label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .cta-detail-wrapper { display: none; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-top: 10px; }
     .cta-detail-wrapper.active { display: block; }
     </style>
-    
+
     <table class="portfolio-meta-table">
-        
+
         <!-- CTA Configuration -->
         <tr>
             <td colspan="2" class="section-header">🎯 Call-to-Action Configuration</td>
         </tr>
-        
+
         <tr>
             <th><label><?php _e('CTA Type', 'putrafiber'); ?></label></th>
             <td>
@@ -183,24 +183,24 @@ function putrafiber_portfolio_details_callback($post) {
                         <strong><?php _e('Konsultasi Langsung (WhatsApp)', 'putrafiber'); ?></strong>
                     </label>
                 </div>
-                
+
                 <div class="cta-detail-wrapper <?php echo ($cta_type === 'detail') ? 'active' : ''; ?>" id="detail-cta-box">
                     <p style="color: #00BCD4; font-weight: 600;">✅ <?php _e('Tombol "Lihat Detail Project" akan tampil', 'putrafiber'); ?></p>
                     <p class="help-text"><?php _e('Pengunjung akan melihat detail project lengkap terlebih dahulu', 'putrafiber'); ?></p>
                 </div>
-                
+
                 <div class="cta-detail-wrapper <?php echo ($cta_type === 'whatsapp') ? 'active' : ''; ?>" id="whatsapp-cta-box">
                     <p style="color: #25D366; font-weight: 600;">📞 <?php _e('Tombol "Konsultasi Project Serupa" akan tampil langsung', 'putrafiber'); ?></p>
                     <p class="help-text"><?php _e('Pengunjung langsung diarahkan ke WhatsApp untuk konsultasi', 'putrafiber'); ?></p>
                 </div>
             </td>
         </tr>
-        
+
         <!-- Basic Information -->
         <tr>
             <td colspan="2" class="section-header">📍 Basic Information</td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_location"><?php _e('Project Location', 'putrafiber'); ?></label></th>
             <td>
@@ -208,7 +208,7 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('City or location where the project is located', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_client"><?php _e('Client Name', 'putrafiber'); ?></label></th>
             <td>
@@ -216,7 +216,7 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Client or company name (optional if confidential)', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_type"><?php _e('Project Type', 'putrafiber'); ?></label></th>
             <td>
@@ -233,26 +233,26 @@ function putrafiber_portfolio_details_callback($post) {
                 </select>
             </td>
         </tr>
-        
+
         <!-- Project Timeline -->
         <tr>
             <td colspan="2" class="section-header">📅 Timeline</td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_date"><?php _e('Start Date', 'putrafiber'); ?></label></th>
             <td>
                 <input type="date" id="portfolio_date" name="portfolio_date" value="<?php echo esc_attr($project_date); ?>" class="portfolio-meta-input">
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_completion_date"><?php _e('Completion Date', 'putrafiber'); ?></label></th>
             <td>
                 <input type="date" id="portfolio_completion_date" name="portfolio_completion_date" value="<?php echo esc_attr($completion_date); ?>" class="portfolio-meta-input">
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_duration"><?php _e('Project Duration', 'putrafiber'); ?></label></th>
             <td>
@@ -260,12 +260,12 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Duration from start to completion', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <!-- Project Details -->
         <tr>
             <td colspan="2" class="section-header">📊 Project Details</td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_size"><?php _e('Project Size/Area', 'putrafiber'); ?></label></th>
             <td>
@@ -273,7 +273,7 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Total project area or size', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_value"><?php _e('Project Value (Optional)', 'putrafiber'); ?></label></th>
             <td>
@@ -281,7 +281,7 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Project budget range (optional)', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_team_size"><?php _e('Team Size', 'putrafiber'); ?></label></th>
             <td>
@@ -289,7 +289,7 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Number of team members involved', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_services"><?php _e('Services Provided', 'putrafiber'); ?></label></th>
             <td>
@@ -297,7 +297,7 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Services provided for this project (comma separated)', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_materials"><?php _e('Materials Used', 'putrafiber'); ?></label></th>
             <td>
@@ -305,31 +305,31 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('Key materials used in this project', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
         <!-- Challenges & Solutions -->
         <tr>
             <td colspan="2" class="section-header">💡 Challenges & Solutions</td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_challenges"><?php _e('Challenges Faced', 'putrafiber'); ?></label></th>
             <td>
                 <textarea id="portfolio_challenges" name="portfolio_challenges" class="portfolio-meta-textarea" placeholder="Describe main challenges..."><?php echo esc_textarea($challenges); ?></textarea>
             </td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_solutions"><?php _e('Solutions Implemented', 'putrafiber'); ?></label></th>
             <td>
                 <textarea id="portfolio_solutions" name="portfolio_solutions" class="portfolio-meta-textarea" placeholder="Describe solutions..."><?php echo esc_textarea($solutions); ?></textarea>
             </td>
         </tr>
-        
+
         <!-- Media -->
         <tr>
             <td colspan="2" class="section-header">🎥 Media</td>
         </tr>
-        
+
         <tr>
             <th><label for="portfolio_video"><?php _e('Video URL (Optional)', 'putrafiber'); ?></label></th>
             <td>
@@ -337,18 +337,18 @@ function putrafiber_portfolio_details_callback($post) {
                 <p class="help-text"><?php _e('YouTube or Vimeo URL', 'putrafiber'); ?></p>
             </td>
         </tr>
-        
+
     </table>
-    
+
     <script>
     jQuery(document).ready(function($){
         // CTA Type toggle
         $('input[name="portfolio_cta_type"]').on('change', function(){
             $('.cta-detail-wrapper').removeClass('active');
-            if ($(this).val() === 'detail') { 
-                $('#detail-cta-box').addClass('active'); 
-            } else { 
-                $('#whatsapp-cta-box').addClass('active'); 
+            if ($(this).val() === 'detail') {
+                $('#detail-cta-box').addClass('active');
+            } else {
+                $('#whatsapp-cta-box').addClass('active');
             }
         });
     });
@@ -381,85 +381,8 @@ function putrafiber_portfolio_gallery_callback($post) {
             ?>
         </div>
     </div>
-    <style>
-    .gallery-preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-    .gallery-item { position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; aspect-ratio: 1; cursor: move; }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-    .gallery-item .remove-gallery-item { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; background: #dc3545; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; display: none; }
-    .gallery-item:hover .remove-gallery-item { display: block; }
-    </style>
-    <script>
-    jQuery(document).ready(function($){
-        var portfolioGalleryUploader;
-        
-        $('#upload-portfolio-gallery-button').on('click', function(e){
-            e.preventDefault();
-            
-            if (portfolioGalleryUploader) { 
-                portfolioGalleryUploader.open(); 
-                return; 
-            }
-            
-            portfolioGalleryUploader = wp.media({ 
-                title: 'Select Portfolio Gallery Images', 
-                button: { text: 'Add to Gallery' }, 
-                multiple: true 
-            });
-            
-            portfolioGalleryUploader.on('select', function(){
-                var attachments = portfolioGalleryUploader.state().get('selection').toJSON();
-                var existingIds = $('#portfolio_gallery').val() ? $('#portfolio_gallery').val().split(',') : [];
-
-                attachments.forEach(function(attachment){
-                    if ($.inArray(attachment.id.toString(), existingIds) === -1) {
-                        existingIds.push(attachment.id);
-                        
-                        var thumbUrl = attachment.sizes && attachment.sizes.thumbnail 
-                            ? attachment.sizes.thumbnail.url 
-                            : attachment.url;
-                        
-                        $('#portfolio-gallery-preview').append(
-                            '<div class="gallery-item" data-id="'+attachment.id+'">' +
-                                '<img src="'+thumbUrl+'" alt="Gallery image">' +
-                                '<button type="button" class="remove-gallery-item" title="Remove">&times;</button>' +
-                            '</div>'
-                        );
-                    }
-                });
-
-                existingIds = existingIds.filter(function(value){ return value && value !== '0'; });
-                $('#portfolio_gallery').val(existingIds.join(','));
-            });
-            
-            portfolioGalleryUploader.open();
-        });
-        
-        $(document).on('click', '.remove-gallery-item', function(){
-            var item = $(this).closest('.gallery-item');
-            var id = item.data('id');
-            var ids = $('#portfolio_gallery').val().split(',').filter(function(value){ 
-                return value && value != id; 
-            });
-            $('#portfolio_gallery').val(ids.join(','));
-            item.fadeOut(200, function(){ $(this).remove(); });
-        });
-        
-        if($.fn.sortable){
-            $('#portfolio-gallery-preview').sortable({
-                placeholder: 'gallery-item-placeholder',
-                cursor: 'move',
-                update:function(){
-                    var ids=[];
-                    $('.gallery-item').each(function(){
-                        ids.push($(this).data('id'));
-                    });
-                    $('#portfolio_gallery').val(ids.join(','));
-                }
-            });
-        }
-    });
-    </script>
     <?php
+    // The JavaScript logic is now unified in admin.js, so no inline script is needed here.
 }
 
 /**
