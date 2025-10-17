@@ -32,7 +32,7 @@
                     if ($logo):
                     ?>
                         <a href="<?php echo esc_url(home_url('/')); ?>" class="custom-logo-link">
-                            <img src="<?php echo esc_url($logo); ?>" alt="<?php bloginfo('name'); ?>" class="custom-logo">
+                            <img src="<?php echo esc_url($logo); ?>" alt="<?php bloginfo('name'); ?>" class="custom-logo" decoding="async" fetchpriority="high">
                         </a>
                     <?php else: ?>
                         <h1 class="site-title">

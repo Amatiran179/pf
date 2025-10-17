@@ -92,24 +92,24 @@ get_header();
                             if (!empty($all_images)):
                                 $gallery_group = 'pf-portfolio-' . $portfolio_id;
                             ?>
-                                <div class="gallery-container" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
-                                    <div class="swiper portfolio-gallery-slider" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
+                                <div class="gallery-container" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
+                                    <div class="swiper portfolio-gallery-slider" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
                                         <div class="swiper-wrapper">
                                             <?php foreach ($all_images as $index => $image): ?>
                                                 <div class="swiper-slide">
-                                                    <a href="<?php echo esc_url($image['full']); ?>"
+                                                    <a href="<?php echo pf_output_url($image['full']); ?>"
                                                        data-lightbox="portfolio-<?php echo $portfolio_id; ?>"
-                                                       data-title="<?php echo esc_attr($image['alt']); ?>"
+                                                       data-title="<?php echo pf_output_attr($image['alt']); ?>"
                                                        class="gallery-item"
-                                                       data-gallery-group="<?php echo esc_attr($gallery_group); ?>"
-                                                       data-gallery-index="<?php echo esc_attr($index); ?>">
-                                                        <img src="<?php echo esc_url($image['url']); ?>"
-                                                             alt="<?php echo esc_attr($image['alt']); ?>"
+                                                       data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
+                                                       data-gallery-index="<?php echo pf_output_attr($index); ?>">
+                                                        <img src="<?php echo pf_output_url($image['url']); ?>"
+                                                             alt="<?php echo pf_output_attr($image['alt']); ?>"
                                                              class="gallery-image"
                                                              <?php if (!empty($image['width']) && !empty($image['height'])): ?>
                                                                  width="<?php echo (int) $image['width']; ?>" height="<?php echo (int) $image['height']; ?>"
                                                              <?php endif; ?>
-                                                             <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
+                                                             <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
                                                              decoding="async">
                                                         <span class="zoom-icon">🔍</span>
                                                     </a>
@@ -132,9 +132,9 @@ get_header();
                                                     if ($thumb_url):
                                                 ?>
                                                     <div class="swiper-slide">
-                                                        <img src="<?php echo esc_url($thumb_url); ?>"
-                                                             alt="<?php echo esc_attr($image['alt']); ?>"
-                                                             loading="lazy">
+                                                        <img src="<?php echo pf_output_url($thumb_url); ?>"
+                                                             alt="<?php echo pf_output_attr($image['alt']); ?>"
+                                                             loading="lazy" decoding="async" fetchpriority="low">
                                                     </div>
                                                 <?php 
                                                     endif;
@@ -145,7 +145,7 @@ get_header();
                                 </div>
                             <?php else: ?>
                                 <div class="no-portfolio-image">
-                                    <img src="<?php echo defined('PUTRAFIBER_URI') ? PUTRAFIBER_URI : get_template_directory_uri(); ?>/assets/images/no-image.svg" alt="No Image">
+                                    <img src="<?php echo defined('PUTRAFIBER_URI') ? PUTRAFIBER_URI : get_template_directory_uri(); ?>/assets/images/no-image.svg" alt="No Image" loading="lazy" decoding="async" fetchpriority="low">
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -158,13 +158,13 @@ get_header();
                                 ?>
                                     <span class="portfolio-category">
                                         <a href="<?php echo get_term_link($terms[0]); ?>">
-                                            <?php echo esc_html($terms[0]->name); ?>
+                                            <?php echo pf_output_html($terms[0]->name); ?>
                                         </a>
                                     </span>
                                 <?php endif; ?>
                                 
                                 <?php if ($project_type): ?>
-                                    <span class="portfolio-type"><?php echo esc_html($project_type); ?></span>
+                                    <span class="portfolio-type"><?php echo pf_output_html($project_type); ?></span>
                                 <?php endif; ?>
                             </div>
                             
@@ -214,42 +214,42 @@ get_header();
                                     <?php if ($location): ?>
                                         <div class="attribute-item">
                                             <strong>📍 Lokasi:</strong>
-                                            <span><?php echo esc_html($location); ?></span>
+                                            <span><?php echo pf_output_html($location); ?></span>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <?php if ($client): ?>
                                         <div class="attribute-item">
                                             <strong>👤 Klien:</strong>
-                                            <span><?php echo esc_html($client); ?></span>
+                                            <span><?php echo pf_output_html($client); ?></span>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <?php if ($project_duration): ?>
                                         <div class="attribute-item">
                                             <strong>⏱️ Durasi:</strong>
-                                            <span><?php echo esc_html($project_duration); ?></span>
+                                            <span><?php echo pf_output_html($project_duration); ?></span>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <?php if ($project_size): ?>
                                         <div class="attribute-item">
                                             <strong>📐 Luas Area:</strong>
-                                            <span><?php echo esc_html($project_size); ?></span>
+                                            <span><?php echo pf_output_html($project_size); ?></span>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <?php if ($team_size): ?>
                                         <div class="attribute-item">
                                             <strong>👥 Tim:</strong>
-                                            <span><?php echo esc_html($team_size); ?></span>
+                                            <span><?php echo pf_output_html($team_size); ?></span>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <?php if ($start_date_formatted && $completion_date_formatted): ?>
                                         <div class="attribute-item">
                                             <strong>📅 Periode:</strong>
-                                            <span><?php echo esc_html($start_date_formatted); ?> - <?php echo esc_html($completion_date_formatted); ?></span>
+                                            <span><?php echo pf_output_html($start_date_formatted); ?> - <?php echo pf_output_html($completion_date_formatted); ?></span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -303,7 +303,7 @@ get_header();
                                     $services_lines = explode("\n", $services);
                                     foreach ($services_lines as $line) {
                                         if (trim($line)) {
-                                            echo '<li>' . esc_html(trim($line)) . '</li>';
+                                            echo '<li>' . pf_output_html(trim($line)) . '</li>';
                                         }
                                     }
                                     ?>
@@ -319,7 +319,7 @@ get_header();
                                     $materials_lines = explode("\n", $materials);
                                     foreach ($materials_lines as $line) {
                                         if (trim($line)) {
-                                            echo '<li>' . esc_html(trim($line)) . '</li>';
+                                            echo '<li>' . pf_output_html(trim($line)) . '</li>';
                                         }
                                     }
                                     ?>
@@ -335,7 +335,7 @@ get_header();
                                 <div class="challenges-box">
                                     <h3>🚧 Tantangan yang Dihadapi</h3>
                                     <div class="content-box">
-                                        <?php echo wpautop(esc_html($challenges)); ?>
+                                        <?php echo wpautop(pf_output_html($challenges)); ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -344,7 +344,7 @@ get_header();
                                 <div class="solutions-box">
                                     <h3>💡 Solusi yang Diterapkan</h3>
                                     <div class="content-box">
-                                        <?php echo wpautop(esc_html($solutions)); ?>
+                                        <?php echo wpautop(pf_output_html($solutions)); ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -363,13 +363,13 @@ get_header();
                         
                         <div class="full-gallery-grid">
                             <?php foreach ($all_images as $image): ?>
-                                <a href="<?php echo esc_url($image['full']); ?>" 
+                                <a href="<?php echo pf_output_url($image['full']); ?>" 
                                    class="gallery-item" 
                                    data-lightbox="portfolio-<?php echo $portfolio_id; ?>"
-                                   data-title="<?php echo esc_attr($image['alt']); ?>">
-                                    <img src="<?php echo esc_url($image['url']); ?>" 
-                                         alt="<?php echo esc_attr($image['alt']); ?>"
-                                         loading="lazy">
+                                   data-title="<?php echo pf_output_attr($image['alt']); ?>">
+                                    <img src="<?php echo pf_output_url($image['url']); ?>"
+                                         alt="<?php echo pf_output_attr($image['alt']); ?>"
+                                         loading="lazy" decoding="async" fetchpriority="low">
                                     <div class="gallery-overlay">
                                         <span class="zoom-icon">🔍</span>
                                     </div>
@@ -398,15 +398,15 @@ get_header();
                                     $video_id = substr(parse_url($video_url, PHP_URL_PATH), 1);
                                 }
                                 if ($video_id):
-                                    echo '<div class="video-container"><iframe width="100%" height="450" src="https://www.youtube.com/embed/' . esc_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+                                    echo '<div class="video-container"><iframe width="100%" height="450" src="https://www.youtube.com/embed/' . pf_output_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
                                 endif;
                             } elseif (strpos($video_url, 'vimeo.com') !== false) {
                                 $video_id = substr(parse_url($video_url, PHP_URL_PATH), 1);
                                 if ($video_id):
-                                    echo '<div class="video-container"><iframe src="https://player.vimeo.com/video/' . esc_attr($video_id) . '" width="100%" height="450" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+                                    echo '<div class="video-container"><iframe src="https://player.vimeo.com/video/' . pf_output_attr($video_id) . '" width="100%" height="450" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
                                 endif;
                             } else {
-                                echo '<div class="video-container"><video controls width="100%"><source src="' . esc_url($video_url) . '" type="video/mp4">Your browser does not support the video tag.</video></div>';
+                                echo '<div class="video-container"><video controls width="100%"><source src="' . pf_output_url($video_url) . '" type="video/mp4">Your browser does not support the video tag.</video></div>';
                             }
                             ?>
                         </div>
@@ -478,7 +478,7 @@ get_header();
                                                     <?php the_post_thumbnail('putrafiber-portfolio'); ?>
                                                 </a>
                                                 <?php if ($rel_type): ?>
-                                                    <span class="portfolio-type-badge"><?php echo esc_html($rel_type); ?></span>
+                                                    <span class="portfolio-type-badge"><?php echo pf_output_html($rel_type); ?></span>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
@@ -492,7 +492,7 @@ get_header();
                                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                                         <circle cx="12" cy="10" r="3"></circle>
                                                     </svg>
-                                                    <?php echo esc_html($rel_location); ?>
+                                                    <?php echo pf_output_html($rel_location); ?>
                                                 </p>
                                             <?php endif; ?>
                                             <?php if (get_the_excerpt()): ?>

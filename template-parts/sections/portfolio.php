@@ -31,7 +31,7 @@ $portfolio_query = new WP_Query(array(
     <div class="container-wide section-content">
         <div class="section-title fade-in">
             <div class="section-pretitle"><?php esc_html_e('Project Ikonik', 'putrafiber'); ?></div>
-            <h2><?php echo esc_html($portfolio_title); ?></h2>
+            <h2><?php echo pf_output_html($portfolio_title); ?></h2>
             <?php if ($portfolio_desc): ?>
                 <div class="section-lead"><?php echo wp_kses_post($portfolio_desc); ?></div>
             <?php endif; ?>
@@ -44,12 +44,12 @@ $portfolio_query = new WP_Query(array(
                 $animations = array('animate-zoom-in', 'animate-rise', 'animate-slide-left', 'animate-tilt-in');
                 while ($portfolio_query->have_posts()):
                     $portfolio_query->the_post();
-                    $location    = get_post_meta(get_the_ID(), '_portfolio_location', true);
-                    $projectDate = get_post_meta(get_the_ID(), '_portfolio_date', true);
+                    $location    = pf_clean_text(get_post_meta(get_the_ID(), '_portfolio_location', true));
+                    $projectDate = pf_clean_text(get_post_meta(get_the_ID(), '_portfolio_date', true));
                     $animation_class = $animations[$index % count($animations)];
                     $delay_value     = $index * 0.1;
                     ?>
-                    <article class="portfolio-item fade-in <?php echo esc_attr($animation_class); ?>" style="--animation-delay: <?php echo esc_attr(number_format($delay_value, 2, '.', '')); ?>s;">
+                    <article class="portfolio-item fade-in <?php echo pf_output_attr($animation_class); ?>" style="--animation-delay: <?php echo pf_output_attr(number_format($delay_value, 2, '.', '')); ?>s;">
                         <div class="portfolio-image">
                             <?php if (has_post_thumbnail()): ?>
                                 <?php the_post_thumbnail('putrafiber-portfolio'); ?>
@@ -63,7 +63,7 @@ $portfolio_query = new WP_Query(array(
                                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                                 <circle cx="12" cy="10" r="3"></circle>
                                             </svg>
-                                            <?php echo esc_html($location); ?>
+                                            <?php echo pf_output_html($location); ?>
                                         </p>
                                     <?php endif; ?>
                                     <?php if ($projectDate): ?>
@@ -74,7 +74,7 @@ $portfolio_query = new WP_Query(array(
                                                 <path d="M16 2v4"></path>
                                                 <rect x="3" y="8" width="18" height="13" rx="2"></rect>
                                             </svg>
-                                            <?php echo esc_html($projectDate); ?>
+                                            <?php echo pf_output_html($projectDate); ?>
                                         </p>
                                     <?php endif; ?>
                                     <a href="<?php the_permalink(); ?>" class="portfolio-link">
@@ -99,7 +99,7 @@ $portfolio_query = new WP_Query(array(
         <?php endif; ?>
 
         <div class="section-cta fade-in">
-            <a href="<?php echo esc_url(home_url('/portfolio/')); ?>" class="btn btn-outline btn-lg">
+            <a href="<?php echo pf_output_url(home_url('/portfolio/')); ?>" class="btn btn-outline btn-lg">
                 <?php esc_html_e('Lihat Semua Portofolio', 'putrafiber'); ?>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>

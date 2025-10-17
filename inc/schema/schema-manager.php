@@ -722,7 +722,6 @@ if (is_front_page()) {
 if (!$is_on_allowed_page) {
     return array();
 }
-
             $business_type = !empty($options['business_type']) ? pf_schema_sanitize_text($options['business_type']) : 'LocalBusiness';
 
             $local_business = array(

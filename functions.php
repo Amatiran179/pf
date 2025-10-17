@@ -18,6 +18,47 @@ if (!defined('PUTRAFIBER_VERSION')) define('PUTRAFIBER_VERSION', '1.0.0');
 if (!defined('PUTRAFIBER_DIR'))     define('PUTRAFIBER_DIR', get_template_directory());
 if (!defined('PUTRAFIBER_URI'))     define('PUTRAFIBER_URI', get_template_directory_uri());
 
+require_once get_template_directory() . '/inc/helpers-sanitize.php';
+require_once get_template_directory() . '/inc/core/versioning.php';
+
+function pf_enqueue_assets() {
+  $manifest_path = get_template_directory() . '/assets/dist/manifest.json';
+
+  if (file_exists($manifest_path)) {
+    $manifest_content = file_get_contents($manifest_path);
+    if (!empty($manifest_content)) {
+      $manifest = json_decode($manifest_content, true);
+      if (json_last_error() === JSON_ERROR_NONE && is_array($manifest)) {
+        $dist_uri = trailingslashit(get_template_directory_uri()) . 'assets/dist/';
+        $dist_relative = 'assets/dist/';
+
+        $main_js = $manifest['assets/src/js/main.js']['file'] ?? '';
+        $main_css = $manifest['assets/src/css/main.css']['file'] ?? '';
+
+        if (!$main_css && !empty($manifest['assets/src/js/main.js']['css'][0])) {
+          $main_css = $manifest['assets/src/js/main.js']['css'][0];
+        }
+
+        if ($main_css) {
+          $css_uri = $dist_uri . ltrim($main_css, '/');
+          wp_enqueue_style('pf-main', $css_uri, array(), pf_asset_version($dist_relative . ltrim($main_css, '/')));
+        }
+
+        if ($main_js) {
+          $js_uri = $dist_uri . ltrim($main_js, '/');
+          wp_enqueue_script('pf-main', $js_uri, array(), pf_asset_version($dist_relative . ltrim($main_js, '/')), true);
+          wp_script_add_data('pf-main', 'type', 'module');
+        }
+
+        return;
+      }
+    }
+  }
+
+  wp_enqueue_style('pf-style', get_stylesheet_uri(), array(), pf_asset_version('style.css'));
+}
+add_action('wp_enqueue_scripts', 'pf_enqueue_assets', 5);
+
 /** ==========================================================================
  * Require files (aman)
  * ========================================================================== */
@@ -48,6 +89,14 @@ require_once get_template_directory() . '/inc/schema/schema-helpers.php';
 require_once get_template_directory() . '/inc/schema/schema-registry.php';
 require_once get_template_directory() . '/inc/schema/schema-manager.php';
 require_once get_template_directory() . '/inc/admin/cta-validator.php';
+
+add_action('after_setup_theme', function () {
+  load_theme_textdomain('putrafiber', get_template_directory() . '/languages');
+  add_theme_support('editor-styles');
+  add_theme_support('wp-block-styles');
+  add_theme_support('responsive-embeds');
+  add_theme_support('align-wide');
+});
 
 add_action('after_setup_theme', array('PutraFiber_Schema_Manager', 'init'));
 add_action('add_meta_boxes', array('PutraFiber_CTA_Validator', 'init'));

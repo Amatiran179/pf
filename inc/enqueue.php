@@ -25,26 +25,26 @@ function putrafiber_enqueue_styles() {
         'putrafiber-style',
         get_stylesheet_uri(),
         array(),
-        PUTRAFIBER_VERSION
+        pf_asset_version('style.css')
     );
 
     // Custom Styles
-    wp_enqueue_style('putrafiber-header',      PUTRAFIBER_URI . '/assets/css/header.css',      array('putrafiber-style'), PUTRAFIBER_VERSION);
-    wp_enqueue_style('putrafiber-footer',      PUTRAFIBER_URI . '/assets/css/footer.css',      array('putrafiber-style'), PUTRAFIBER_VERSION);
-    wp_enqueue_style('putrafiber-components',  PUTRAFIBER_URI . '/assets/css/components.css',  array('putrafiber-style'), PUTRAFIBER_VERSION);
-    wp_enqueue_style('putrafiber-animations',  PUTRAFIBER_URI . '/assets/css/animations.css',  array('putrafiber-style'), PUTRAFIBER_VERSION);
+    wp_enqueue_style('putrafiber-header',      PUTRAFIBER_URI . '/assets/css/header.css',      array('putrafiber-style'), pf_asset_version('assets/css/header.css'));
+    wp_enqueue_style('putrafiber-footer',      PUTRAFIBER_URI . '/assets/css/footer.css',      array('putrafiber-style'), pf_asset_version('assets/css/footer.css'));
+    wp_enqueue_style('putrafiber-components',  PUTRAFIBER_URI . '/assets/css/components.css',  array('putrafiber-style'), pf_asset_version('assets/css/components.css'));
+    wp_enqueue_style('putrafiber-animations',  PUTRAFIBER_URI . '/assets/css/animations.css',  array('putrafiber-style'), pf_asset_version('assets/css/animations.css'));
 
     if (is_front_page()) {
         wp_enqueue_style(
             'putrafiber-front-epic',
             PUTRAFIBER_URI . '/assets/css/front-page-epic.css',
             array('putrafiber-components', 'putrafiber-animations'),
-            PUTRAFIBER_VERSION
+            pf_asset_version('assets/css/front-page-epic.css')
         );
     }
 
     // Responsive (biasakan terakhir untuk layer global)
-    wp_enqueue_style('putrafiber-responsive',  PUTRAFIBER_URI . '/assets/css/responsive.css',  array('putrafiber-style'), PUTRAFIBER_VERSION);
+    wp_enqueue_style('putrafiber-responsive',  PUTRAFIBER_URI . '/assets/css/responsive.css',  array('putrafiber-style'), pf_asset_version('assets/css/responsive.css'));
 
     // ===== PRODUCT PAGES =====
     if (is_singular('product') || is_post_type_archive('product') || is_tax('product_category') || is_tax('product_tag')) {
@@ -54,14 +54,14 @@ function putrafiber_enqueue_styles() {
         wp_enqueue_style('simplelightbox-css',  'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
 
         // Product CSS
-        wp_enqueue_style('putrafiber-product-styles', PUTRAFIBER_URI . '/assets/css/product.css', array('putrafiber-style'), PUTRAFIBER_VERSION);
+        wp_enqueue_style('putrafiber-product-styles', PUTRAFIBER_URI . '/assets/css/product.css', array('putrafiber-style'), pf_asset_version('assets/css/product.css'));
 
         // Product Gallery Fix CSS (HANDLE UNIK + depend ke product.css)
         wp_enqueue_style(
             'putrafiber-product-gallery-fix',
             PUTRAFIBER_URI . '/assets/css/product-gallery-fix.css',
             array('putrafiber-product-styles', 'swiper-css', 'simplelightbox-css'),
-            PUTRAFIBER_VERSION
+            pf_asset_version('assets/css/product-gallery-fix.css')
         );
     }
 
@@ -74,14 +74,14 @@ function putrafiber_enqueue_styles() {
         wp_enqueue_style('simplelightbox-css',  'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
 
         // Portfolio CSS
-        wp_enqueue_style('putrafiber-portfolio-styles', PUTRAFIBER_URI . '/assets/css/portfolio.css', array('putrafiber-style'), PUTRAFIBER_VERSION);
+        wp_enqueue_style('putrafiber-portfolio-styles', PUTRAFIBER_URI . '/assets/css/portfolio.css', array('putrafiber-style'), pf_asset_version('assets/css/portfolio.css'));
 
         // Portfolio Gallery Fix CSS (HANDLE UNIK + depend ke portfolio.css)
         wp_enqueue_style(
             'putrafiber-portfolio-gallery-fix',
             PUTRAFIBER_URI . '/assets/css/portfolio-gallery-fix.css',
             array('putrafiber-portfolio-styles', 'swiper-css', 'simplelightbox-css'),
-            PUTRAFIBER_VERSION
+            pf_asset_version('assets/css/portfolio-gallery-fix.css')
         );
     }
 }
@@ -95,21 +95,32 @@ function putrafiber_enqueue_scripts() {
     wp_enqueue_script('jquery');
 
     // Main JavaScript
-    wp_enqueue_script('putrafiber-main-js', PUTRAFIBER_URI . '/assets/js/main.js', array('jquery'), PUTRAFIBER_VERSION, true);
+    wp_enqueue_script('putrafiber-main-js', PUTRAFIBER_URI . '/assets/js/main.js', array('jquery'), pf_asset_version('assets/js/main.js'), true);
 
-    wp_enqueue_script('putrafiber-search', PUTRAFIBER_URI . '/assets/js/search.js', array(), PUTRAFIBER_VERSION, true);
+    wp_enqueue_script('putrafiber-search', PUTRAFIBER_URI . '/assets/js/search.js', array(), pf_asset_version('assets/js/search.js'), true);
 
     // Lazy Load
-    wp_enqueue_script('putrafiber-lazyload', PUTRAFIBER_URI . '/assets/js/lazyload.js', array(), PUTRAFIBER_VERSION, true);
+    wp_enqueue_script('putrafiber-lazyload', PUTRAFIBER_URI . '/assets/js/lazyload.js', array(), pf_asset_version('assets/js/lazyload.js'), true);
 
     // Animations
-    wp_enqueue_script('putrafiber-animations', PUTRAFIBER_URI . '/assets/js/animations.js', array('jquery'), PUTRAFIBER_VERSION, true);
+    wp_enqueue_script('putrafiber-animations', PUTRAFIBER_URI . '/assets/js/animations.js', array('jquery'), pf_asset_version('assets/js/animations.js'), true);
 
-    // PWA Service Worker Registration
-    wp_enqueue_script('putrafiber-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), PUTRAFIBER_VERSION, true);
+    // PWA Service Worker Registration (respect toggle)
+    $pwa_enabled = true;
+    if (function_exists('putrafiber_is_pwa_enabled')) {
+        $pwa_enabled = putrafiber_is_pwa_enabled();
+    } elseif (function_exists('putrafiber_get_option')) {
+        $raw_pwa_value = putrafiber_get_option('enable_pwa', '1');
+        $normalized    = strtolower(trim((string) $raw_pwa_value));
+        $pwa_enabled   = !in_array($normalized, array('0', 'false', 'no', 'off'), true);
+    }
+
+    if ($pwa_enabled) {
+        wp_enqueue_script('putrafiber-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), pf_asset_version('assets/js/pwa.js'), true);
+    }
 
     if (is_front_page()) {
-        wp_enqueue_script('putrafiber-front-epic', PUTRAFIBER_URI . '/assets/js/front-page-epic.js', array('jquery'), PUTRAFIBER_VERSION, true);
+        wp_enqueue_script('putrafiber-front-epic', PUTRAFIBER_URI . '/assets/js/front-page-epic.js', array('jquery'), pf_asset_version('assets/js/front-page-epic.js'), true);
     }
 
     // ===== PRODUCT & PORTFOLIO (gabungan) =====
@@ -130,7 +141,7 @@ function putrafiber_enqueue_scripts() {
             'putrafiber-product-gallery',
             PUTRAFIBER_URI . '/assets/js/product-gallery.js',
             array('jquery', 'swiper-js', 'simplelightbox-js'),
-            PUTRAFIBER_VERSION,
+            pf_asset_version('assets/js/product-gallery.js'),
             true
         );
 
@@ -173,7 +184,7 @@ add_action('wp_enqueue_scripts', 'putrafiber_enqueue_scripts');
  */
 function putrafiber_admin_styles() {
     wp_enqueue_style('wp-color-picker');
-    wp_enqueue_style('putrafiber-admin', PUTRAFIBER_URI . '/assets/css/admin.css', array(), PUTRAFIBER_VERSION);
+    wp_enqueue_style('putrafiber-admin', PUTRAFIBER_URI . '/assets/css/admin.css', array(), pf_asset_version('assets/css/admin.css'));
     wp_enqueue_media();
 }
 add_action('admin_enqueue_scripts', 'putrafiber_admin_styles');
@@ -183,7 +194,7 @@ add_action('admin_enqueue_scripts', 'putrafiber_admin_styles');
  */
 function putrafiber_admin_scripts() {
     wp_enqueue_script('wp-color-picker');
-    wp_enqueue_script('putrafiber-admin-js', PUTRAFIBER_URI . '/assets/js/admin.js', array('jquery'), PUTRAFIBER_VERSION, true);
+    wp_enqueue_script('putrafiber-admin-js', PUTRAFIBER_URI . '/assets/js/admin.js', array('jquery'), pf_asset_version('assets/js/admin.js'), true);
     wp_localize_script('putrafiber-admin-js', 'putrafiberAdminVars', array(
         'ajax_url'               => admin_url('admin-ajax.php'),
         'analyticsResetError'    => esc_html__('Terjadi kesalahan saat menghapus data analytics.', 'putrafiber'),

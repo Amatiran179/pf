@@ -126,7 +126,8 @@ add_action('admin_enqueue_scripts', 'putrafiber_portfolio_admin_assets');
  */
 function putrafiber_portfolio_details_callback($post) {
     wp_nonce_field('putrafiber_portfolio_nonce', 'putrafiber_portfolio_nonce_field');
-    
+    wp_nonce_field('pf_save_meta', 'pf_meta_nonce');
+
     // Get meta values
     $cta_type = get_post_meta($post->ID, '_portfolio_cta_type', true) ?: 'detail';
     $location = get_post_meta($post->ID, '_portfolio_location', true);
@@ -465,10 +466,11 @@ function putrafiber_portfolio_gallery_callback($post) {
  * Save Portfolio Meta - ENHANCED WITH CTA TYPE
  */
 function putrafiber_save_portfolio_meta($post_id) {
+    if (!isset($_POST['pf_meta_nonce']) || !wp_verify_nonce($_POST['pf_meta_nonce'], 'pf_save_meta')) return;
+    if (!current_user_can('edit_post', $post_id)) return;
     if (!isset($_POST['putrafiber_portfolio_nonce_field'])) return;
     if (!wp_verify_nonce($_POST['putrafiber_portfolio_nonce_field'], 'putrafiber_portfolio_nonce')) return;
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-    if (!current_user_can('edit_post', $post_id)) return;
 
     $fields = array(
         'portfolio_cta_type' => '_portfolio_cta_type',
@@ -491,18 +493,20 @@ function putrafiber_save_portfolio_meta($post_id) {
 
     foreach ($fields as $field => $meta_key) {
         if (isset($_POST[$field])) {
+            $raw_value = $_POST[$field];
+
             if (in_array($field, array('portfolio_services', 'portfolio_materials', 'portfolio_challenges', 'portfolio_solutions'))) {
-                update_post_meta($post_id, $meta_key, sanitize_textarea_field($_POST[$field]));
+                update_post_meta($post_id, $meta_key, pf_clean_html($raw_value));
             } elseif ($field === 'portfolio_video') {
-                update_post_meta($post_id, $meta_key, esc_url_raw($_POST[$field]));
+                update_post_meta($post_id, $meta_key, pf_clean_url($raw_value));
             } elseif ($field === 'portfolio_gallery') {
-                $value = sanitize_text_field(wp_unslash($_POST[$field]));
+                $gallery_raw = pf_clean_text($raw_value);
                 $value = function_exists('putrafiber_prepare_gallery_meta_value')
-                    ? putrafiber_prepare_gallery_meta_value($value)
-                    : implode(',', array_filter(array_map('absint', explode(',', $value))));
+                    ? putrafiber_prepare_gallery_meta_value($gallery_raw)
+                    : implode(',', array_filter(array_map('absint', explode(',', $gallery_raw))));
                 update_post_meta($post_id, $meta_key, $value);
             } else {
-                update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$field]));
+                update_post_meta($post_id, $meta_key, pf_clean_text($raw_value));
             }
         }
     }

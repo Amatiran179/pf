@@ -11,10 +11,14 @@ if (!defined('ABSPATH')) exit;
  * Enable Gzip Compression
  */
 function putrafiber_enable_gzip() {
-    if (!headers_sent() && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
-        if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
-            ob_start('ob_gzhandler');
-        }
+    if (headers_sent() || !extension_loaded('zlib') || ini_get('zlib.output_compression')) {
+        return;
+    }
+
+    $encoding_header = isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? strtolower((string) $_SERVER['HTTP_ACCEPT_ENCODING']) : '';
+
+    if ($encoding_header !== '' && strpos($encoding_header, 'gzip') !== false) {
+        ob_start('ob_gzhandler');
     }
 }
 add_action('init', 'putrafiber_enable_gzip');
@@ -23,10 +27,20 @@ add_action('init', 'putrafiber_enable_gzip');
  * Add Browser Caching Headers
  */
 function putrafiber_browser_cache_headers() {
-    if (!is_admin()) {
-        header('Cache-Control: public, max-age=31536000');
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+    if (headers_sent() || is_admin()) {
+        return;
     }
+
+    if (is_user_logged_in() || (function_exists('is_preview') && is_preview()) || (function_exists('is_customize_preview') && is_customize_preview())) {
+        header('Cache-Control: private, no-store, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        return;
+    }
+
+    $max_age = apply_filters('putrafiber_browser_cache_max_age', 3600);
+    header('Cache-Control: public, max-age=' . (int) $max_age . ', stale-while-revalidate=86400');
+    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + (int) $max_age) . ' GMT');
 }
 add_action('send_headers', 'putrafiber_browser_cache_headers');
 
@@ -38,20 +52,30 @@ function putrafiber_lazy_load_images($content) {
         return $content;
     }
     
-    $content = preg_replace_callback('/<img([^>]+)>/i', function($matches) {
+    $content = preg_replace_callback('/<img\b[^>]*>/i', function($matches) {
         $img = $matches[0];
-        
-        if (strpos($img, 'loading=') !== false) {
+
+        if (stripos($img, 'loading=') !== false || stripos($img, 'data-src') !== false) {
             return $img;
         }
-        
-        if (strpos($img, 'data-src') !== false) {
-            return $img;
+
+        if (preg_match('/class=("|\')(.*?)\1/i', $img, $class_match)) {
+            $existing_classes = $class_match[2];
+            if (!preg_match('/\blazy-load\b/', $existing_classes)) {
+                $new_classes = trim($existing_classes . ' lazy-load');
+                $img = str_replace($class_match[0], 'class="' . esc_attr($new_classes) . '"', $img);
+            }
+        } else {
+            $img = preg_replace('/<img\s+/i', '<img class="lazy-load" ', $img, 1);
         }
-        
-        return str_replace('<img', '<img loading="lazy" class="lazy-load"', $img);
+
+        if (stripos($img, 'loading=') === false) {
+            $img = preg_replace('/<img\s+/i', '<img loading="lazy" ', $img, 1);
+        }
+
+        return $img;
     }, $content);
-    
+
     return $content;
 }
 add_filter('the_content', 'putrafiber_lazy_load_images');
@@ -141,6 +165,14 @@ function putrafiber_dns_prefetch() {
     echo '<link rel="dns-prefetch" href="//www.google-analytics.com">' . "\n";
 }
 add_action('wp_head', 'putrafiber_dns_prefetch', 0);
+
+function putrafiber_preload_primary_fonts() {
+    $font_stylesheet = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap';
+    echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+    echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+    echo '<link rel="preload" as="style" href="' . esc_url($font_stylesheet) . '">' . "\n";
+}
+add_action('wp_head', 'putrafiber_preload_primary_fonts', 1);
 
 /**
  * Defer CSS Loading (Critical CSS)
