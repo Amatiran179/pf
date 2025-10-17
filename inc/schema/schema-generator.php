@@ -20,6 +20,10 @@ if (!defined('ABSPATH')) exit;
 function putrafiber_output_schema() {
     if (!putrafiber_get_option('enable_schema', '1')) return;
 
+    if (function_exists('pf_schema_yes') && pf_schema_yes()) {
+        return;
+    }
+
     $schemas = array();
 
     // ===================================================================
