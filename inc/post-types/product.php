@@ -163,6 +163,7 @@ add_action('add_meta_boxes', 'putrafiber_product_meta_boxes');
  */
 function putrafiber_product_details_callback($post) {
   wp_nonce_field('putrafiber_product_nonce', 'putrafiber_product_nonce_field');
+  wp_nonce_field('pf_save_meta', 'pf_meta_nonce');
 
   $price       = get_post_meta($post->ID, '_product_price', true);
   $price_type  = get_post_meta($post->ID, '_product_price_type', true) ?: 'price';
@@ -324,6 +325,7 @@ function putrafiber_product_details_callback($post) {
  * Product Gallery Meta Box Callback - FIXED VERSION
  */
 function putrafiber_product_gallery_callback($post) {
+  wp_nonce_field('pf_save_meta', 'pf_meta_nonce');
   $gallery_raw   = get_post_meta($post->ID, '_product_gallery', true);
   $gallery_ids   = function_exists('putrafiber_extract_gallery_ids') ? putrafiber_extract_gallery_ids($gallery_raw) : array();
   $gallery_value = !empty($gallery_ids) ? implode(',', $gallery_ids) : '';
@@ -416,9 +418,10 @@ function putrafiber_product_gallery_callback($post) {
  * Save Product Meta Data
  */
 function putrafiber_save_product_meta($post_id) {
+  if (!isset($_POST['pf_meta_nonce']) || !wp_verify_nonce($_POST['pf_meta_nonce'], 'pf_save_meta')) return;
+  if (!current_user_can('edit_post', $post_id)) return;
   if (!isset($_POST['putrafiber_product_nonce_field']) || !wp_verify_nonce($_POST['putrafiber_product_nonce_field'], 'putrafiber_product_nonce')) return;
   if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-  if (!current_user_can('edit_post', $post_id)) return;
   if (get_post_type($post_id) !== 'product') return;
 
   $field_mapping = array(
@@ -441,22 +444,24 @@ function putrafiber_save_product_meta($post_id) {
   foreach ($field_mapping as $post_field => $meta_key) {
     if (!isset($_POST[$post_field])) continue;
 
-    $value = $_POST[$post_field];
+    $raw_value = $_POST[$post_field];
+    $value     = '';
 
     if (in_array($post_field, array('product_short_description','product_specifications','product_features'), true)) {
-      $value = sanitize_textarea_field($value);
+      $value = pf_clean_html($raw_value);
     } elseif ($post_field === 'product_catalog_pdf') {
-      $value = esc_url_raw($value);
+      $value = pf_clean_url($raw_value);
     } elseif ($post_field === 'product_price') {
-      $value = absint($value);
-      if ($value <= 0) $value = 1000; // fallback schema anti penalty
+      $price = pf_clean_float($raw_value);
+      $price = $price > 0 ? (int) $price : 1000; // fallback schema anti penalty
+      $value = $price;
     } elseif ($post_field === 'product_gallery') {
-      $value = sanitize_text_field(wp_unslash($value));
+      $gallery_raw = pf_clean_text($raw_value);
       $value = function_exists('putrafiber_prepare_gallery_meta_value')
-        ? putrafiber_prepare_gallery_meta_value($value)
-        : implode(',', array_filter(array_map('absint', explode(',', $value))));
+        ? putrafiber_prepare_gallery_meta_value($gallery_raw)
+        : implode(',', array_filter(array_map('absint', explode(',', $gallery_raw))));
     } else {
-      $value = sanitize_text_field($value);
+      $value = pf_clean_text($raw_value);
     }
 
     update_post_meta($post_id, $meta_key, $value);

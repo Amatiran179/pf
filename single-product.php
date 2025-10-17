@@ -153,9 +153,9 @@ while (have_posts()) : the_post();
         <div class="product-gallery">
           <?php if ($total_gallery_images > 0): ?>
             <?php $gallery_group = 'pf-product-' . $product_id; ?>
-            <div class="gallery-container" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
+            <div class="gallery-container" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
               <!-- Main slider -->
-              <div class="swiper product-gallery-slider" data-gallery-group="<?php echo esc_attr($gallery_group); ?>">
+              <div class="swiper product-gallery-slider" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
                 <div class="swiper-wrapper">
                   <?php foreach ($all_gallery_images as $index => $image):
                     if (empty($image['url'])) {
@@ -166,22 +166,22 @@ while (have_posts()) : the_post();
                     $img_height= !empty($image['height']) ? (int) $image['height'] : 0;
                   ?>
                   <div class="swiper-slide">
-                    <a href="<?php echo esc_url($image['full']); ?>"
+                    <a href="<?php echo pf_output_url($image['full']); ?>"
                        data-lightbox="product-<?php echo (int) $product_id; ?>"
-                       data-title="<?php echo esc_attr($img_alt); ?>"
+                       data-title="<?php echo pf_output_attr($img_alt); ?>"
                        class="gallery-item"
-                       data-gallery-group="<?php echo esc_attr($gallery_group); ?>"
-                       data-gallery-index="<?php echo esc_attr($index); ?>"
-                       style="<?php echo esc_attr($anti_zoom_style); ?>">
+                       data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
+                       data-gallery-index="<?php echo pf_output_attr($index); ?>"
+                       style="<?php echo pf_output_attr($anti_zoom_style); ?>">
                       <img
-                        src="<?php echo esc_url($image['url']); ?>"
-                        alt="<?php echo esc_attr($img_alt); ?>"
+                        src="<?php echo pf_output_url($image['url']); ?>"
+                        alt="<?php echo pf_output_attr($img_alt); ?>"
                         class="gallery-image"
                         <?php if ($img_width && $img_height): ?>
                           width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
                         <?php endif; ?>
                         <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
-                        style="<?php echo esc_attr($anti_zoom_style); ?>"
+                        style="<?php echo pf_output_attr($anti_zoom_style); ?>"
                         decoding="async"
                       />
                       <span class="zoom-icon">🔍</span>
@@ -208,8 +208,8 @@ while (have_posts()) : the_post();
                     ?>
                       <div class="swiper-slide">
                         <img
-                          src="<?php echo esc_url($image['thumb']); ?>"
-                          alt="<?php echo esc_attr($thumb_alt); ?>"
+                          src="<?php echo pf_output_url($image['thumb']); ?>"
+                          alt="<?php echo pf_output_attr($thumb_alt); ?>"
                           loading="lazy"
                         />
                       </div>
@@ -220,7 +220,7 @@ while (have_posts()) : the_post();
             </div>
           <?php else: ?>
             <div class="no-product-image">
-              <img src="<?php echo esc_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image" width="400" height="300" />
+              <img src="<?php echo pf_output_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image" width="400" height="300" />
             </div>
           <?php endif; ?>
         </div>
@@ -231,39 +231,39 @@ while (have_posts()) : the_post();
           <div class="product-meta-header">
             <?php if ($categories): ?>
               <span class="product-category">
-                <a href="<?php echo esc_url(get_term_link($categories[0])); ?>">
-                  <?php echo esc_html($categories[0]->name); ?>
+                <a href="<?php echo pf_output_url(get_term_link($categories[0])); ?>">
+                  <?php echo pf_output_html($categories[0]->name); ?>
                 </a>
               </span>
             <?php endif; ?>
 
             <?php if (!empty($sku)): ?>
-              <span class="product-sku">SKU: <?php echo esc_html($sku); ?></span>
+              <span class="product-sku">SKU: <?php echo pf_output_html($sku); ?></span>
             <?php endif; ?>
           </div>
 
           <h1 class="product-title"><?php the_title(); ?></h1>
 
           <?php if (!empty($short_desc)): ?>
-            <div class="product-short-description"><p><?php echo esc_html($short_desc); ?></p></div>
+            <div class="product-short-description"><p><?php echo pf_output_html($short_desc); ?></p></div>
           <?php endif; ?>
 
-          <div class="product-stock <?php echo esc_attr($stock_info['class']); ?>">
+          <div class="product-stock <?php echo pf_output_attr($stock_info['class']); ?>">
             <span class="stock-icon">
               <?php echo ($stock === 'ready' ? '✅' : ($stock === 'pre-order' ? '⏳' : '❌')); ?>
             </span>
-            <?php echo esc_html($stock_info['text']); ?>
+            <?php echo pf_output_html($stock_info['text']); ?>
           </div>
 
           <?php if ($price_type === 'price'): ?>
             <?php if ($price_display > 0): ?>
               <div class="product-price">
                 <span class="price-label">Harga:</span>
-                <span class="price-amount"><?php echo esc_html($formatted_price); ?></span>
+                <span class="price-amount"><?php echo pf_output_html($formatted_price); ?></span>
               </div>
             <?php else: ?>
               <div class="product-cta-price">
-                <a href="<?php echo esc_url(putrafiber_whatsapp_link('Halo, saya ingin tanya harga produk: ' . get_the_title())); ?>"
+                <a href="<?php echo pf_output_url(putrafiber_whatsapp_link('Halo, saya ingin tanya harga produk: ' . get_the_title())); ?>"
                    class="btn-whatsapp-cta" target="_blank" rel="nofollow noopener">
                   <?php echo function_exists('putrafiber_get_svg_icon') ? putrafiber_get_svg_icon('whatsapp') : '💬'; ?>
                   Tanya Harga
@@ -273,7 +273,7 @@ while (have_posts()) : the_post();
             <?php endif; ?>
           <?php else: ?>
             <div class="product-cta-price">
-              <a href="<?php echo esc_url(putrafiber_whatsapp_link('Halo, saya tertarik dengan produk: ' . get_the_title())); ?>"
+              <a href="<?php echo pf_output_url(putrafiber_whatsapp_link('Halo, saya tertarik dengan produk: ' . get_the_title())); ?>"
                  class="btn-whatsapp-cta" target="_blank" rel="nofollow noopener">
                 <?php echo function_exists('putrafiber_get_svg_icon') ? putrafiber_get_svg_icon('whatsapp') : '📞'; ?>
                 Hubungi Kami
@@ -285,19 +285,19 @@ while (have_posts()) : the_post();
           <?php if ($sizes || $colors || $models || $material || $warranty): ?>
             <div class="product-attributes">
               <?php if ($sizes): ?>
-                <div class="attribute-item"><strong>Ukuran:</strong> <span><?php echo esc_html($sizes); ?></span></div>
+                <div class="attribute-item"><strong>Ukuran:</strong> <span><?php echo pf_output_html($sizes); ?></span></div>
               <?php endif; ?>
               <?php if ($colors): ?>
-                <div class="attribute-item"><strong>Warna:</strong> <span><?php echo esc_html($colors); ?></span></div>
+                <div class="attribute-item"><strong>Warna:</strong> <span><?php echo pf_output_html($colors); ?></span></div>
               <?php endif; ?>
               <?php if ($models): ?>
-                <div class="attribute-item"><strong>Model:</strong> <span><?php echo esc_html($models); ?></span></div>
+                <div class="attribute-item"><strong>Model:</strong> <span><?php echo pf_output_html($models); ?></span></div>
               <?php endif; ?>
               <?php if ($material): ?>
-                <div class="attribute-item"><strong>Material:</strong> <span><?php echo esc_html($material); ?></span></div>
+                <div class="attribute-item"><strong>Material:</strong> <span><?php echo pf_output_html($material); ?></span></div>
               <?php endif; ?>
               <?php if ($warranty): ?>
-                <div class="attribute-item"><strong>Garansi:</strong> <span><?php echo esc_html($warranty); ?></span></div>
+                <div class="attribute-item"><strong>Garansi:</strong> <span><?php echo pf_output_html($warranty); ?></span></div>
               <?php endif; ?>
             </div>
           <?php endif; ?>
@@ -323,7 +323,7 @@ while (have_posts()) : the_post();
 
           <?php if (!empty($catalog_pdf)): ?>
             <div class="product-catalog">
-              <a href="<?php echo esc_url($catalog_pdf); ?>" class="btn-download-catalog" target="_blank" rel="noopener" download>
+              <a href="<?php echo pf_output_url($catalog_pdf); ?>" class="btn-download-catalog" target="_blank" rel="noopener" download>
                 📄 Download Katalog PDF
               </a>
             </div>
@@ -353,7 +353,7 @@ while (have_posts()) : the_post();
               <h2>📋 Spesifikasi</h2>
               <ul>
                 <?php foreach (explode("\n", $specs) as $line) {
-                  $line = trim($line); if ($line) echo '<li>' . esc_html($line) . '</li>';
+                  $line = trim($line); if ($line) echo '<li>' . pf_output_html($line) . '</li>';
                 } ?>
               </ul>
             </div>
@@ -364,7 +364,7 @@ while (have_posts()) : the_post();
               <h2>⭐ Fitur & Keunggulan</h2>
               <ul>
                 <?php foreach (explode("\n", $features) as $line) {
-                  $line = trim($line); if ($line) echo '<li>' . esc_html($line) . '</li>';
+                  $line = trim($line); if ($line) echo '<li>' . pf_output_html($line) . '</li>';
                 } ?>
               </ul>
             </div>

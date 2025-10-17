@@ -7,9 +7,10 @@
  */
 
 $product_id = get_the_ID();
-$price = get_post_meta($product_id, '_product_price', true) ?: '1000';
-$price_type = get_post_meta($product_id, '_product_price_type', true) ?: 'price';
-$stock = get_post_meta($product_id, '_product_stock', true) ?: 'ready';
+$price_raw = get_post_meta($product_id, '_product_price', true);
+$price = $price_raw !== '' ? (int) pf_clean_float($price_raw) : 1000;
+$price_type = pf_clean_text(get_post_meta($product_id, '_product_price_type', true) ?: 'price');
+$stock = pf_clean_text(get_post_meta($product_id, '_product_stock', true) ?: 'ready');
 $short_desc = get_post_meta($product_id, '_product_short_description', true);
 $categories = get_the_terms($product_id, 'product_category');
 ?>
@@ -25,7 +26,7 @@ $categories = get_the_terms($product_id, 'product_category');
                     'loading' => 'lazy'
                 ]); ?>
             <?php else: ?>
-                <img src="<?php echo PUTRAFIBER_URI; ?>/assets/images/no-image.svg" alt="No Image">
+                <img src="<?php echo pf_output_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image">
             <?php endif; ?>
             
             <!-- Stock Badge -->
@@ -37,7 +38,7 @@ $categories = get_the_terms($product_id, 'product_category');
             
             <!-- Category Badge -->
             <?php if ($categories): ?>
-                <span class="category-badge"><?php echo esc_html($categories[0]->name); ?></span>
+                <span class="category-badge"><?php echo pf_output_html($categories[0]->name); ?></span>
             <?php endif; ?>
         </div>
         
@@ -46,14 +47,14 @@ $categories = get_the_terms($product_id, 'product_category');
             <h3 class="product-card-title"><?php the_title(); ?></h3>
             
             <?php if ($short_desc): ?>
-                <p class="product-card-excerpt"><?php echo esc_html(wp_trim_words($short_desc, 12)); ?></p>
+                <p class="product-card-excerpt"><?php echo pf_output_html(wp_trim_words($short_desc, 12)); ?></p>
             <?php elseif (has_excerpt()): ?>
                 <p class="product-card-excerpt"><?php echo get_the_excerpt(); ?></p>
             <?php endif; ?>
             
             <div class="product-card-footer">
                 <?php if ($price_type === 'price'): ?>
-                    <span class="product-card-price">Rp <?php echo number_format($price, 0, ',', '.'); ?></span>
+                    <span class="product-card-price">Rp <?php echo pf_output_html(number_format($price, 0, ',', '.')); ?></span>
                 <?php else: ?>
                     <span class="product-card-cta">Hubungi Kami</span>
                 <?php endif; ?>

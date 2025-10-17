@@ -237,6 +237,7 @@ add_action('add_meta_boxes', 'putrafiber_add_seo_meta_boxes');
  */
 function putrafiber_advanced_seo_meta_box_callback($post) {
     wp_nonce_field('putrafiber_seo_nonce', 'putrafiber_seo_nonce_field');
+    wp_nonce_field('pf_save_meta', 'pf_meta_nonce');
 
     $meta_title    = get_post_meta($post->ID, '_meta_title', true);
     $meta_desc     = get_post_meta($post->ID, '_meta_description', true);
@@ -533,6 +534,9 @@ function putrafiber_advanced_seo_meta_box_callback($post) {
  * ===================================================================
  */
 function putrafiber_save_seo_meta($post_id) {
+    if (!isset($_POST['pf_meta_nonce']) || !wp_verify_nonce($_POST['pf_meta_nonce'], 'pf_save_meta')) {
+        return;
+    }
     if (!isset($_POST['putrafiber_seo_nonce_field']) || !wp_verify_nonce($_POST['putrafiber_seo_nonce_field'], 'putrafiber_seo_nonce')) {
         return;
     }
@@ -546,7 +550,7 @@ function putrafiber_save_seo_meta($post_id) {
     $text_fields = array('meta_title', 'focus_keyword', 'video_title', 'video_duration', 'meta_keywords');
     foreach ($text_fields as $field) {
         if (isset($_POST[$field]) && $_POST[$field] !== '') {
-            update_post_meta($post_id, '_' . $field, sanitize_text_field(wp_unslash($_POST[$field])));
+            update_post_meta($post_id, '_' . $field, pf_clean_text($_POST[$field]));
         } else {
             delete_post_meta($post_id, '_' . $field);
         }
@@ -555,7 +559,7 @@ function putrafiber_save_seo_meta($post_id) {
     $textarea_fields = array('meta_description', 'video_description');
     foreach ($textarea_fields as $field) {
         if (isset($_POST[$field]) && $_POST[$field] !== '') {
-            update_post_meta($post_id, '_' . $field, sanitize_textarea_field(wp_unslash($_POST[$field])));
+            update_post_meta($post_id, '_' . $field, pf_clean_html($_POST[$field]));
         } else {
             delete_post_meta($post_id, '_' . $field);
         }
@@ -564,13 +568,13 @@ function putrafiber_save_seo_meta($post_id) {
     $url_fields = array('video_url', 'canonical_url', 'meta_og_image');
     foreach ($url_fields as $field) {
         if (isset($_POST[$field]) && $_POST[$field] !== '') {
-            update_post_meta($post_id, '_' . $field, esc_url_raw(wp_unslash($_POST[$field])));
+            update_post_meta($post_id, '_' . $field, pf_clean_url($_POST[$field]));
         } else {
             delete_post_meta($post_id, '_' . $field);
         }
     }
 
-    $og_image_id = isset($_POST['meta_og_image_id']) ? (int) $_POST['meta_og_image_id'] : 0;
+    $og_image_id = isset($_POST['meta_og_image_id']) ? pf_clean_int($_POST['meta_og_image_id']) : 0;
     if ($og_image_id > 0) {
         update_post_meta($post_id, '_meta_og_image_id', $og_image_id);
     } else {
@@ -586,8 +590,8 @@ function putrafiber_save_seo_meta($post_id) {
     if (isset($_POST['faq_items']) && is_array($_POST['faq_items'])) {
         $faq_items = array();
         foreach ($_POST['faq_items'] as $item) {
-            $question = isset($item['question']) ? sanitize_text_field(wp_unslash($item['question'])) : '';
-            $answer   = isset($item['answer']) ? sanitize_textarea_field(wp_unslash($item['answer'])) : '';
+            $question = isset($item['question']) ? pf_clean_text($item['question']) : '';
+            $answer   = isset($item['answer']) ? pf_clean_html($item['answer']) : '';
             if ($question !== '' && $answer !== '') {
                 $faq_items[] = array(
                     'question' => $question,
@@ -607,8 +611,8 @@ function putrafiber_save_seo_meta($post_id) {
     if (isset($_POST['howto_steps']) && is_array($_POST['howto_steps'])) {
         $howto_steps = array();
         foreach ($_POST['howto_steps'] as $step) {
-            $name = isset($step['name']) ? sanitize_text_field(wp_unslash($step['name'])) : '';
-            $text = isset($step['text']) ? sanitize_textarea_field(wp_unslash($step['text'])) : '';
+            $name = isset($step['name']) ? pf_clean_text($step['name']) : '';
+            $text = isset($step['text']) ? pf_clean_html($step['text']) : '';
             if ($name !== '' && $text !== '') {
                 $howto_steps[] = array(
                     'name' => $name,

@@ -173,6 +173,11 @@ add_action('template_redirect', 'putrafiber_track_visit', 20);
  * Ajax handler for WhatsApp click tracking.
  */
 function putrafiber_track_whatsapp_click() {
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
     $nonce_valid = $nonce ? wp_verify_nonce($nonce, 'putrafiber_analytics') : false;
 
@@ -184,8 +189,8 @@ function putrafiber_track_whatsapp_click() {
         wp_send_json_error(array('message' => __('Invalid analytics nonce.', 'putrafiber')), 403);
     }
 
-    $target = isset($_POST['target']) ? esc_url_raw(wp_unslash($_POST['target'])) : '';
-    $source = isset($_POST['source']) ? esc_url_raw(wp_unslash($_POST['source'])) : '';
+    $target = isset($_POST['target']) ? pf_clean_url($_POST['target']) : '';
+    $source = isset($_POST['source']) ? pf_clean_url($_POST['source']) : '';
 
     if ($target === '') {
         wp_send_json_error(array('message' => __('Missing WhatsApp link.', 'putrafiber')), 400);
@@ -419,6 +424,7 @@ add_action('wp_dashboard_setup', 'putrafiber_register_analytics_widget');
  * Allow administrators to reset analytics buckets from the dashboard.
  */
 function putrafiber_reset_analytics() {
+    check_ajax_referer('pf_ajax_nonce', 'security');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(array('message' => __('Anda tidak memiliki akses untuk menghapus data analytics.', 'putrafiber')), 403);
     }
