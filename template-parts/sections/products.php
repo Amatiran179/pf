@@ -62,7 +62,11 @@ $products_query = new WP_Query(array(
                                 <?php endif; ?>
                             </div>
                         <?php else: ?>
-                            <span class="product-badge badge-ready product-badge--floating"><?php esc_html_e('Ready Stock', 'putrafiber'); ?></span>
+                            <?php if ($stock === 'pre-order'): ?>
+                                <span class="product-badge badge-preorder product-badge--floating"><?php esc_html_e('Pre-Order', 'putrafiber'); ?></span>
+                            <?php else: ?>
+                                <span class="product-badge badge-ready product-badge--floating"><?php esc_html_e('Ready Stock', 'putrafiber'); ?></span>
+                            <?php endif; ?>
                         <?php endif; ?>
 
                         <div class="product-content">
