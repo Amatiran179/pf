@@ -8,21 +8,18 @@ Dokumen ini berfungsi sebagai panduan untuk membersihkan, memelihara, dan mengem
 
 Setelah menerapkan perbaikan terakhir, beberapa file menjadi tidak terpakai (redundant) dan aman untuk dihapus. Menghapus file-file ini akan membuat struktur tema lebih bersih dan mencegah kebingungan di masa depan.
 
-### File yang Harus Dihapus:
+### Status Pembersihan Terkini (April 2024)
 
-1.  **`inc/enqueue.php`**
-    *   **Alasan:** Semua logika untuk memuat aset (CSS & JavaScript) telah dipindahkan dan disatukan ke dalam file `functions.php`. File ini tidak lagi digunakan.
+- [x] **Hapus `inc/enqueue.php`**
+  * Seluruh logika enqueue kini terpusat di `functions.php`. File lama sudah dihapus dari repo.
 
-2.  **Skrip Galeri Lama (`assets/js/`)**
-    *   `assets/js/portfolio-gallery.js`
-    *   `assets/js/product-gallery.js`
-    *   `assets/js/product-gallery2.js`
-    *   **Alasan:** Ketiga file ini telah digantikan oleh satu skrip terpusat, `assets/js/gallery-unified.js`, yang menangani galeri produk dan portofolio.
+- [x] **Singkirkan skrip galeri lama (`assets/js/portfolio-gallery.js`, `product-gallery.js`, `product-gallery2.js`)**
+  * Kedua tipe galeri kini bergantung sepenuhnya pada `assets/js/gallery-unified.js`.
 
-3.  **File CSS Galeri Lama (`assets/css/`)**
-    *   `assets/css/portfolio-gallery-fix.css`
-    *   `assets/css/product-gallery-fix.css`
-    *   **Alasan:** Kedua file ini telah digabungkan menjadi satu file yang lebih efisien, `assets/css/gallery-fix.css`. Pastikan file baru ini diimpor ke dalam file CSS utama Anda.
+- [x] **Hapus stylesheet galeri lama (`assets/css/portfolio-gallery-fix.css`, `product-gallery-fix.css`)**
+  * Seluruh perbaikan gaya galeri berada di stylesheet utama (`product.css`, `portfolio.css`) serta `gallery-fix.css` pada build Vite bila tersedia.
+
+> **Langkah selanjutnya:** Audit bundle Vite (`assets/dist/`) untuk memastikan `gallery-fix.css` atau stylesheet pengganti lain sudah ikut ter-build dan ter- enqueue otomatis, lalu dokumentasikan alur build terbaru.
 
 ---
 

@@ -180,7 +180,6 @@ add_action('wp_enqueue_scripts', 'pf_enqueue_assets', 5);
  * ========================================================================== */
 $pf_requires = array(
   '/inc/theme-setup.php',
-  // '/inc/enqueue.php', // DINONAKTIFKAN: Logika telah dipindah ke fungsi pf_enqueue_assets()
   '/inc/helpers-gallery.php',
   '/inc/helpers-frontpage.php',
   '/inc/customizer.php',
