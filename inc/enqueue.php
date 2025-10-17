@@ -105,8 +105,19 @@ function putrafiber_enqueue_scripts() {
     // Animations
     wp_enqueue_script('putrafiber-animations', PUTRAFIBER_URI . '/assets/js/animations.js', array('jquery'), pf_asset_version('assets/js/animations.js'), true);
 
-    // PWA Service Worker Registration
-    wp_enqueue_script('putrafiber-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), pf_asset_version('assets/js/pwa.js'), true);
+    // PWA Service Worker Registration (respect toggle)
+    $pwa_enabled = true;
+    if (function_exists('putrafiber_is_pwa_enabled')) {
+        $pwa_enabled = putrafiber_is_pwa_enabled();
+    } elseif (function_exists('putrafiber_get_option')) {
+        $raw_pwa_value = putrafiber_get_option('enable_pwa', '1');
+        $normalized    = strtolower(trim((string) $raw_pwa_value));
+        $pwa_enabled   = !in_array($normalized, array('0', 'false', 'no', 'off'), true);
+    }
+
+    if ($pwa_enabled) {
+        wp_enqueue_script('putrafiber-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), pf_asset_version('assets/js/pwa.js'), true);
+    }
 
     if (is_front_page()) {
         wp_enqueue_script('putrafiber-front-epic', PUTRAFIBER_URI . '/assets/js/front-page-epic.js', array('jquery'), pf_asset_version('assets/js/front-page-epic.js'), true);
