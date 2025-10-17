@@ -180,7 +180,7 @@ while (have_posts()) : the_post();
                         <?php if ($img_width && $img_height): ?>
                           width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
                         <?php endif; ?>
-                        <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
+                        <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
                         style="<?php echo pf_output_attr($anti_zoom_style); ?>"
                         decoding="async"
                       />
@@ -211,6 +211,8 @@ while (have_posts()) : the_post();
                           src="<?php echo pf_output_url($image['thumb']); ?>"
                           alt="<?php echo pf_output_attr($thumb_alt); ?>"
                           loading="lazy"
+                          decoding="async"
+                          fetchpriority="low"
                         />
                       </div>
                     <?php endforeach; ?>
@@ -220,7 +222,7 @@ while (have_posts()) : the_post();
             </div>
           <?php else: ?>
             <div class="no-product-image">
-              <img src="<?php echo pf_output_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image" width="400" height="300" />
+              <img src="<?php echo pf_output_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image" width="400" height="300" loading="lazy" decoding="async" fetchpriority="low" />
             </div>
           <?php endif; ?>
         </div>

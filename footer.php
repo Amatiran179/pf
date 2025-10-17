@@ -17,7 +17,7 @@
                             $logo = get_theme_mod('putrafiber_logo');
                             if ($logo):
                             ?>
-                                <img src="<?php echo esc_url($logo); ?>" alt="<?php bloginfo('name'); ?>">
+                                <img src="<?php echo esc_url($logo); ?>" alt="<?php bloginfo('name'); ?>" loading="lazy" decoding="async" fetchpriority="low">
                             <?php else: ?>
                                 <h3><?php bloginfo('name'); ?></h3>
                             <?php endif; ?>

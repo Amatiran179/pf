@@ -1,0 +1,10 @@
+/* Base styles imported via Vite build pipeline */
+:root {
+  --pf-accent: #005bbb;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+  background-color: #ffffff;
+}

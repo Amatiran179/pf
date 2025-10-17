@@ -234,7 +234,7 @@ $category = get_queried_object();
                         <div class="category-showcase-card card fade-in">
                             <?php if ($cat_image): ?>
                                 <div class="category-showcase-image">
-                                    <img src="<?php echo esc_url($cat_image); ?>" alt="<?php echo esc_attr($cat->name); ?>">
+                                    <img src="<?php echo esc_url($cat_image); ?>" alt="<?php echo esc_attr($cat->name); ?>" loading="lazy" decoding="async" fetchpriority="low">
                                 </div>
                             <?php else: ?>
                                 <div class="category-showcase-icon">
