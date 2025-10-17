@@ -40,7 +40,8 @@ add_action('add_meta_boxes', 'putrafiber_add_schema_metabox');
  */
 function putrafiber_schema_metabox_callback($post) {
     wp_nonce_field('putrafiber_schema_nonce', 'putrafiber_schema_nonce_field');
-    
+    wp_nonce_field('pf_save_meta', 'pf_meta_nonce');
+
     // Get saved data - ServiceArea
     $enable_service_area = get_post_meta($post->ID, '_enable_service_area', true);
     $service_areas = get_post_meta($post->ID, '_service_areas', true);
@@ -759,24 +760,28 @@ function putrafiber_schema_metabox_callback($post) {
  * Save Schema Meta Data
  */
 function putrafiber_save_schema_meta($post_id) {
-    if (!isset($_POST['putrafiber_schema_nonce_field']) || 
+    if (!isset($_POST['pf_meta_nonce']) || !wp_verify_nonce($_POST['pf_meta_nonce'], 'pf_save_meta')) return;
+    if (!current_user_can('edit_post', $post_id)) return;
+    if (!isset($_POST['putrafiber_schema_nonce_field']) ||
         !wp_verify_nonce($_POST['putrafiber_schema_nonce_field'], 'putrafiber_schema_nonce')) {
         return;
     }
-    
+
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-    if (!current_user_can('edit_post', $post_id)) return;
-    
+
     // Save Service Area
     update_post_meta($post_id, '_enable_service_area', isset($_POST['enable_service_area']) ? '1' : '0');
-    
+
     if (isset($_POST['service_areas']) && is_array($_POST['service_areas'])) {
         $areas = array();
         foreach ($_POST['service_areas'] as $area) {
-            if (!empty($area['city'])) {
+            $city     = isset($area['city']) ? pf_clean_text($area['city']) : '';
+            $province = isset($area['province']) ? pf_clean_text($area['province']) : '';
+
+            if ($city !== '') {
                 $areas[] = array(
-                    'city' => sanitize_text_field($area['city']),
-                    'province' => sanitize_text_field($area['province'])
+                    'city'     => $city,
+                    'province' => $province,
                 );
             }
         }
@@ -788,29 +793,29 @@ function putrafiber_save_schema_meta($post_id) {
     if (isset($_POST['manual_service_areas']) && is_array($_POST['manual_service_areas'])) {
         $manual_entries = array();
         foreach ($_POST['manual_service_areas'] as $entry) {
-            $type = isset($entry['type']) ? sanitize_text_field($entry['type']) : '';
-            $name = isset($entry['name']) ? sanitize_text_field($entry['name']) : '';
+            $type = isset($entry['type']) ? pf_clean_text($entry['type']) : '';
+            $name = isset($entry['name']) ? pf_clean_text($entry['name']) : '';
 
-            if (empty($type) || empty($name)) {
+            if ($type === '' || $name === '') {
                 continue;
             }
 
-            $country_code = isset($entry['country_code']) ? strtoupper(sanitize_text_field($entry['country_code'])) : '';
-            $identifier_raw = isset($entry['identifier']) ? trim(wp_unslash($entry['identifier'])) : '';
+            $country_code = isset($entry['country_code']) ? strtoupper(pf_clean_text($entry['country_code'])) : '';
+            $identifier_raw = isset($entry['identifier']) ? wp_unslash($entry['identifier']) : '';
             $identifier = '';
 
-            if (!empty($identifier_raw)) {
+            if ($identifier_raw !== '') {
                 $identifier = filter_var($identifier_raw, FILTER_VALIDATE_URL)
-                    ? esc_url_raw($identifier_raw)
-                    : sanitize_text_field($identifier_raw);
+                    ? pf_clean_url($identifier_raw)
+                    : pf_clean_text($identifier_raw);
             }
 
             $manual_entries[] = array(
-                'type' => $type,
-                'name' => $name,
+                'type'         => $type,
+                'name'         => $name,
                 'country_code' => $country_code,
-                'identifier' => $identifier,
-                'note' => isset($entry['note']) ? sanitize_textarea_field($entry['note']) : ''
+                'identifier'   => $identifier,
+                'note'         => isset($entry['note']) ? pf_clean_html($entry['note']) : '',
             );
         }
 
@@ -825,21 +830,24 @@ function putrafiber_save_schema_meta($post_id) {
 
     // Save Video
     update_post_meta($post_id, '_enable_video_schema', isset($_POST['enable_video_schema']) ? '1' : '0');
-    update_post_meta($post_id, '_video_url', isset($_POST['video_url']) ? esc_url_raw($_POST['video_url']) : '');
-    update_post_meta($post_id, '_video_title', isset($_POST['video_title']) ? sanitize_text_field($_POST['video_title']) : '');
-    update_post_meta($post_id, '_video_description', isset($_POST['video_description']) ? sanitize_textarea_field($_POST['video_description']) : '');
-    update_post_meta($post_id, '_video_duration', isset($_POST['video_duration']) ? sanitize_text_field($_POST['video_duration']) : '');
-    
+    update_post_meta($post_id, '_video_url', isset($_POST['video_url']) ? pf_clean_url($_POST['video_url']) : '');
+    update_post_meta($post_id, '_video_title', isset($_POST['video_title']) ? pf_clean_text($_POST['video_title']) : '');
+    update_post_meta($post_id, '_video_description', isset($_POST['video_description']) ? pf_clean_html($_POST['video_description']) : '');
+    update_post_meta($post_id, '_video_duration', isset($_POST['video_duration']) ? pf_clean_text($_POST['video_duration']) : '');
+
     // Save FAQ
     update_post_meta($post_id, '_enable_faq_schema', isset($_POST['enable_faq_schema']) ? '1' : '0');
-    
+
     if (isset($_POST['faq_items']) && is_array($_POST['faq_items'])) {
         $faq = array();
         foreach ($_POST['faq_items'] as $item) {
-            if (!empty($item['question']) && !empty($item['answer'])) {
+            $question = isset($item['question']) ? pf_clean_text($item['question']) : '';
+            $answer   = isset($item['answer']) ? pf_clean_html($item['answer']) : '';
+
+            if ($question !== '' && $answer !== '') {
                 $faq[] = array(
-                    'question' => sanitize_text_field($item['question']),
-                    'answer' => sanitize_textarea_field($item['answer'])
+                    'question' => $question,
+                    'answer'   => $answer,
                 );
             }
         }
@@ -847,17 +855,22 @@ function putrafiber_save_schema_meta($post_id) {
     } else {
         delete_post_meta($post_id, '_faq_items');
     }
-    
+
     // Save HowTo
     update_post_meta($post_id, '_enable_howto_schema', isset($_POST['enable_howto_schema']) ? '1' : '0');
-    
+
     if (isset($_POST['howto_steps']) && is_array($_POST['howto_steps'])) {
         $steps = array();
         foreach ($_POST['howto_steps'] as $step) {
-            if (!empty($step['name']) && !empty($step['text'])) {
+            $name        = isset($step['name']) ? pf_clean_text($step['name']) : '';
+            $description = isset($step['description']) ? pf_clean_html($step['description']) : '';
+            $image       = isset($step['image']) ? pf_clean_url($step['image']) : '';
+
+            if ($name !== '' && $description !== '') {
                 $steps[] = array(
-                    'name' => sanitize_text_field($step['name']),
-                    'text' => sanitize_textarea_field($step['text'])
+                    'name'        => $name,
+                    'description' => $description,
+                    'image'       => $image,
                 );
             }
         }
@@ -865,26 +878,35 @@ function putrafiber_save_schema_meta($post_id) {
     } else {
         delete_post_meta($post_id, '_howto_steps');
     }
-    
+
     // Save TouristAttraction
     update_post_meta($post_id, '_enable_tourist_schema', isset($_POST['enable_tourist_schema']) ? '1' : '0');
-    update_post_meta($post_id, '_tourist_street_address', isset($_POST['tourist_street_address']) ? sanitize_text_field($_POST['tourist_street_address']) : '');
-    update_post_meta($post_id, '_tourist_city', isset($_POST['tourist_city']) ? sanitize_text_field($_POST['tourist_city']) : '');
-    update_post_meta($post_id, '_tourist_province', isset($_POST['tourist_province']) ? sanitize_text_field($_POST['tourist_province']) : '');
-    update_post_meta($post_id, '_tourist_postal_code', isset($_POST['tourist_postal_code']) ? sanitize_text_field($_POST['tourist_postal_code']) : '');
-    update_post_meta($post_id, '_tourist_latitude', isset($_POST['tourist_latitude']) ? sanitize_text_field($_POST['tourist_latitude']) : '');
-    update_post_meta($post_id, '_tourist_longitude', isset($_POST['tourist_longitude']) ? sanitize_text_field($_POST['tourist_longitude']) : '');
-    
-    // Opening Hours
+    update_post_meta($post_id, '_tourist_street_address', isset($_POST['tourist_street_address']) ? pf_clean_text($_POST['tourist_street_address']) : '');
+    update_post_meta($post_id, '_tourist_city', isset($_POST['tourist_city']) ? pf_clean_text($_POST['tourist_city']) : '');
+    update_post_meta($post_id, '_tourist_province', isset($_POST['tourist_province']) ? pf_clean_text($_POST['tourist_province']) : '');
+    update_post_meta($post_id, '_tourist_postal_code', isset($_POST['tourist_postal_code']) ? pf_clean_text($_POST['tourist_postal_code']) : '');
+    update_post_meta($post_id, '_tourist_latitude', isset($_POST['tourist_latitude']) ? pf_clean_text($_POST['tourist_latitude']) : '');
+    update_post_meta($post_id, '_tourist_longitude', isset($_POST['tourist_longitude']) ? pf_clean_text($_POST['tourist_longitude']) : '');
+
     if (isset($_POST['tourist_opening_hours']) && is_array($_POST['tourist_opening_hours'])) {
         $hours = array();
         foreach ($_POST['tourist_opening_hours'] as $schedule) {
-            if (!empty($schedule['days']) && !empty($schedule['opens']) && !empty($schedule['closes'])) {
-                $days = is_array($schedule['days']) ? implode(',', $schedule['days']) : $schedule['days'];
+            $days_raw   = isset($schedule['days']) ? $schedule['days'] : '';
+            $opens      = isset($schedule['opens']) ? pf_clean_text($schedule['opens']) : '';
+            $closes     = isset($schedule['closes']) ? pf_clean_text($schedule['closes']) : '';
+            $days_value = '';
+
+            if (is_array($days_raw)) {
+                $days_value = implode(',', array_map('pf_clean_text', $days_raw));
+            } else {
+                $days_value = pf_clean_text($days_raw);
+            }
+
+            if ($days_value !== '' && $opens !== '' && $closes !== '') {
                 $hours[] = array(
-                    'days' => sanitize_text_field($days),
-                    'opens' => sanitize_text_field($schedule['opens']),
-                    'closes' => sanitize_text_field($schedule['closes'])
+                    'days'   => $days_value,
+                    'opens'  => $opens,
+                    'closes' => $closes,
                 );
             }
         }
@@ -892,15 +914,15 @@ function putrafiber_save_schema_meta($post_id) {
     } else {
         delete_post_meta($post_id, '_tourist_opening_hours');
     }
-    
+
     update_post_meta($post_id, '_tourist_is_free', isset($_POST['tourist_is_free']) ? '1' : '0');
-    update_post_meta($post_id, '_tourist_entrance_fee', isset($_POST['tourist_entrance_fee']) ? sanitize_text_field($_POST['tourist_entrance_fee']) : '');
-    update_post_meta($post_id, '_tourist_phone', isset($_POST['tourist_phone']) ? sanitize_text_field($_POST['tourist_phone']) : '');
-    update_post_meta($post_id, '_tourist_email', isset($_POST['tourist_email']) ? sanitize_email($_POST['tourist_email']) : '');
-    update_post_meta($post_id, '_tourist_languages', isset($_POST['tourist_languages']) ? sanitize_text_field($_POST['tourist_languages']) : '');
-    update_post_meta($post_id, '_tourist_amenities', isset($_POST['tourist_amenities']) ? sanitize_textarea_field($_POST['tourist_amenities']) : '');
-    update_post_meta($post_id, '_tourist_rating', isset($_POST['tourist_rating']) ? sanitize_text_field($_POST['tourist_rating']) : '');
-    update_post_meta($post_id, '_tourist_review_count', isset($_POST['tourist_review_count']) ? absint($_POST['tourist_review_count']) : '');
+    update_post_meta($post_id, '_tourist_entrance_fee', isset($_POST['tourist_entrance_fee']) ? pf_clean_text($_POST['tourist_entrance_fee']) : '');
+    update_post_meta($post_id, '_tourist_phone', isset($_POST['tourist_phone']) ? pf_clean_text($_POST['tourist_phone']) : '');
+    update_post_meta($post_id, '_tourist_email', isset($_POST['tourist_email']) ? sanitize_email(wp_unslash($_POST['tourist_email'])) : '');
+    update_post_meta($post_id, '_tourist_languages', isset($_POST['tourist_languages']) ? pf_clean_text($_POST['tourist_languages']) : '');
+    update_post_meta($post_id, '_tourist_amenities', isset($_POST['tourist_amenities']) ? pf_clean_html($_POST['tourist_amenities']) : '');
+    update_post_meta($post_id, '_tourist_rating', isset($_POST['tourist_rating']) ? pf_clean_text($_POST['tourist_rating']) : '');
+    update_post_meta($post_id, '_tourist_review_count', isset($_POST['tourist_review_count']) ? pf_clean_int($_POST['tourist_review_count']) : '');
     update_post_meta($post_id, '_tourist_public_access', isset($_POST['tourist_public_access']) ? '1' : '0');
 }
 add_action('save_post', 'putrafiber_save_schema_meta');

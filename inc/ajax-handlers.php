@@ -20,14 +20,15 @@ if (!defined('ABSPATH')) exit;
  * Load More Posts via AJAX
  */
 function putrafiber_ajax_load_more_posts() {
-    // Verify nonce
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    // Get parameters
-    $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
-    $posts_per_page = isset($_POST['posts_per_page']) ? intval($_POST['posts_per_page']) : 6;
-    $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
-    $post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : 'post';
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $page = isset($_POST['page']) ? max(1, pf_clean_int($_POST['page'])) : 1;
+    $posts_per_page = isset($_POST['posts_per_page']) ? max(1, pf_clean_int($_POST['posts_per_page'])) : 6;
+    $category = isset($_POST['category']) ? pf_clean_text($_POST['category']) : '';
+    $post_type = isset($_POST['post_type']) ? pf_clean_text($_POST['post_type']) : 'post';
     
     // Build query args
     $args = array(
@@ -79,10 +80,13 @@ add_action('wp_ajax_nopriv_load_more_posts', 'putrafiber_ajax_load_more_posts');
  * Filter Portfolio by Category via AJAX
  */
 function putrafiber_ajax_filter_portfolio() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
-    $posts_per_page = isset($_POST['posts_per_page']) ? intval($_POST['posts_per_page']) : 12;
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $category = isset($_POST['category']) ? pf_clean_text($_POST['category']) : '';
+    $posts_per_page = isset($_POST['posts_per_page']) ? max(1, pf_clean_int($_POST['posts_per_page'])) : 12;
     
     $args = array(
         'post_type' => 'portfolio',
@@ -133,7 +137,7 @@ function putrafiber_ajax_filter_portfolio() {
                     <div class="portfolio-content">
                         <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
                         <?php if ($location): ?>
-                            <p class="location"><?php echo esc_html($location); ?></p>
+                          <p class="location"><?php echo pf_output_html($location); ?></p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -163,14 +167,16 @@ add_action('wp_ajax_nopriv_filter_portfolio', 'putrafiber_ajax_filter_portfolio'
  * Handle Contact Form Submission
  */
 function putrafiber_ajax_contact_form() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    // Sanitize input
-    $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
-    $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-    $phone = isset($_POST['phone']) ? sanitize_text_field($_POST['phone']) : '';
-    $subject = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
-    $message = isset($_POST['message']) ? sanitize_textarea_field($_POST['message']) : '';
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $name = isset($_POST['name']) ? pf_clean_text($_POST['name']) : '';
+    $email = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
+    $phone = isset($_POST['phone']) ? pf_clean_text($_POST['phone']) : '';
+    $subject = isset($_POST['subject']) ? pf_clean_text($_POST['subject']) : '';
+    $message = isset($_POST['message']) ? pf_clean_html($_POST['message']) : '';
     
     $response = array(
         'success' => false,
@@ -258,9 +264,12 @@ add_action('wp_ajax_nopriv_contact_form', 'putrafiber_ajax_contact_form');
  * Get Search Suggestions
  */
 function putrafiber_ajax_search_suggestions() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $search_term = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $search_term = isset($_POST['search']) ? pf_clean_text($_POST['search']) : '';
     
     $response = array(
         'success' => false,
@@ -314,9 +323,12 @@ add_action('wp_ajax_nopriv_search_suggestions', 'putrafiber_ajax_search_suggesti
  * Handle Newsletter Subscription
  */
 function putrafiber_ajax_newsletter_subscribe() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $email = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
     
     $response = array(
         'success' => false,
@@ -376,9 +388,12 @@ add_action('wp_ajax_nopriv_newsletter_subscribe', 'putrafiber_ajax_newsletter_su
  * Like/Unlike Post
  */
 function putrafiber_ajax_like_post() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $post_id = isset($_POST['post_id']) ? pf_clean_int($_POST['post_id']) : 0;
     
     $response = array(
         'success' => false,
@@ -395,7 +410,11 @@ function putrafiber_ajax_like_post() {
     $likes = $likes ? intval($likes) : 0;
     
     // Check if user already liked
-    $user_ip = $_SERVER['REMOTE_ADDR'];
+    $user_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+    if (!empty($user_ip)) {
+        $validated_ip = filter_var($user_ip, FILTER_VALIDATE_IP);
+        $user_ip = $validated_ip ? $validated_ip : $user_ip;
+    }
     $liked_posts = get_transient('putrafiber_liked_posts_' . md5($user_ip));
     $liked_posts = $liked_posts ? $liked_posts : array();
     
@@ -433,10 +452,13 @@ add_action('wp_ajax_nopriv_like_post', 'putrafiber_ajax_like_post');
  * Get Related Posts via AJAX
  */
 function putrafiber_ajax_get_related_posts() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
-    $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 3;
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $post_id = isset($_POST['post_id']) ? pf_clean_int($_POST['post_id']) : 0;
+    $limit = isset($_POST['limit']) ? max(1, pf_clean_int($_POST['limit'])) : 3;
     
     $response = array(
         'success' => false,
@@ -506,9 +528,12 @@ add_action('wp_ajax_nopriv_get_related_posts', 'putrafiber_ajax_get_related_post
  * Quick View Portfolio Details
  */
 function putrafiber_ajax_quick_view_portfolio() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $portfolio_id = isset($_POST['portfolio_id']) ? intval($_POST['portfolio_id']) : 0;
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $portfolio_id = isset($_POST['portfolio_id']) ? pf_clean_int($_POST['portfolio_id']) : 0;
     
     $response = array(
         'success' => false,
@@ -535,9 +560,12 @@ function putrafiber_ajax_quick_view_portfolio() {
     // Get gallery images
     $gallery_images = array();
     if ($gallery) {
-        $gallery_ids = explode(',', $gallery);
+        $gallery_ids = array_filter(array_map('absint', explode(',', (string) $gallery)));
         foreach ($gallery_ids as $img_id) {
-            $gallery_images[] = wp_get_attachment_image_url($img_id, 'large');
+            $image_url = wp_get_attachment_image_url($img_id, 'large');
+            if ($image_url) {
+                $gallery_images[] = $image_url;
+            }
         }
     }
     
@@ -571,9 +599,12 @@ add_action('wp_ajax_nopriv_quick_view_portfolio', 'putrafiber_ajax_quick_view_po
  * Save User Preferences (Dark Mode, etc)
  */
 function putrafiber_ajax_save_preferences() {
-    check_ajax_referer('putrafiber_nonce', 'nonce');
-    
-    $dark_mode = isset($_POST['dark_mode']) ? sanitize_text_field($_POST['dark_mode']) : 'light';
+    check_ajax_referer('pf_ajax_nonce', 'security');
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $dark_mode = isset($_POST['dark_mode']) ? pf_clean_text($_POST['dark_mode']) : 'light';
     
     $response = array(
         'success' => true,
@@ -633,7 +664,11 @@ function putrafiber_validate_phone($phone) {
  * @return bool Allowed or not
  */
 function putrafiber_rate_limit_check($action, $limit = 5, $period = 3600) {
-    $user_ip = $_SERVER['REMOTE_ADDR'];
+    $user_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+    if (!empty($user_ip)) {
+        $validated_ip = filter_var($user_ip, FILTER_VALIDATE_IP);
+        $user_ip = $validated_ip ? $validated_ip : $user_ip;
+    }
     $transient_key = 'putrafiber_rate_limit_' . md5($action . $user_ip);
     
     $requests = get_transient($transient_key);
@@ -661,9 +696,13 @@ function putrafiber_rate_limit_check($action, $limit = 5, $period = 3600) {
  * @return bool Security check passed
  */
 function putrafiber_ajax_security_check() {
-    // Verify nonce
-    if (!check_ajax_referer('putrafiber_nonce', 'nonce', false)) {
+    if (!check_ajax_referer('pf_ajax_nonce', 'security', false)) {
         wp_send_json_error(__('Security check failed', 'putrafiber'));
+        return false;
+    }
+
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized', 403);
         return false;
     }
     
