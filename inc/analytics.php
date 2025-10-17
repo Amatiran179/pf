@@ -12,23 +12,13 @@ if (!defined('ABSPATH')) exit;
  * @return array
  */
 function putrafiber_get_analytics_data() {
-    $defaults = array(
-        'visits_total'      => 0,
-        'pages'             => array(),
-        'referrers'         => array(),
-        'wa_clicks_total'   => 0,
-        'wa_clicks_by_page' => array(),
-        'wa_clicks_by_link' => array(),
-        'last_updated'      => '',
-    );
-
     $stored = get_option('putrafiber_analytics', array());
 
     if (!is_array($stored)) {
         $stored = array();
     }
 
-    return wp_parse_args($stored, $defaults);
+    return putrafiber_normalize_analytics_data($stored);
 }
 
 /**
@@ -41,7 +31,188 @@ function putrafiber_update_analytics_data($data) {
         return;
     }
 
-    update_option('putrafiber_analytics', $data, false);
+    $normalized = putrafiber_normalize_analytics_data($data);
+
+    update_option('putrafiber_analytics', $normalized, false);
+}
+
+/**
+ * Normalize analytics payload to maintain schema integrity.
+ *
+ * @param array $data Raw analytics data.
+ * @return array
+ */
+function putrafiber_normalize_analytics_data($data) {
+    $defaults = array(
+        'visits_total'      => 0,
+        'pages'             => array(),
+        'referrers'         => array(),
+        'wa_clicks_total'   => 0,
+        'wa_clicks_by_page' => array(),
+        'wa_clicks_by_link' => array(),
+        'last_updated'      => '',
+    );
+
+    $analytics = wp_parse_args(is_array($data) ? $data : array(), $defaults);
+
+    $analytics['visits_total'] = max(0, (int) $analytics['visits_total']);
+    $analytics['wa_clicks_total'] = max(0, (int) $analytics['wa_clicks_total']);
+    $analytics['last_updated'] = sanitize_text_field($analytics['last_updated']);
+
+    $pages = array();
+    if (is_array($analytics['pages'])) {
+        foreach ($analytics['pages'] as $url => $page_data) {
+            $url_key = pf_clean_url(is_string($url) ? $url : '');
+
+            if ($url_key === '') {
+                continue;
+            }
+
+            $page_data = is_array($page_data) ? $page_data : array();
+
+            $count = isset($page_data['count']) ? max(0, (int) $page_data['count']) : 0;
+            $last_visit = isset($page_data['last_visit']) ? sanitize_text_field($page_data['last_visit']) : '';
+            $referrers_raw = isset($page_data['referrers']) ? $page_data['referrers'] : array();
+            $referrers = putrafiber_normalize_analytics_bucket($referrers_raw, true, 50);
+
+            $pages[$url_key] = array(
+                'count'      => $count,
+                'referrers'  => $referrers,
+                'last_visit' => $last_visit,
+            );
+        }
+    }
+
+    putrafiber_trim_page_analytics($pages, 250);
+    $analytics['pages'] = $pages;
+
+    $analytics['referrers'] = putrafiber_normalize_analytics_bucket($analytics['referrers'], true, 250);
+    $analytics['wa_clicks_by_page'] = putrafiber_normalize_analytics_bucket($analytics['wa_clicks_by_page'], true, 250);
+    $analytics['wa_clicks_by_link'] = putrafiber_normalize_analytics_bucket($analytics['wa_clicks_by_link'], false, 250);
+
+    return $analytics;
+}
+
+/**
+ * Normalize analytics buckets so they remain associative arrays with integer counters.
+ *
+ * @param array $bucket      Raw bucket data.
+ * @param bool  $allow_direct Whether to keep the "direct" placeholder key.
+ * @param int   $limit        Optional limit for bucket size.
+ * @return array
+ */
+function putrafiber_normalize_analytics_bucket($bucket, $allow_direct = false, $limit = null) {
+    if (!is_array($bucket)) {
+        return array();
+    }
+
+    $normalized = array();
+
+    foreach ($bucket as $key => $count) {
+        $normalized_key = '';
+
+        if ($allow_direct && is_string($key) && strtolower($key) === 'direct') {
+            $normalized_key = 'direct';
+        } else {
+            $normalized_key = pf_clean_url(is_string($key) ? $key : '');
+        }
+
+        if ($normalized_key === '') {
+            continue;
+        }
+
+        $normalized[$normalized_key] = isset($normalized[$normalized_key])
+            ? $normalized[$normalized_key] + max(0, (int) $count)
+            : max(0, (int) $count);
+    }
+
+    if (!empty($normalized)) {
+        arsort($normalized);
+    }
+
+    if (is_int($limit) && $limit > 0 && count($normalized) > $limit) {
+        $normalized = array_slice($normalized, 0, $limit, true);
+    }
+
+    return $normalized;
+}
+
+/**
+ * Resolve fingerprint for the current visitor when enforcing rate limits.
+ *
+ * @return string Rate limit key (transient identifier) or empty string when unavailable.
+ */
+function putrafiber_get_wa_rate_limit_key() {
+    if (php_sapi_name() === 'cli') {
+        return '';
+    }
+
+    $remote_addr = '';
+    if (isset($_SERVER['REMOTE_ADDR'])) {
+        $candidate = filter_var(wp_unslash($_SERVER['REMOTE_ADDR']), FILTER_VALIDATE_IP);
+        if ($candidate !== false) {
+            $remote_addr = $candidate;
+        }
+    }
+
+    if ($remote_addr === '') {
+        return '';
+    }
+
+    $user_agent = '';
+    if (isset($_SERVER['HTTP_USER_AGENT'])) {
+        $user_agent = substr(sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])), 0, 191);
+    }
+
+    $fingerprint = $remote_addr . '|' . $user_agent;
+
+    return 'pf_wa_rl_' . wp_hash($fingerprint);
+}
+
+/**
+ * Increment and validate rate limit buckets stored in transients.
+ *
+ * @param string $key    Rate limit key.
+ * @param int    $limit  Maximum allowed hits within the window.
+ * @param int    $window Window length in seconds.
+ * @return bool Whether the current hit is allowed.
+ */
+function putrafiber_rate_limit_allows($key, $limit, $window) {
+    $limit = (int) $limit;
+    $window = (int) $window;
+
+    if ($key === '' || $limit <= 0 || $window <= 0) {
+        return true;
+    }
+
+    $now = time();
+    $payload = get_transient($key);
+
+    if (!is_array($payload) || !isset($payload['count'], $payload['start'])) {
+        set_transient($key, array('count' => 1, 'start' => $now), $window);
+        return true;
+    }
+
+    $count = max(0, (int) $payload['count']);
+    $start = max(0, (int) $payload['start']);
+    $elapsed = $now - $start;
+
+    if ($elapsed >= $window) {
+        set_transient($key, array('count' => 1, 'start' => $now), $window);
+        return true;
+    }
+
+    $remaining = max(1, $window - $elapsed);
+
+    if ($count >= $limit) {
+        set_transient($key, array('count' => $count, 'start' => $start), $remaining);
+        return false;
+    }
+
+    $count++;
+    set_transient($key, array('count' => $count, 'start' => $start), $remaining);
+
+    return true;
 }
 
 /**
@@ -169,10 +340,33 @@ add_action('template_redirect', 'putrafiber_track_visit', 20);
 function putrafiber_track_whatsapp_click() {
     // Cukup verifikasi nonce yang dikirim dari client-side.
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-    $nonce_valid = $nonce ? wp_verify_nonce($nonce, 'putrafiber_wa_click_nonce') : false; // Gunakan nonce yang lebih spesifik
+
+    // Sejak refactor enqueue, front-end mengirimkan nonce dengan aksi `putrafiber_analytics`.
+    // Tetap dukung aksi lama (`putrafiber_nonce`) agar request versi sebelumnya tidak gagal.
+    $nonce_valid = false;
+    if ($nonce) {
+        $nonce_valid = wp_verify_nonce($nonce, 'putrafiber_analytics');
+
+        if (!$nonce_valid) {
+            $nonce_valid = wp_verify_nonce($nonce, 'putrafiber_nonce');
+        }
+    }
 
     if (!$nonce_valid) {
         wp_send_json_error(array('message' => __('Invalid security nonce.', 'putrafiber')), 403);
+    }
+
+    $default_rate_limit = array(
+        'limit'  => 30,
+        'window' => MINUTE_IN_SECONDS,
+    );
+    $rate_limit_config = apply_filters('putrafiber_wa_click_rate_limit', $default_rate_limit);
+    $limit = isset($rate_limit_config['limit']) ? (int) $rate_limit_config['limit'] : $default_rate_limit['limit'];
+    $window = isset($rate_limit_config['window']) ? (int) $rate_limit_config['window'] : $default_rate_limit['window'];
+
+    $rate_limit_key = putrafiber_get_wa_rate_limit_key();
+    if ($rate_limit_key !== '' && !putrafiber_rate_limit_allows($rate_limit_key, $limit, $window)) {
+        wp_send_json_error(array('message' => __('Terlalu banyak klik WhatsApp dari sumber yang sama, coba lagi nanti.', 'putrafiber')), 429);
     }
 
     // Hardening: Batasi panjang input untuk mencegah penyalahgunaan.
