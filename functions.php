@@ -44,6 +44,14 @@ foreach ($pf_requires as $rel) {
   if (file_exists($path)) require_once $path;
 }
 
+require_once get_template_directory() . '/inc/schema/schema-helpers.php';
+require_once get_template_directory() . '/inc/schema/schema-registry.php';
+require_once get_template_directory() . '/inc/schema/schema-manager.php';
+require_once get_template_directory() . '/inc/admin/cta-validator.php';
+
+add_action('after_setup_theme', array('PutraFiber_Schema_Manager', 'init'));
+add_action('add_meta_boxes', array('PutraFiber_CTA_Validator', 'init'));
+
 /** ==========================================================================
  * Theme Setup
  * ========================================================================== */
