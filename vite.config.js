@@ -1,16 +1,23 @@
 import { defineConfig } from 'vite';
 import { resolve, parse } from 'path';
 
+const rootDir = __dirname;
+
 export default defineConfig({
   base: '',
   build: {
-    manifest: true,
-    outDir: resolve(__dirname, 'assets/dist'),
+    manifest: 'manifest.json',
+    outDir: resolve(rootDir, 'assets/dist'),
     emptyOutDir: false,
     rollupOptions: {
       input: {
-        'assets/src/js/main.js': resolve(__dirname, 'assets/src/js/main.js'),
-        'assets/src/css/main.css': resolve(__dirname, 'assets/src/css/main.css')
+        'assets/src/js/main.js': resolve(rootDir, 'assets/src/js/main.js'),
+        'assets/src/js/front-page.js': resolve(rootDir, 'assets/src/js/front-page.js'),
+        'assets/src/js/pwa.js': resolve(rootDir, 'assets/src/js/pwa.js'),
+        'assets/src/css/main.css': resolve(rootDir, 'assets/src/css/main.css'),
+        'assets/src/css/front-page.css': resolve(rootDir, 'assets/src/css/front-page.css'),
+        'assets/src/css/product.css': resolve(rootDir, 'assets/src/css/product.css'),
+        'assets/src/css/portfolio.css': resolve(rootDir, 'assets/src/css/portfolio.css')
       },
       output: {
         entryFileNames: 'js/[name]-[hash].js',

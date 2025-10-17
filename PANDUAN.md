@@ -8,21 +8,23 @@ Dokumen ini berfungsi sebagai panduan untuk membersihkan, memelihara, dan mengem
 
 Setelah menerapkan perbaikan terakhir, beberapa file menjadi tidak terpakai (redundant) dan aman untuk dihapus. Menghapus file-file ini akan membuat struktur tema lebih bersih dan mencegah kebingungan di masa depan.
 
-### File yang Harus Dihapus:
+### Status Pembersihan Terkini (April 2024)
 
-1.  **`inc/enqueue.php`**
-    *   **Alasan:** Semua logika untuk memuat aset (CSS & JavaScript) telah dipindahkan dan disatukan ke dalam file `functions.php`. File ini tidak lagi digunakan.
+- [x] **Hapus `inc/enqueue.php`**
+  * Seluruh logika enqueue kini terpusat di `functions.php`. File lama sudah dihapus dari repo.
 
-2.  **Skrip Galeri Lama (`assets/js/`)**
-    *   `assets/js/portfolio-gallery.js`
-    *   `assets/js/product-gallery.js`
-    *   `assets/js/product-gallery2.js`
-    *   **Alasan:** Ketiga file ini telah digantikan oleh satu skrip terpusat, `assets/js/gallery-unified.js`, yang menangani galeri produk dan portofolio.
+- [x] **Singkirkan skrip galeri lama (`assets/js/portfolio-gallery.js`, `product-gallery.js`, `product-gallery2.js`)**
+  * Kedua tipe galeri kini bergantung sepenuhnya pada `assets/js/gallery-unified.js`.
 
-3.  **File CSS Galeri Lama (`assets/css/`)**
-    *   `assets/css/portfolio-gallery-fix.css`
-    *   `assets/css/product-gallery-fix.css`
-    *   **Alasan:** Kedua file ini telah digabungkan menjadi satu file yang lebih efisien, `assets/css/gallery-fix.css`. Pastikan file baru ini diimpor ke dalam file CSS utama Anda.
+- [x] **Hapus stylesheet galeri lama (`assets/css/portfolio-gallery-fix.css`, `product-gallery-fix.css`)**
+  * Seluruh perbaikan gaya galeri berada di stylesheet utama (`product.css`, `portfolio.css`) serta `gallery-fix.css` pada build Vite bila tersedia.
+
+- [x] **Audit bundel Vite dan buat manifest baru yang memuat gaya/skrip galeri**
+  * Seluruh gaya inti kini dikompilasi ke dalam `assets/src/css/main.css` (mengimpor `style.css`, header/footer, komponen, utilities, responsive).
+  * Halaman khusus (landing epic, product, portfolio) serta skrip inti (`main`, `pwa`, `front-page`) mempunyai entry point tersendiri sehingga `manifest.json` memetakan semua kebutuhan enqueue.
+  * `functions.php` sekarang membaca `assets/dist/manifest.json`, memuat jQuery lebih awal, dan menjaga kondisi fallback agar non-Vite tetap aman.
+
+> **Langkah selanjutnya:** Otomatiskan proses build (`npm run build`) pada pipeline deploy/staging dan tambahkan dokumentasi singkat tentang cara membersihkan cache CDN setelah mengganti aset ber-hash.
 
 ---
 
@@ -33,6 +35,7 @@ Berikut adalah ringkasan dari penyempurnaan utama yang telah diimplementasikan:
 *   **Konsolidasi Aset:**
     *   Semua proses `wp_enqueue_script` dan `wp_enqueue_style` sekarang dikelola secara terpusat dari `functions.php`. Ini menghilangkan potensi pemuatan ganda dan memudahkan pengelolaan dependensi.
     *   Hanya satu skrip (`gallery-unified.js`) dan satu file CSS (`gallery-fix.css`) yang sekarang bertanggung jawab untuk semua galeri di frontend.
+    *   Jalur build Vite menyertakan bundel modular (`main`, `front-page`, `product`, `portfolio`, `pwa`) sehingga ketika `manifest.json` tersedia, WordPress otomatis memuat versi terkompilasi tanpa kehilangan fallback tradisional.
 
 *   **Pembersihan Kode Redundan:**
     *   Blok JavaScript dan CSS inline yang besar di dalam file metabox (`inc/post-types/product.php` dan `inc/post-types/portfolio.php`) telah dihapus.
