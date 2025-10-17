@@ -86,3 +86,19 @@ Tema ini memiliki fondasi yang sangat kuat. Berikut adalah beberapa ide untuk pe
 ---
 
 Dengan mengikuti panduan ini, tema PutraFiber akan tetap optimal, aman, dan siap untuk dikembangkan lebih lanjut sesuai kebutuhan bisnis.
+
+---
+
+## 4. Catatan Pemeliharaan Terkini (Juni 2024)
+
+### Sudah Dilakukan
+
+- Menyelaraskan validasi nonce analytics pada endpoint `putrafiber_track_whatsapp_click` agar kembali menerima nonce `putrafiber_analytics` yang dikirim front-end, sembari mempertahankan dukungan kompatibilitas untuk `putrafiber_nonce`.
+- Menormalkan struktur opsi analytics (visit, referrer, dan klik WhatsApp) agar selalu ter-trim, bertipe integer, serta aman dari entri rusak setelah periode produksi panjang. Sekarang opsi akan otomatis dibersihkan setiap kali dibaca maupun disimpan.
+- Menambahkan rate limiting server-side untuk endpoint klik WhatsApp (default 30 klik/menit per fingerprint IP + User-Agent) agar potensi spam atau serangan brute-force tidak merusak statistik maupun membebani server. Filter `putrafiber_wa_click_rate_limit` tersedia untuk penyesuaian batas.
+
+### Belum Dilakukan
+
+- Dokumentasikan flow pelaporan analytics (pengambilan data, reset berkala) di wiki internal agar tim non-teknis dapat melakukan troubleshooting dasar.
+- Riset opsi penyimpanan analytics jangka panjang (mis. custom table atau integrasi layanan pihak ketiga) untuk meminimalisir beban pada `wp_options` ketika trafik tumbuh besar.
+- Evaluasi efektivitas rate limiting baru dan siapkan fallback batching jika traffic organik jauh melebihi ambang standar.
