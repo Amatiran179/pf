@@ -101,14 +101,6 @@ add_action('after_setup_theme', function () {
 add_action('after_setup_theme', array('PutraFiber_Schema_Manager', 'init'));
 add_action('add_meta_boxes', array('PutraFiber_CTA_Validator', 'init'));
 
-add_action('wp_footer', function () {
-  if (is_admin()) {
-    return;
-  }
-
-  echo "<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js');}</script>";
-}, 100);
-
 /** ==========================================================================
  * Theme Setup
  * ========================================================================== */
