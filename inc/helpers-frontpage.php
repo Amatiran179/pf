@@ -407,6 +407,346 @@ function putrafiber_frontpage_limit($section, $default) {
 }
 
 /**
+ * Normalise card layout settings for the requested section.
+ *
+ * @param string $section
+ * @return array{layout:string,style:string,animation:string,columns:int,background_effect:string}
+ */
+function putrafiber_frontpage_card_settings($section) {
+    $defaults = array(
+        'layout'            => 'grid',
+        'style'             => 'glass',
+        'animation'         => 'auto',
+        'columns'           => 3,
+        'background_effect' => 'none',
+    );
+
+    switch ($section) {
+        case 'services':
+            $defaults['layout']            = 'grid';
+            $defaults['style']             = 'glass';
+            $defaults['animation']         = 'auto';
+            $defaults['background_effect'] = 'none';
+            break;
+        case 'blog':
+            $defaults['layout']            = 'grid';
+            $defaults['style']             = 'glass';
+            $defaults['animation']         = 'auto';
+            $defaults['columns']           = 3;
+            $defaults['background_effect'] = 'glass';
+            break;
+        default:
+            // keep defaults for features and other contexts
+            break;
+    }
+
+    if ($section === 'blog') {
+        $size_raw = putrafiber_get_option('front_blog_card_density', 'comfortable');
+    } else {
+        $size_raw = putrafiber_get_option('front_' . $section . '_card_size', 'regular');
+    }
+
+    $layout            = putrafiber_get_option('front_' . $section . '_layout', $defaults['layout']);
+    $style             = putrafiber_get_option('front_' . $section . '_card_style', $defaults['style']);
+    $animation         = putrafiber_get_option('front_' . $section . '_card_animation', $defaults['animation']);
+    $columns           = (int) putrafiber_get_option('front_' . $section . '_card_columns', $defaults['columns']);
+    $background_effect = putrafiber_get_option('front_' . $section . '_background_effect', $defaults['background_effect']);
+
+    $settings = array(
+        'layout'            => putrafiber_frontpage_normalise_choice($layout, array('grid', 'masonry', 'list', 'stacked', 'magazine', 'carousel'), $defaults['layout']),
+        'style'             => putrafiber_frontpage_normalise_choice($style, array('glass', 'solid', 'soft', 'outline'), $defaults['style']),
+        'animation'         => putrafiber_frontpage_normalise_choice($animation, array('auto', 'rise', 'zoom', 'tilt', 'float', 'none'), $defaults['animation']),
+        'columns'           => max(1, min(6, $columns)),
+        'background_effect' => putrafiber_frontpage_normalise_choice($background_effect, array('none', 'gradient', 'bubbles', 'mesh', 'flare', 'glass', 'waves', 'aurora'), $defaults['background_effect']),
+    );
+
+    if ($section === 'blog') {
+        $settings['size'] = putrafiber_frontpage_normalise_choice($size_raw, array('comfortable', 'compact', 'expanded'), 'comfortable');
+    } else {
+        $settings['size'] = putrafiber_frontpage_normalise_choice($size_raw, array('compact', 'regular', 'spacious'), 'regular');
+    }
+
+    return $settings;
+}
+
+/**
+ * Normalise a choice value against an allowed list.
+ *
+ * @param string $value
+ * @param array<int,string> $allowed
+ * @param string $default
+ * @return string
+ */
+function putrafiber_frontpage_normalise_choice($value, $allowed, $default) {
+    $value = sanitize_key($value);
+    if (!in_array($value, $allowed, true)) {
+        return $default;
+    }
+    return $value;
+}
+
+/**
+ * Retrieve advanced card configuration for a section.
+ * Falls back to legacy repeater data when the builder is empty.
+ *
+ * @param string $section Section slug (features|services|blog).
+ * @param string $legacy_key Legacy repeater option key for backwards compatibility.
+ * @param array<int,array<string,string>> $fallback Default items.
+ * @return array<int,array<string,mixed>>
+ */
+function putrafiber_frontpage_cards($section, $legacy_key, $fallback = array()) {
+    $option_key = 'front_' . $section . '_cards';
+    $cards      = putrafiber_get_option($option_key, array());
+
+    if (is_array($cards) && !empty($cards)) {
+        return array_values(array_filter(array_map('putrafiber_frontpage_normalise_card', $cards)));
+    }
+
+    $normalised = array();
+    if ($legacy_key !== '') {
+        $legacy_items = putrafiber_frontpage_parse_repeater($legacy_key, $fallback);
+        foreach ($legacy_items as $item) {
+            $normalised[] = putrafiber_frontpage_normalise_card(array(
+                'title'       => isset($item['title']) ? $item['title'] : '',
+                'description' => isset($item['description']) ? $item['description'] : '',
+                'icon_type'   => 'icon',
+                'icon'        => isset($item['icon']) ? $item['icon'] : '',
+            ));
+        }
+    }
+
+    if (empty($normalised) && !empty($fallback)) {
+        foreach ($fallback as $item) {
+            $normalised[] = putrafiber_frontpage_normalise_card(array(
+                'title'       => isset($item['title']) ? $item['title'] : '',
+                'description' => isset($item['description']) ? $item['description'] : '',
+                'icon_type'   => 'icon',
+                'icon'        => isset($item['icon']) ? $item['icon'] : '',
+            ));
+        }
+    }
+
+    return array_values(array_filter($normalised));
+}
+
+/**
+ * Guarantee all expected fields exist for a card entry.
+ *
+ * @param array<string,mixed> $card
+ * @return array<string,mixed>
+ */
+function putrafiber_frontpage_normalise_card($card) {
+    $defaults = array(
+        'title'        => '',
+        'subtitle'     => '',
+        'description'  => '',
+        'icon_type'    => 'icon',
+        'icon'         => '',
+        'image'        => '',
+        'image_alt'    => '',
+        'image_size'   => 'auto',
+        'badge'        => '',
+        'highlight'    => '',
+        'list'         => array(),
+        'list_effect'  => '',
+        'accent_color' => '',
+        'background'   => '',
+        'text_color'   => '',
+        'link_text'    => '',
+        'link_url'     => '',
+        'button_label' => '',
+        'animation'    => '',
+        'custom_class' => '',
+        'excerpt'      => '',
+        'category_label' => '',
+        'date_label'     => '',
+        'reading_time'   => '',
+        'author_label'   => '',
+        'position'       => 0,
+    );
+
+    $card = wp_parse_args($card, $defaults);
+
+    if (!is_array($card['list'])) {
+        $card['list'] = array();
+    } else {
+        $card['list'] = array_values(array_filter(array_map('sanitize_text_field', $card['list'])));
+    }
+
+    $card['icon_type']  = putrafiber_frontpage_normalise_choice($card['icon_type'], array('icon', 'image', 'image-large'), 'icon');
+    $card['image_size'] = putrafiber_frontpage_normalise_choice($card['image_size'], array('auto', 'small', 'medium', 'large', 'cover', 'contain', 'wide', 'tall', 'square', 'circle'), 'auto');
+    $card['list_effect'] = putrafiber_frontpage_normalise_choice($card['list_effect'], array('', 'check', 'spark', 'wave', 'bullet', 'arrow'), '');
+    $card['animation']   = putrafiber_frontpage_normalise_choice($card['animation'], array('', 'auto', 'rise', 'zoom', 'tilt', 'float', 'pulse', 'fade', 'slide', 'none'), '');
+
+    $card['position'] = isset($card['position']) ? (int) $card['position'] : 0;
+    if ($card['position'] < 0) {
+        $card['position'] = 0;
+    }
+
+    if (!empty($card['custom_class'])) {
+        $pieces = preg_split('/\s+/', $card['custom_class']);
+        $sanitised = array();
+        if (is_array($pieces)) {
+            foreach ($pieces as $piece) {
+                $piece = sanitize_html_class($piece);
+                if ($piece !== '') {
+                    $sanitised[] = $piece;
+                }
+            }
+        }
+        $card['custom_class'] = implode(' ', array_unique($sanitised));
+    } else {
+        $card['custom_class'] = '';
+    }
+
+    $card['icon'] = sanitize_key($card['icon']);
+    $card['image'] = esc_url($card['image']);
+    $card['image_alt'] = sanitize_text_field($card['image_alt']);
+    $card['accent_color'] = sanitize_text_field($card['accent_color']);
+    $card['background'] = sanitize_text_field($card['background']);
+    $card['text_color'] = sanitize_text_field($card['text_color']);
+    $card['link_text'] = sanitize_text_field($card['link_text']);
+    $card['link_url'] = esc_url($card['link_url']);
+    $card['button_label'] = sanitize_text_field($card['button_label']);
+    $card['subtitle'] = sanitize_text_field($card['subtitle']);
+    $card['title'] = sanitize_text_field($card['title']);
+    $card['badge'] = sanitize_text_field($card['badge']);
+    $card['highlight'] = sanitize_text_field($card['highlight']);
+    $card['category_label'] = sanitize_text_field($card['category_label']);
+    $card['date_label'] = sanitize_text_field($card['date_label']);
+    $card['reading_time'] = sanitize_text_field($card['reading_time']);
+    $card['author_label'] = sanitize_text_field($card['author_label']);
+
+    if (!is_string($card['description'])) {
+        $card['description'] = '';
+    }
+    if (!is_string($card['excerpt'])) {
+        $card['excerpt'] = '';
+    }
+
+    $card['description'] = wp_kses_post($card['description']);
+    $card['excerpt']      = wp_kses_post($card['excerpt']);
+
+    return $card;
+}
+
+/**
+ * Return manual blog cards authored via Theme Options.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function putrafiber_frontpage_blog_custom_cards() {
+    $cards = putrafiber_get_option('front_blog_custom_cards', array());
+    if (!is_array($cards) || empty($cards)) {
+        return array();
+    }
+
+    $normalised = array_values(array_filter(array_map('putrafiber_frontpage_normalise_card', $cards)));
+
+    if (empty($normalised)) {
+        return array();
+    }
+
+    usort($normalised, function ($a, $b) {
+        $position_a = isset($a['position']) ? (int) $a['position'] : 0;
+        $position_b = isset($b['position']) ? (int) $b['position'] : 0;
+
+        if ($position_a === $position_b) {
+            return 0;
+        }
+
+        if ($position_a === 0) {
+            return 1;
+        }
+
+        if ($position_b === 0) {
+            return -1;
+        }
+
+        return ($position_a < $position_b) ? -1 : 1;
+    });
+
+    return $normalised;
+}
+
+/**
+ * Build the final ordered deck of blog cards including manual entries.
+ *
+ * @param array<int> $post_ids Ordered list of WordPress post IDs.
+ * @return array<int,array<string,mixed>>
+ */
+function putrafiber_frontpage_blog_deck($post_ids) {
+    $post_ids = array_values(array_unique(array_map('intval', (array) $post_ids)));
+    $custom_cards = putrafiber_frontpage_blog_custom_cards();
+
+    if (empty($custom_cards)) {
+        return array_map(function ($post_id) {
+            return array(
+                'type'    => 'post',
+                'post_id' => $post_id,
+            );
+        }, $post_ids);
+    }
+
+    $positioned = array();
+    $append = array();
+
+    foreach ($custom_cards as $card) {
+        $position = isset($card['position']) ? (int) $card['position'] : 0;
+        if ($position > 0) {
+            if (!isset($positioned[$position])) {
+                $positioned[$position] = array();
+            }
+            $positioned[$position][] = $card;
+        } else {
+            $append[] = $card;
+        }
+    }
+
+    $max_position = !empty($positioned) ? max(array_keys($positioned)) : 0;
+    $max_slots    = max($max_position, count($post_ids));
+
+    $final   = array();
+    $pointer = 0;
+
+    for ($slot = 1; $slot <= $max_slots; $slot++) {
+        if (isset($positioned[$slot])) {
+            foreach ($positioned[$slot] as $card) {
+                $final[] = array(
+                    'type' => 'custom',
+                    'data' => $card,
+                );
+            }
+        }
+
+        if ($pointer < count($post_ids)) {
+            $final[] = array(
+                'type'    => 'post',
+                'post_id' => $post_ids[$pointer],
+            );
+            $pointer++;
+        }
+    }
+
+    while ($pointer < count($post_ids)) {
+        $final[] = array(
+            'type'    => 'post',
+            'post_id' => $post_ids[$pointer],
+        );
+        $pointer++;
+    }
+
+    foreach ($append as $card) {
+        $final[] = array(
+            'type' => 'custom',
+            'data' => $card,
+        );
+    }
+
+    return $final;
+}
+
+/**
  * Retrieve manually curated blog slots configuration.
  *
  * Each line stored in Theme Options should follow the pattern:
