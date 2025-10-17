@@ -66,6 +66,13 @@
     object-fit: cover;
 }
 
+/* Hard reset transforms & animations for slider context */
+.single-portfolio-page .portfolio-gallery-slider .gallery-item,
+.single-portfolio-page .portfolio-gallery-slider .gallery-image {
+    transform: none !important;
+    animation: none !important;
+}
+
 /*
  * ===================================================================
  * FIX: Infinite zoom bug - sama seperti product
@@ -909,13 +916,14 @@
 }
 
 /* CRITICAL: Prevent hover zoom (root cause of infinite zoom) */
-.gallery-item:hover .gallery-image {
-    transform: scale(1);
+.single-portfolio-page .portfolio-gallery-slider .gallery-item:hover .gallery-image {
+    transform: none !important;
 }
 
 /* Prevent image animations */
 .single-portfolio-page .portfolio-gallery-slider .gallery-image {
-    animation: none;
+    animation: none !important;
+    transition: opacity 0.3s ease;
 }
 
 /* Ensure navigation is clickable */
