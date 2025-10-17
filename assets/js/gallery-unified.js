@@ -61,6 +61,28 @@
         }, 100);
     }
 
+    function resetGalleryTransforms(selector) {
+        if (!selector) return;
+
+        const container = document.querySelector(selector);
+        if (!container) return;
+
+        container.querySelectorAll('.gallery-item, .gallery-image').forEach((element) => {
+            if (element.style.transform && element.style.transform !== 'none') {
+                element.style.transform = 'none';
+            }
+            if (element.style.animation && element.style.animation !== 'none') {
+                element.style.animation = 'none';
+            }
+            if (element.classList.contains('animate-zoom-in')) {
+                element.classList.remove('animate-zoom-in');
+            }
+            if (element.classList.contains('fade-in') && !element.classList.contains('visible')) {
+                element.classList.add('visible');
+            }
+        });
+    }
+
     function initProductGallery() {
         if (typeof Swiper === 'undefined' || $('.product-gallery-slider').length === 0) {
             if ($('.product-gallery-slider').length > 0) log('Swiper not defined for Product Gallery.', 'error');
@@ -82,8 +104,9 @@
                 });
             }
 
-            const mainSliderConfig = buildSwiperConfig(totalSlides, galleryThumbs);
+            const mainSliderConfig = buildSwiperConfig(totalSlides, galleryThumbs, '.product-gallery-slider');
             galleryMain = new Swiper('.product-gallery-slider', mainSliderConfig);
+            resetGalleryTransforms('.product-gallery-slider');
             log('Product gallery initialized successfully!', 'success');
 
         } catch (error) {
@@ -114,8 +137,9 @@
             }
 
             // MENGGUNAKAN KONFIGURASI YANG SAMA DAN KONSISTEN
-            const portfolioSliderConfig = buildSwiperConfig(totalSlides, portfolioGalleryThumbs);
+            const portfolioSliderConfig = buildSwiperConfig(totalSlides, portfolioGalleryThumbs, '.portfolio-gallery-slider');
             portfolioGalleryMain = new Swiper('.portfolio-gallery-slider', portfolioSliderConfig);
+            resetGalleryTransforms('.portfolio-gallery-slider');
             log('Portfolio gallery initialized successfully!', 'success');
 
         } catch (error) {
@@ -127,7 +151,7 @@
     /**
      * Helper function to build a consistent Swiper configuration
      */
-    function buildSwiperConfig(totalSlides, thumbsSwiper = null) {
+    function buildSwiperConfig(totalSlides, thumbsSwiper = null, sliderSelector = '') {
         const sliderConfig = {
             spaceBetween: 10,
             slidesPerView: 1,
@@ -157,7 +181,15 @@
                         if (this && typeof this.update === 'function') {
                             this.update();
                         }
+                        if (sliderSelector) {
+                            resetGalleryTransforms(sliderSelector);
+                        }
                     }, 100);
+                },
+                slideChangeTransitionEnd: function () {
+                    if (sliderSelector) {
+                        resetGalleryTransforms(sliderSelector);
+                    }
                 }
             }
         };

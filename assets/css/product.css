@@ -202,6 +202,13 @@
     object-fit: cover;
 }
 
+/* Hard reset transforms & animations to stop rogue zoom behaviour */
+.product-single-page .product-gallery-slider .gallery-item,
+.product-single-page .product-gallery-slider .gallery-image {
+    transform: none !important;
+    animation: none !important;
+}
+
 /*
  * ===================================================================
  * FIX: Infinite zoom bug
@@ -814,13 +821,13 @@
 }
 
 /* CRITICAL: Prevent hover zoom (root cause of infinite zoom) */
-.gallery-item:hover .gallery-image {
-    transform: scale(1);
+.product-single-page .product-gallery-slider .gallery-item:hover .gallery-image {
+    transform: none !important;
 }
 
 /* Prevent image animations */
 .product-single-page .product-gallery-slider .gallery-image {
-    animation: none;
+    animation: none !important;
     transition: opacity 0.3s ease;
 }
 
