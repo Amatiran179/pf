@@ -142,6 +142,14 @@ function putrafiber_dns_prefetch() {
 }
 add_action('wp_head', 'putrafiber_dns_prefetch', 0);
 
+function putrafiber_preload_primary_fonts() {
+    $font_stylesheet = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap';
+    echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+    echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+    echo '<link rel="preload" as="style" href="' . esc_url($font_stylesheet) . '">' . "\n";
+}
+add_action('wp_head', 'putrafiber_preload_primary_fonts', 1);
+
 /**
  * Defer CSS Loading (Critical CSS)
  */

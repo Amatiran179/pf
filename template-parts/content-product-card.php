@@ -23,10 +23,12 @@ $categories = get_the_terms($product_id, 'product_category');
             <?php if (has_post_thumbnail()): ?>
                 <?php the_post_thumbnail('putrafiber-product', [
                     'alt' => get_the_title(),
-                    'loading' => 'lazy'
+                    'loading' => 'lazy',
+                    'decoding' => 'async',
+                    'fetchpriority' => 'low'
                 ]); ?>
             <?php else: ?>
-                <img src="<?php echo pf_output_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image">
+                <img src="<?php echo pf_output_url(PUTRAFIBER_URI . '/assets/images/no-image.svg'); ?>" alt="No Image" loading="lazy" decoding="async" fetchpriority="low">
             <?php endif; ?>
             
             <!-- Stock Badge -->

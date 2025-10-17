@@ -422,7 +422,7 @@ function putrafiber_testimonial_shortcode($atts, $content = null) {
     <div class="testimonial-box">
         <?php if ($atts['image']): ?>
             <div class="testimonial-image">
-                <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['name']); ?>">
+                <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['name']); ?>" loading="lazy" decoding="async" fetchpriority="low">
             </div>
         <?php endif; ?>
         <div class="testimonial-content">
@@ -857,7 +857,7 @@ function putrafiber_team_member_shortcode($atts) {
     <div class="team-member-card">
         <?php if ($atts['image']): ?>
             <div class="team-member-image">
-                <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['name']); ?>">
+                <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['name']); ?>" loading="lazy" decoding="async" fetchpriority="low">
             </div>
         <?php endif; ?>
         

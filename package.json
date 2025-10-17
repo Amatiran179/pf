@@ -4,8 +4,9 @@
   "description": "Premium WordPress theme untuk PutraFiber - Kontraktor Waterpark & Playground Fiberglass",
   "main": "index.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
     "watch": "echo 'Development mode - watching for changes...'",
-    "build": "echo 'Building production assets...'",
     "lint:css": "echo 'Linting CSS files...'",
     "lint:js": "echo 'Linting JavaScript files...'",
     "test": "echo 'Running tests...'"
@@ -30,7 +31,9 @@
     "url": "https://github.com/putrafiber/enterprise-theme/issues"
   },
   "homepage": "https://putrafiber.com",
-  "devDependencies": {},
+  "devDependencies": {
+    "vite": "^5.2.0"
+  },
   "dependencies": {},
   "engines": {
     "node": ">=14.0.0",

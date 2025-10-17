@@ -109,7 +109,7 @@ get_header();
                                                              <?php if (!empty($image['width']) && !empty($image['height'])): ?>
                                                                  width="<?php echo (int) $image['width']; ?>" height="<?php echo (int) $image['height']; ?>"
                                                              <?php endif; ?>
-                                                             <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
+                                                             <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
                                                              decoding="async">
                                                         <span class="zoom-icon">🔍</span>
                                                     </a>
@@ -134,7 +134,7 @@ get_header();
                                                     <div class="swiper-slide">
                                                         <img src="<?php echo pf_output_url($thumb_url); ?>"
                                                              alt="<?php echo pf_output_attr($image['alt']); ?>"
-                                                             loading="lazy">
+                                                             loading="lazy" decoding="async" fetchpriority="low">
                                                     </div>
                                                 <?php 
                                                     endif;
@@ -145,7 +145,7 @@ get_header();
                                 </div>
                             <?php else: ?>
                                 <div class="no-portfolio-image">
-                                    <img src="<?php echo defined('PUTRAFIBER_URI') ? PUTRAFIBER_URI : get_template_directory_uri(); ?>/assets/images/no-image.svg" alt="No Image">
+                                    <img src="<?php echo defined('PUTRAFIBER_URI') ? PUTRAFIBER_URI : get_template_directory_uri(); ?>/assets/images/no-image.svg" alt="No Image" loading="lazy" decoding="async" fetchpriority="low">
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -367,9 +367,9 @@ get_header();
                                    class="gallery-item" 
                                    data-lightbox="portfolio-<?php echo $portfolio_id; ?>"
                                    data-title="<?php echo pf_output_attr($image['alt']); ?>">
-                                    <img src="<?php echo pf_output_url($image['url']); ?>" 
+                                    <img src="<?php echo pf_output_url($image['url']); ?>"
                                          alt="<?php echo pf_output_attr($image['alt']); ?>"
-                                         loading="lazy">
+                                         loading="lazy" decoding="async" fetchpriority="low">
                                     <div class="gallery-overlay">
                                         <span class="zoom-icon">🔍</span>
                                     </div>

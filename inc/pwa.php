@@ -19,7 +19,7 @@ function putrafiber_pwa_meta_tags() {
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="<?php echo esc_attr(putrafiber_get_option('pwa_short_name', 'PutraFiber')); ?>">
-    <link rel="manifest" href="<?php echo home_url('/manifest.json'); ?>">
+    <link rel="manifest" href="<?php echo esc_url(home_url('/manifest.webmanifest')); ?>">
     <?php
     
     $icon = putrafiber_get_option('pwa_icon', '');
@@ -74,6 +74,39 @@ function putrafiber_generate_manifest() {
     }
 }
 add_action('init', 'putrafiber_generate_manifest');
+
+function putrafiber_serve_static_pwa_files() {
+    if (is_admin()) {
+        return;
+    }
+
+    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (!$request_uri) {
+        return;
+    }
+
+    $theme_dir = get_template_directory();
+
+    if (preg_match('#/(manifest\.webmanifest)$#', $request_uri)) {
+        $manifest_path = $theme_dir . '/manifest.webmanifest';
+        if (file_exists($manifest_path)) {
+            header('Content-Type: application/manifest+json');
+            readfile($manifest_path);
+            exit;
+        }
+    }
+
+    if (preg_match('#/(service-worker\.js)$#', $request_uri)) {
+        $sw_path = $theme_dir . '/service-worker.js';
+        if (file_exists($sw_path)) {
+            header('Content-Type: application/javascript');
+            header('Service-Worker-Allowed: /');
+            readfile($sw_path);
+            exit;
+        }
+    }
+}
+add_action('init', 'putrafiber_serve_static_pwa_files', 1);
 
 /**
  * Generate Service Worker
