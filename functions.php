@@ -22,17 +22,26 @@ require_once get_template_directory() . '/inc/helpers-sanitize.php';
 require_once get_template_directory() . '/inc/core/versioning.php';
 
 function pf_enqueue_assets() {
-  $manifest_path = get_template_directory() . '/assets/dist/manifest.json';
+  $manifest_loaded = false;
+  $manifest_path   = get_template_directory() . '/assets/dist/manifest.json';
+
+  // Font selalu dimuat agar konsisten antara build dan fallback.
+  wp_enqueue_style(
+    'pf-fonts',
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
+    array(),
+    null
+  );
 
   if (file_exists($manifest_path)) {
     $manifest_content = file_get_contents($manifest_path);
     if (!empty($manifest_content)) {
       $manifest = json_decode($manifest_content, true);
       if (json_last_error() === JSON_ERROR_NONE && is_array($manifest)) {
-        $dist_uri = trailingslashit(get_template_directory_uri()) . 'assets/dist/';
+        $dist_uri      = trailingslashit(get_template_directory_uri()) . 'assets/dist/';
         $dist_relative = 'assets/dist/';
 
-        $main_js = $manifest['assets/src/js/main.js']['file'] ?? '';
+        $main_js  = $manifest['assets/src/js/main.js']['file'] ?? '';
         $main_css = $manifest['assets/src/css/main.css']['file'] ?? '';
 
         if (!$main_css && !empty($manifest['assets/src/js/main.js']['css'][0])) {
@@ -42,42 +51,127 @@ function pf_enqueue_assets() {
         if ($main_css) {
           $css_uri = $dist_uri . ltrim($main_css, '/');
           wp_enqueue_style('pf-main', $css_uri, array(), pf_asset_version($dist_relative . ltrim($main_css, '/')));
+          $manifest_loaded = true;
         }
 
         if ($main_js) {
           $js_uri = $dist_uri . ltrim($main_js, '/');
           wp_enqueue_script('pf-main', $js_uri, array(), pf_asset_version($dist_relative . ltrim($main_js, '/')), true);
           wp_script_add_data('pf-main', 'type', 'module');
+          $manifest_loaded = true;
         }
 
-        // KONSOLIDASI & OPTIMALISASI FINAL: Muat semua aset galeri dalam satu blok kondisional.
-        if (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag')) || is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
-            // Swiper + SimpleLightbox (CDN)
+        if ($manifest_loaded && (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag')) || is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category'))) {
             wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
             wp_enqueue_style('simplelightbox-css', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
 
             wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.5', true);
             wp_enqueue_script('simplelightbox-js', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js', array('jquery'), '2.14.2', true);
 
-            // Enqueue skrip galeri utama dengan dependensi yang benar.
-            // Ini memastikan Swiper & SimpleLightbox dimuat SEBELUM gallery-unified.js.
             wp_enqueue_script(
                 'pf-gallery-unified',
                 PUTRAFIBER_URI . '/assets/js/gallery-unified.js',
-                array('jquery', 'swiper-js', 'simplelightbox-js'), // Dependensi eksplisit
-                PUTRAFIBER_VERSION,
+                array('jquery', 'swiper-js', 'simplelightbox-js'),
+                pf_asset_version('assets/js/gallery-unified.js'),
                 true
             );
-            // Tambahkan atribut defer untuk performa yang lebih baik.
+
             wp_script_add_data('simplelightbox-js', 'defer', true);
             wp_script_add_data('swiper-js', 'defer', true);
         }
-        return;
       }
     }
   }
 
-  wp_enqueue_style('pf-style', get_stylesheet_uri(), array(), pf_asset_version('style.css'));
+  if (!$manifest_loaded) {
+    // Stylesheet dasar tema.
+    wp_enqueue_style('pf-style', get_stylesheet_uri(), array(), pf_asset_version('style.css'));
+    wp_enqueue_style('pf-header', PUTRAFIBER_URI . '/assets/css/header.css', array('pf-style'), pf_asset_version('assets/css/header.css'));
+    wp_enqueue_style('pf-footer', PUTRAFIBER_URI . '/assets/css/footer.css', array('pf-style'), pf_asset_version('assets/css/footer.css'));
+    wp_enqueue_style('pf-components', PUTRAFIBER_URI . '/assets/css/components.css', array('pf-style'), pf_asset_version('assets/css/components.css'));
+    wp_enqueue_style('pf-animations', PUTRAFIBER_URI . '/assets/css/animations.css', array('pf-style'), pf_asset_version('assets/css/animations.css'));
+
+    if (is_front_page()) {
+      wp_enqueue_style('pf-front-epic', PUTRAFIBER_URI . '/assets/css/front-page-epic.css', array('pf-components', 'pf-animations'), pf_asset_version('assets/css/front-page-epic.css'));
+    }
+
+    wp_enqueue_style('pf-responsive', PUTRAFIBER_URI . '/assets/css/responsive.css', array('pf-style'), pf_asset_version('assets/css/responsive.css'));
+
+    if (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag'))) {
+      wp_enqueue_style('pf-product', PUTRAFIBER_URI . '/assets/css/product.css', array('pf-style'), pf_asset_version('assets/css/product.css'));
+    }
+
+    if (is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
+      wp_enqueue_style('pf-portfolio', PUTRAFIBER_URI . '/assets/css/portfolio.css', array('pf-style'), pf_asset_version('assets/css/portfolio.css'));
+    }
+
+    // Skrip inti tema (non-module).
+    wp_enqueue_script('jquery');
+    wp_enqueue_script('pf-main', PUTRAFIBER_URI . '/assets/js/main.js', array('jquery'), pf_asset_version('assets/js/main.js'), true);
+    wp_enqueue_script('pf-search', PUTRAFIBER_URI . '/assets/js/search.js', array(), pf_asset_version('assets/js/search.js'), true);
+    wp_enqueue_script('pf-lazyload', PUTRAFIBER_URI . '/assets/js/lazyload.js', array(), pf_asset_version('assets/js/lazyload.js'), true);
+    wp_enqueue_script('pf-animations', PUTRAFIBER_URI . '/assets/js/animations.js', array(), pf_asset_version('assets/js/animations.js'), true);
+
+    $pwa_enabled = true;
+    if (function_exists('putrafiber_is_pwa_enabled')) {
+      $pwa_enabled = putrafiber_is_pwa_enabled();
+    } elseif (function_exists('putrafiber_get_option')) {
+      $raw_pwa_value = putrafiber_get_option('enable_pwa', '1');
+      $normalized    = strtolower(trim((string) $raw_pwa_value));
+      $pwa_enabled   = !in_array($normalized, array('0', 'false', 'no', 'off'), true);
+    }
+
+    if ($pwa_enabled) {
+      wp_enqueue_script('pf-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), pf_asset_version('assets/js/pwa.js'), true);
+    }
+
+    if (is_front_page()) {
+      wp_enqueue_script('pf-front-epic', PUTRAFIBER_URI . '/assets/js/front-page-epic.js', array('jquery'), pf_asset_version('assets/js/front-page-epic.js'), true);
+    }
+
+    if (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag')) || is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
+      wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
+      wp_enqueue_style('simplelightbox-css', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
+
+      wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.5', true);
+      wp_enqueue_script('simplelightbox-js', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js', array('jquery'), '2.14.2', true);
+
+      wp_enqueue_script(
+        'pf-gallery-unified',
+        PUTRAFIBER_URI . '/assets/js/gallery-unified.js',
+        array('jquery', 'swiper-js', 'simplelightbox-js'),
+        pf_asset_version('assets/js/gallery-unified.js'),
+        true
+      );
+
+      wp_script_add_data('simplelightbox-js', 'defer', true);
+      wp_script_add_data('swiper-js', 'defer', true);
+    }
+  }
+
+  if (wp_script_is('pf-gallery-unified', 'enqueued')) {
+    wp_localize_script('pf-gallery-unified', 'pfGalleryConfig', array(
+      'autoplayDelay'          => 4000,
+      'slideSpeed'             => 600,
+      'enableLoop'             => true,
+      'enableAutoplay'         => true,
+      'lightboxAutoplay'       => true,
+      'lightboxAutoplayDelay'  => 5200,
+      'lightboxAnimationSpeed' => 280,
+      'debug'                  => defined('WP_DEBUG') && WP_DEBUG,
+    ));
+  }
+
+  if (wp_script_is('pf-main', 'enqueued')) {
+    wp_localize_script('pf-main', 'putrafiber_vars', array(
+      'ajax_url'        => admin_url('admin-ajax.php'),
+      'nonce'           => wp_create_nonce('putrafiber_nonce'),
+      'analytics_nonce' => wp_create_nonce('putrafiber_analytics'),
+      'theme_url'       => PUTRAFIBER_URI,
+      'whatsapp_number' => function_exists('putrafiber_whatsapp_number') ? putrafiber_whatsapp_number() : '',
+      'copied_text'     => esc_html__('Copied to clipboard!', 'putrafiber'),
+    ));
+  }
 }
 add_action('wp_enqueue_scripts', 'pf_enqueue_assets', 5);
 
