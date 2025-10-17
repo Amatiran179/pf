@@ -3,6 +3,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initSectionsBuilder();
+    initCardBuilders();
     initColorPresets();
   });
 
@@ -30,6 +31,7 @@
     var sortableInstance = null;
 
     renderAll();
+    updateInput();
     syncLegacyCheckboxes();
 
     if (addButton) {
@@ -419,6 +421,827 @@
         var enabledIds = sections.filter(function (section) { return section.enabled; }).map(function (section) { return section.id; });
         orderInput.value = enabledIds.join(',');
       }
+    }
+  }
+
+  function initCardBuilders() {
+    var builders = document.querySelectorAll('[data-pf-card-builder]');
+    if (!builders.length) {
+      return;
+    }
+
+    Array.prototype.forEach.call(builders, function (builderEl) {
+      createCardBuilder(builderEl);
+    });
+  }
+
+  function createCardBuilder(builderEl) {
+    var listEl = builderEl.querySelector('.pf-card-builder__list');
+    var addButton = builderEl.querySelector('.pf-card-builder__add');
+    var importButton = builderEl.querySelector('.pf-card-builder__import');
+    var inputEl = builderEl.querySelector('input[type="hidden"][name]');
+    var config = parseJSON(builderEl.getAttribute('data-config')) || {};
+    var section = config.section || 'features';
+    var allowedFields = Array.isArray(config.fields) ? config.fields : [];
+    var cards = normaliseCards(readStoredCards());
+    var sortableInstance = null;
+
+    renderAll();
+
+    if (addButton) {
+      addButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        cards.push(createEmptyCard());
+        renderAll();
+        updateInput();
+      });
+    }
+
+    if (importButton) {
+      importButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        importLegacy(importButton.getAttribute('data-source'));
+      });
+    }
+
+    if (listEl) {
+      listEl.addEventListener('input', handleFieldEvent);
+      listEl.addEventListener('change', handleFieldEvent);
+      listEl.addEventListener('click', handleListClick);
+    }
+
+    function readStoredCards() {
+      if (!inputEl) {
+        return [];
+      }
+
+      var raw = inputEl.value;
+      if (!raw) {
+        return [];
+      }
+
+      var parsed = parseJSON(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+
+      return [];
+    }
+
+    function createEmptyCard() {
+      var defaults = {
+        title: '',
+        subtitle: '',
+        description: '',
+        icon_type: 'icon',
+        icon: '',
+        image: '',
+        image_alt: '',
+        image_size: 'auto',
+        badge: '',
+        highlight: '',
+        list: [],
+        list_effect: '',
+        accent_color: '',
+        background: '',
+        text_color: '',
+        link_text: '',
+        link_url: '',
+        button_label: '',
+        animation: '',
+        custom_class: '',
+        excerpt: '',
+        category_label: '',
+        date_label: '',
+        reading_time: '',
+        author_label: '',
+        position: 0
+      };
+
+      var card = {};
+      allowedFields.forEach(function (field) {
+        if (typeof defaults[field] !== 'undefined') {
+          if (Array.isArray(defaults[field])) {
+            card[field] = [].concat(defaults[field]);
+          } else {
+            card[field] = defaults[field];
+          }
+        } else {
+          card[field] = '';
+        }
+      });
+
+      return card;
+    }
+
+    function normaliseCards(initialCards) {
+      if (!Array.isArray(initialCards) || !initialCards.length) {
+        return [];
+      }
+
+      return initialCards.map(function (rawCard) {
+        var card = createEmptyCard();
+        if (!rawCard || typeof rawCard !== 'object') {
+          return card;
+        }
+
+        allowedFields.forEach(function (field) {
+          if (typeof rawCard[field] === 'undefined') {
+            return;
+          }
+
+          if (field === 'list') {
+            if (Array.isArray(rawCard.list)) {
+              card.list = rawCard.list.filter(function (item) {
+                return typeof item === 'string' && item.trim() !== '';
+              }).map(function (item) {
+                return item.trim();
+              });
+            } else if (typeof rawCard.list === 'string') {
+              card.list = rawCard.list.split(/\r?\n/).map(function (item) {
+                return item.trim();
+              }).filter(function (item) {
+                return item !== '';
+              });
+            }
+          } else if (field === 'position') {
+            card.position = parseInt(rawCard.position, 10);
+            if (isNaN(card.position) || card.position < 0) {
+              card.position = 0;
+            }
+          } else {
+            card[field] = rawCard[field];
+          }
+        });
+
+        return card;
+      });
+    }
+
+    function renderAll() {
+      if (!listEl) {
+        return;
+      }
+
+      listEl.innerHTML = '';
+
+      if (!cards.length) {
+        var empty = document.createElement('p');
+        empty.className = 'pf-card-builder__empty';
+        empty.textContent = builderEmptyMessage();
+        listEl.appendChild(empty);
+        destroySortable();
+        return;
+      }
+
+      cards.forEach(function (card, index) {
+        listEl.appendChild(buildCardItem(card, index));
+      });
+
+      initSortable();
+    }
+
+    function builderEmptyMessage() {
+      switch (section) {
+        case 'services':
+          return 'Belum ada kartu layanan. Tambahkan dari tombol di bawah.';
+        case 'blog':
+          return 'Belum ada artikel khusus. Tambah kartu untuk menampilkan konten manual.';
+        default:
+          return 'Belum ada kartu fitur. Klik tombol tambah untuk memulai.';
+      }
+    }
+
+    function buildCardItem(card, index) {
+      var item = document.createElement('div');
+      item.className = 'pf-card-item';
+      item.dataset.index = index;
+      if (card.icon_type) {
+        item.setAttribute('data-icon-type', card.icon_type);
+      }
+
+      var header = document.createElement('div');
+      header.className = 'pf-card-item__header';
+      header.innerHTML = '' +
+        '<button type="button" class="pf-card-item__handle" aria-label="Pindahkan kartu">' +
+          '<span class="dashicons dashicons-move"></span>' +
+        '</button>' +
+        '<div class="pf-card-item__summary">' +
+          '<span class="pf-card-item__title">' + escapeHtml(cardTitle(card, index)) + '</span>' +
+          '<span class="pf-card-item__meta">' + escapeHtml(cardMeta(card)) + '</span>' +
+        '</div>' +
+        '<button type="button" class="button-link-delete pf-card-item__remove" data-action="remove-card">Hapus</button>';
+      item.appendChild(header);
+
+      var body = document.createElement('div');
+      body.className = 'pf-card-item__body';
+      body.innerHTML = buildFieldsHtml(card);
+      item.appendChild(body);
+
+      return item;
+    }
+
+    function cardTitle(card, index) {
+      if (card && card.title) {
+        return card.title;
+      }
+
+      if (section === 'blog' && card && card.subtitle) {
+        return card.subtitle;
+      }
+
+      return 'Kartu ' + (index + 1);
+    }
+
+    function cardMeta(card) {
+      if (section === 'blog') {
+        if (card && card.date_label) {
+          return card.date_label;
+        }
+        if (typeof card.position !== 'undefined' && card.position > 0) {
+          return 'Posisi #' + card.position;
+        }
+        return 'Artikel landing page';
+      }
+
+      if (card && card.icon_type === 'image') {
+        return 'Gambar custom';
+      }
+      if (card && card.icon_type === 'image-large') {
+        return 'Gambar lebar';
+      }
+
+      return 'Ikon: ' + (card.icon || 'default');
+    }
+
+    function buildFieldsHtml(card) {
+      return allowedFields.map(function (field) {
+        return buildField(field, card);
+      }).join('');
+    }
+
+    function buildField(field, card) {
+      var value = typeof card[field] !== 'undefined' ? card[field] : '';
+      var meta = getFieldMeta(field);
+      var description = meta.description ? '<p class="description">' + meta.description + '</p>' : '';
+
+      if (field === 'list' && Array.isArray(value)) {
+        value = value.join('\n');
+      }
+
+      if (meta.type === 'textarea') {
+        return '' +
+          '<div class="pf-card-field">' +
+            '<label>' + meta.label + '</label>' +
+          '<textarea rows="' + meta.rows + '" data-field="' + field + '" data-field-type="textarea" placeholder="' + escapeAttr(meta.placeholder || '') + '">' + escapeTextarea(value || '') + '</textarea>' +
+            description +
+          '</div>';
+      }
+
+      if (meta.type === 'select') {
+        var options = meta.options.map(function (option) {
+          var selected = option.value === value ? ' selected' : '';
+          return '<option value="' + escapeAttr(option.value) + '"' + selected + '>' + option.label + '</option>';
+        }).join('');
+        return '' +
+          '<div class="pf-card-field">' +
+            '<label>' + meta.label + '</label>' +
+            '<select data-field="' + field + '">' + options + '</select>' +
+            description +
+          '</div>';
+      }
+
+      if (meta.type === 'media') {
+        var preview = value ? '<div class="pf-card-media__preview"><img src="' + escapeAttr(value) + '" alt=""></div>' : '<div class="pf-card-media__preview pf-card-media__preview--empty">Belum ada gambar</div>';
+        return '' +
+          '<div class="pf-card-field pf-card-field--media">' +
+            '<label>' + meta.label + '</label>' +
+            preview +
+            '<div class="pf-card-media__actions">' +
+              '<button type="button" class="button pf-card-media__choose" data-action="choose-media">Pilih gambar</button>' +
+              '<button type="button" class="button-link pf-card-media__remove" data-action="clear-media">Hapus</button>' +
+            '</div>' +
+            '<input type="hidden" data-field="' + field + '" value="' + escapeAttr(value || '') + '">' +
+            description +
+          '</div>';
+      }
+
+      if (meta.type === 'number') {
+        return '' +
+          '<div class="pf-card-field pf-card-field--inline">' +
+            '<label>' + meta.label + '</label>' +
+            '<input type="number" data-field="' + field + '" data-field-type="number" min="' + meta.min + '" value="' + escapeAttr(value || 0) + '" placeholder="' + escapeAttr(meta.placeholder || '') + '">' +
+            description +
+          '</div>';
+      }
+
+      var inputType = meta.type === 'url' ? 'url' : 'text';
+      return '' +
+        '<div class="pf-card-field' + (meta.inline ? ' pf-card-field--inline' : '') + '">' +
+          '<label>' + meta.label + '</label>' +
+          '<input type="' + inputType + '" data-field="' + field + '" value="' + escapeAttr(value || '') + '" placeholder="' + escapeAttr(meta.placeholder || '') + '">' +
+          description +
+        '</div>';
+    }
+
+    function getFieldMeta(field) {
+      var meta = {
+        label: field,
+        type: 'text',
+        placeholder: ''
+      };
+
+      switch (field) {
+        case 'title':
+          meta.label = 'Judul';
+          meta.placeholder = 'Contoh: Water Adventure';
+          break;
+        case 'subtitle':
+          meta.label = 'Subjudul';
+          meta.placeholder = 'Opsional, muncul di bawah judul';
+          break;
+        case 'description':
+          meta.label = 'Deskripsi';
+          meta.type = 'textarea';
+          meta.rows = 4;
+          meta.placeholder = 'Tuliskan detail manfaat atau isi utama.';
+          meta.description = 'HTML dasar (strong, em, ul, ol, a) diperbolehkan.';
+          break;
+        case 'excerpt':
+          meta.label = 'Ringkasan';
+          meta.type = 'textarea';
+          meta.rows = 4;
+          meta.placeholder = 'Ringkasan artikel custom.';
+          meta.description = 'Gunakan enter untuk paragraf baru.';
+          break;
+        case 'icon_type':
+          meta.label = 'Jenis media';
+          meta.type = 'select';
+          meta.options = [
+            { value: 'icon', label: 'Gunakan ikon bawaan' },
+            { value: 'image', label: 'Gambar custom (ukuran fleksibel)' },
+            { value: 'image-large', label: 'Gambar besar (melebar)' }
+          ];
+          meta.description = 'Pilih apakah kartu menampilkan ikon atau gambar.';
+          break;
+        case 'icon':
+          meta.label = 'Nama ikon';
+          meta.placeholder = 'Misal: spark, wave, gear';
+          meta.description = 'Gunakan daftar ikon tema seperti spark, drop, shield, wave.';
+          break;
+        case 'image':
+          meta.label = 'Gambar';
+          meta.type = 'media';
+          meta.description = 'Gambar akan menggantikan ikon. Resolusi tinggi direkomendasikan.';
+          break;
+        case 'image_alt':
+          meta.label = 'Alt text gambar';
+          meta.placeholder = 'Deskripsi singkat gambar';
+          meta.description = 'Wajib diisi untuk aksesibilitas.';
+          break;
+        case 'image_size':
+          meta.label = 'Ukuran media';
+          meta.type = 'select';
+          meta.options = [
+            { value: 'auto', label: 'Otomatis' },
+            { value: 'small', label: 'Kecil' },
+            { value: 'medium', label: 'Sedang' },
+            { value: 'large', label: 'Besar' },
+            { value: 'cover', label: 'Cover (isi penuh)' },
+            { value: 'contain', label: 'Contain' },
+            { value: 'wide', label: 'Lebar' },
+            { value: 'tall', label: 'Tinggi' },
+            { value: 'square', label: 'Persegi' },
+            { value: 'circle', label: 'Lingkaran' }
+          ];
+          break;
+        case 'badge':
+          meta.label = 'Badge/Label kecil';
+          meta.placeholder = 'Contoh: Favorit';
+          meta.description = 'Muncul di pojok atas kartu.';
+          break;
+        case 'highlight':
+          meta.label = 'Highlight';
+          meta.placeholder = 'Kalimat pendek yang menonjol';
+          break;
+        case 'list':
+          meta.label = 'Bullet list';
+          meta.type = 'textarea';
+          meta.rows = 3;
+          meta.placeholder = 'Tulis satu poin per baris';
+          meta.description = 'Setiap baris akan menjadi bullet terpisah.';
+          break;
+        case 'list_effect':
+          meta.label = 'Gaya bullet';
+          meta.type = 'select';
+          meta.options = [
+            { value: '', label: 'Default' },
+            { value: 'check', label: 'Checklist hijau' },
+            { value: 'spark', label: 'Spark animasi' },
+            { value: 'wave', label: 'Gelombang' },
+            { value: 'bullet', label: 'Bullet klasik' },
+            { value: 'arrow', label: 'Panah dinamis' }
+          ];
+          break;
+        case 'accent_color':
+          meta.label = 'Warna aksen';
+          meta.placeholder = '#f4c542 atau rgba(244,197,66,0.8)';
+          meta.description = 'Digunakan untuk garis hias atau icon.';
+          break;
+        case 'background':
+          meta.label = 'Warna latar kartu';
+          meta.placeholder = 'Contoh: #ffffff atau linear-gradient(...)';
+          meta.description = 'Kosongkan untuk menggunakan default tema.';
+          break;
+        case 'text_color':
+          meta.label = 'Warna teks';
+          meta.placeholder = '#0b1320';
+          break;
+        case 'link_text':
+          meta.label = 'Teks tautan';
+          meta.placeholder = 'Contoh: Pelajari selengkapnya';
+          break;
+        case 'link_url':
+          meta.label = 'URL tautan';
+          meta.type = 'url';
+          meta.placeholder = 'https://';
+          break;
+        case 'button_label':
+          meta.label = 'Label tombol';
+          meta.placeholder = 'Contoh: Konsultasi';
+          break;
+        case 'animation':
+          meta.label = 'Animasi kartu';
+          meta.type = 'select';
+          meta.options = [
+            { value: '', label: 'Ikuti pengaturan global' },
+            { value: 'auto', label: 'Otomatis (acak)' },
+            { value: 'rise', label: 'Melayang naik' },
+            { value: 'zoom', label: 'Zoom lembut' },
+            { value: 'tilt', label: 'Tilt dinamis' },
+            { value: 'float', label: 'Mengambang' },
+            { value: 'pulse', label: 'Pulse' },
+            { value: 'fade', label: 'Fade in' },
+            { value: 'slide', label: 'Slide kanan' },
+            { value: 'none', label: 'Tanpa animasi' }
+          ];
+          break;
+        case 'custom_class':
+          meta.label = 'Kelas CSS khusus';
+          meta.placeholder = 'pisahkan dengan spasi';
+          meta.description = 'Gunakan untuk styling lanjutan.';
+          break;
+        case 'category_label':
+          meta.label = 'Label kategori';
+          meta.placeholder = 'Misal: Insight, Tips';
+          break;
+        case 'date_label':
+          meta.label = 'Label tanggal';
+          meta.placeholder = 'Format bebas, misal Januari 2024';
+          break;
+        case 'reading_time':
+          meta.label = 'Waktu baca';
+          meta.placeholder = 'Contoh: 4 menit';
+          break;
+        case 'author_label':
+          meta.label = 'Penulis';
+          meta.placeholder = 'Nama penulis atau tim';
+          break;
+        case 'position':
+          meta.label = 'Posisi khusus';
+          meta.type = 'number';
+          meta.min = 0;
+          meta.placeholder = '0';
+          meta.description = 'Nilai 1 akan menempatkan kartu sebelum artikel WordPress pertama.';
+          break;
+      }
+
+      if (field === 'accent_color' || field === 'background' || field === 'text_color') {
+        meta.inline = true;
+      }
+
+      return meta;
+    }
+
+    function handleFieldEvent(event) {
+      var target = event.target;
+      if (!target || !target.getAttribute('data-field')) {
+        return;
+      }
+
+      var cardEl = target.closest('.pf-card-item');
+      if (!cardEl) {
+        return;
+      }
+
+      var index = parseInt(cardEl.getAttribute('data-index'), 10);
+      if (isNaN(index) || !cards[index]) {
+        return;
+      }
+
+      var field = target.getAttribute('data-field');
+      var fieldType = target.getAttribute('data-field-type') || target.tagName.toLowerCase();
+      var value = target.value;
+
+      if (fieldType === 'textarea' && field === 'list') {
+        cards[index][field] = value.split(/\r?\n/).map(function (line) {
+          return line.trim();
+        }).filter(function (line) {
+          return line !== '';
+        });
+      } else if (fieldType === 'number') {
+        var parsed = parseInt(value, 10);
+        if (isNaN(parsed) || parsed < 0) {
+          parsed = 0;
+        }
+        cards[index][field] = parsed;
+        target.value = parsed;
+      } else if (field === 'list') {
+        cards[index][field] = value.split(/\r?\n/).map(function (line) {
+          return line.trim();
+        }).filter(function (line) {
+          return line !== '';
+        });
+      } else {
+        cards[index][field] = value;
+      }
+
+      if (field === 'title' || (section === 'blog' && (field === 'date_label' || field === 'position'))) {
+        updateSummary(cardEl, cards[index], index);
+      }
+
+      if (field === 'icon_type') {
+        cardEl.setAttribute('data-icon-type', value);
+      }
+
+      updateInput();
+    }
+
+    function handleListClick(event) {
+      var target = event.target;
+      if (!target) {
+        return;
+      }
+
+      if (target.getAttribute('data-action') === 'remove-card') {
+        event.preventDefault();
+        var cardEl = target.closest('.pf-card-item');
+        if (!cardEl) {
+          return;
+        }
+        var index = parseInt(cardEl.getAttribute('data-index'), 10);
+        if (isNaN(index) || !cards[index]) {
+          return;
+        }
+        if (window.confirm('Hapus kartu ini?')) {
+          cards.splice(index, 1);
+          renderAll();
+          updateInput();
+        }
+        return;
+      }
+
+      if (target.getAttribute('data-action') === 'choose-media') {
+        event.preventDefault();
+        openMediaFrame(target.closest('.pf-card-item'), target);
+        return;
+      }
+
+      if (target.getAttribute('data-action') === 'clear-media') {
+        event.preventDefault();
+        var container = target.closest('.pf-card-field');
+        if (!container) {
+          return;
+        }
+        var cardEl = target.closest('.pf-card-item');
+        var index = parseInt(cardEl.getAttribute('data-index'), 10);
+        if (isNaN(index) || !cards[index]) {
+          return;
+        }
+        var hidden = container.querySelector('input[data-field="image"]');
+        if (hidden) {
+          hidden.value = '';
+        }
+        var preview = container.querySelector('.pf-card-media__preview');
+        if (preview) {
+          preview.innerHTML = '';
+          preview.classList.add('pf-card-media__preview--empty');
+          preview.textContent = 'Belum ada gambar';
+        }
+        cards[index].image = '';
+        updateInput();
+      }
+    }
+
+    function updateSummary(cardEl, card, index) {
+      var titleEl = cardEl.querySelector('.pf-card-item__title');
+      if (titleEl) {
+        titleEl.textContent = cardTitle(card, index);
+      }
+      var metaEl = cardEl.querySelector('.pf-card-item__meta');
+      if (metaEl) {
+        metaEl.textContent = cardMeta(card);
+      }
+    }
+
+    function updateInput() {
+      if (!inputEl) {
+        return;
+      }
+
+      if (!cards.length) {
+        inputEl.value = '[]';
+        return;
+      }
+
+      var payload = cards.map(function (card) {
+        var output = {};
+        allowedFields.forEach(function (field) {
+          if (typeof card[field] === 'undefined') {
+            return;
+          }
+          if (field === 'list') {
+            output[field] = Array.isArray(card.list) ? card.list.filter(function (item) {
+              return item && item.trim() !== '';
+            }).map(function (item) {
+              return item.trim();
+            }) : [];
+          } else if (field === 'position') {
+            var position = parseInt(card.position, 10);
+            output[field] = isNaN(position) || position < 0 ? 0 : position;
+          } else {
+            output[field] = card[field];
+          }
+        });
+        return output;
+      });
+
+      inputEl.value = JSON.stringify(payload);
+    }
+
+    function initSortable() {
+      if (typeof Sortable === 'undefined' || !listEl) {
+        return;
+      }
+
+      destroySortable();
+
+      sortableInstance = Sortable.create(listEl, {
+        animation: 150,
+        handle: '.pf-card-item__handle',
+        draggable: '.pf-card-item',
+        filter: '.pf-card-builder__empty',
+        onEnd: function (evt) {
+          if (evt.oldIndex === evt.newIndex) {
+            syncCardIndices();
+            return;
+          }
+          var moved = cards.splice(evt.oldIndex, 1)[0];
+          cards.splice(evt.newIndex, 0, moved);
+          renderAll();
+          updateInput();
+        }
+      });
+    }
+
+    function destroySortable() {
+      if (sortableInstance) {
+        sortableInstance.destroy();
+        sortableInstance = null;
+      }
+    }
+
+    function syncCardIndices() {
+      if (!listEl) {
+        return;
+      }
+      Array.prototype.forEach.call(listEl.children, function (child, index) {
+        if (child.classList.contains('pf-card-item')) {
+          child.dataset.index = index;
+        }
+      });
+    }
+
+    function importLegacy(source) {
+      if (!source) {
+        return;
+      }
+
+      var textarea = document.querySelector('textarea[name="putrafiber_options[front_' + source + '_items]"]');
+      if (!textarea) {
+        window.alert('Tidak ditemukan data lama untuk dikonversi.');
+        return;
+      }
+
+      var raw = textarea.value;
+      if (!raw) {
+        window.alert('Kolom data lama masih kosong.');
+        return;
+      }
+
+      var lines = raw.split(/\r?\n/);
+      var imported = [];
+
+      lines.forEach(function (line) {
+        var trimmed = line.trim();
+        if (!trimmed) {
+          return;
+        }
+        var parts = trimmed.split('|');
+        var title = parts[0] ? parts[0].trim() : '';
+        var description = parts[1] ? parts[1].trim() : '';
+        var icon = parts[2] ? parts[2].trim() : '';
+        if (!title && !description) {
+          return;
+        }
+
+        var card = createEmptyCard();
+        if (allowedFields.indexOf('title') !== -1) {
+          card.title = title;
+        }
+        if (allowedFields.indexOf('description') !== -1) {
+          card.description = description;
+        }
+        if (allowedFields.indexOf('icon') !== -1) {
+          card.icon = icon;
+        }
+        imported.push(card);
+      });
+
+      if (!imported.length) {
+        window.alert('Tidak ada baris valid yang ditemukan.');
+        return;
+      }
+
+      if (cards.length && !window.confirm('Ganti semua kartu dengan data hasil konversi?')) {
+        return;
+      }
+
+      cards = imported;
+      renderAll();
+      updateInput();
+    }
+
+    var mediaFrame = null;
+
+    function openMediaFrame(cardEl, trigger) {
+      if (!cardEl) {
+        return;
+      }
+      var index = parseInt(cardEl.getAttribute('data-index'), 10);
+      if (isNaN(index) || !cards[index]) {
+        return;
+      }
+
+      if (!window.wp || !wp.media) {
+        window.alert('Fitur media WordPress tidak tersedia.');
+        return;
+      }
+
+      if (mediaFrame) {
+        mediaFrame.off('select');
+      }
+
+      mediaFrame = wp.media({
+        title: 'Pilih gambar kartu',
+        multiple: false,
+        library: { type: 'image' }
+      });
+
+      mediaFrame.on('select', function () {
+        var attachment = mediaFrame.state().get('selection').first();
+        if (!attachment) {
+          return;
+        }
+        var url = attachment.get('url');
+        var alt = attachment.get('alt') || attachment.get('title') || '';
+        cards[index].image = url;
+        if (allowedFields.indexOf('image_alt') !== -1 && !cards[index].image_alt) {
+          cards[index].image_alt = alt;
+        }
+
+        var container = trigger ? trigger.closest('.pf-card-field') : cardEl.querySelector('.pf-card-field--media');
+        if (container) {
+          var hidden = container.querySelector('input[data-field="image"]');
+          if (hidden) {
+            hidden.value = url;
+          }
+          var preview = container.querySelector('.pf-card-media__preview');
+          if (preview) {
+            preview.classList.remove('pf-card-media__preview--empty');
+            preview.innerHTML = '<img src="' + escapeAttr(url) + '" alt="">';
+          }
+          var altInput = cardEl.querySelector('input[data-field="image_alt"]');
+          if (altInput && !altInput.value) {
+            altInput.value = alt;
+            cards[index].image_alt = alt;
+          }
+        }
+
+        updateInput();
+      });
+
+      mediaFrame.open();
     }
   }
 

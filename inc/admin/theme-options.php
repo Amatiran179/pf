@@ -108,6 +108,25 @@ function putrafiber_settings_init() {
     add_settings_field('enable_portfolio_section', __('Tampilkan Portfolio', 'putrafiber'), 'putrafiber_enable_portfolio_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('enable_products_section', __('Tampilkan Products', 'putrafiber'), 'putrafiber_enable_products_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('enable_blog_section', __('Tampilkan Blog', 'putrafiber'), 'putrafiber_enable_blog_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+
+    add_settings_field('front_features_layout', __('Layout Fitur', 'putrafiber'), 'putrafiber_front_features_layout_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_features_card_style', __('Gaya Kartu Fitur', 'putrafiber'), 'putrafiber_front_features_card_style_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_features_card_size', __('Ukuran Kartu Fitur', 'putrafiber'), 'putrafiber_front_features_card_size_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_features_card_animation', __('Animasi Global Fitur', 'putrafiber'), 'putrafiber_front_features_card_animation_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_features_card_columns', __('Kolom Grid Fitur', 'putrafiber'), 'putrafiber_front_features_card_columns_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_features_background_effect', __('Efek Latar Fitur', 'putrafiber'), 'putrafiber_front_features_background_effect_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+
+    add_settings_field('front_services_layout', __('Layout Layanan', 'putrafiber'), 'putrafiber_front_services_layout_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_services_card_style', __('Gaya Kartu Layanan', 'putrafiber'), 'putrafiber_front_services_card_style_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_services_card_size', __('Ukuran Kartu Layanan', 'putrafiber'), 'putrafiber_front_services_card_size_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_services_card_animation', __('Animasi Global Layanan', 'putrafiber'), 'putrafiber_front_services_card_animation_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_services_card_columns', __('Kolom Grid Layanan', 'putrafiber'), 'putrafiber_front_services_card_columns_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_services_background_effect', __('Efek Latar Layanan', 'putrafiber'), 'putrafiber_front_services_background_effect_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+
+    add_settings_field('front_blog_layout', __('Layout Artikel', 'putrafiber'), 'putrafiber_front_blog_layout_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_blog_card_style', __('Gaya Kartu Artikel', 'putrafiber'), 'putrafiber_front_blog_card_style_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_blog_card_density', __('Kepadatan Kartu Artikel', 'putrafiber'), 'putrafiber_front_blog_card_density_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_blog_background_effect', __('Efek Latar Artikel', 'putrafiber'), 'putrafiber_front_blog_background_effect_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('enable_cta_section', __('Tampilkan CTA', 'putrafiber'), 'putrafiber_enable_cta_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('enable_testimonials_section', __('Tampilkan Testimonials', 'putrafiber'), 'putrafiber_enable_testimonials_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('enable_partners_section', __('Tampilkan Partners', 'putrafiber'), 'putrafiber_enable_partners_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
@@ -130,10 +149,12 @@ function putrafiber_settings_init() {
 
     add_settings_field('front_features_title', __('Features Title', 'putrafiber'), 'putrafiber_front_features_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_features_description', __('Features Description', 'putrafiber'), 'putrafiber_front_features_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_features_cards', __('Feature Cards (Advanced)', 'putrafiber'), 'putrafiber_front_features_cards_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_features_items', __('Feature Highlights', 'putrafiber'), 'putrafiber_front_features_items_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
 
     add_settings_field('front_services_title', __('Services Title', 'putrafiber'), 'putrafiber_front_services_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_services_description', __('Services Description', 'putrafiber'), 'putrafiber_front_services_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_services_cards', __('Services Cards (Advanced)', 'putrafiber'), 'putrafiber_front_services_cards_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_services_items', __('Services Items', 'putrafiber'), 'putrafiber_front_services_items_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
 
     add_settings_field('front_portfolio_title', __('Portfolio Title', 'putrafiber'), 'putrafiber_front_portfolio_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
@@ -147,6 +168,7 @@ function putrafiber_settings_init() {
     add_settings_field('front_blog_title', __('Blog Title', 'putrafiber'), 'putrafiber_front_blog_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_blog_description', __('Blog Description', 'putrafiber'), 'putrafiber_front_blog_description_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_blog_limit', __('Blog Posts Limit', 'putrafiber'), 'putrafiber_front_blog_limit_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
+    add_settings_field('front_blog_custom_cards', __('Artikel Khusus Landing Page', 'putrafiber'), 'putrafiber_front_blog_custom_cards_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
     add_settings_field('front_blog_manual_posts', __('Blog Slot Manual Order', 'putrafiber'), 'putrafiber_front_blog_manual_posts_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
 
     add_settings_field('front_cta_title', __('CTA Title', 'putrafiber'), 'putrafiber_front_cta_title_render', 'putrafiber-landing', 'putrafiber_landing_copy_section');
@@ -328,6 +350,48 @@ function putrafiber_sanitize_options($input) {
     foreach ($text_fields as $field) {
         $output[$field] = isset($input[$field]) ? sanitize_text_field($input[$field]) : '';
     }
+
+    $choice_fields = array(
+        'front_features_layout'            => array('grid', 'masonry', 'list', 'stacked'),
+        'front_features_card_style'        => array('glass', 'solid', 'soft', 'outline'),
+        'front_features_card_size'         => array('compact', 'regular', 'spacious'),
+        'front_features_card_animation'    => array('auto', 'rise', 'zoom', 'tilt', 'float', 'none'),
+        'front_features_background_effect' => array('none', 'gradient', 'bubbles', 'mesh'),
+        'front_services_layout'            => array('grid', 'masonry', 'list', 'stacked'),
+        'front_services_card_style'        => array('glass', 'solid', 'soft', 'outline'),
+        'front_services_card_size'         => array('compact', 'regular', 'spacious'),
+        'front_services_card_animation'    => array('auto', 'rise', 'zoom', 'tilt', 'float', 'none'),
+        'front_services_background_effect' => array('none', 'gradient', 'mesh', 'flare'),
+        'front_blog_layout'                => array('grid', 'magazine', 'list', 'carousel'),
+        'front_blog_card_style'            => array('glass', 'solid', 'soft', 'outline'),
+        'front_blog_card_density'          => array('comfortable', 'compact', 'expanded'),
+        'front_blog_background_effect'     => array('none', 'glass', 'waves', 'aurora'),
+    );
+
+    foreach ($choice_fields as $field => $choices) {
+        $default = reset($choices);
+        $value   = isset($input[$field]) ? sanitize_key($input[$field]) : $default;
+        if (!in_array($value, $choices, true)) {
+            $value = $default;
+        }
+        $output[$field] = $value;
+    }
+
+    $column_defaults = array(
+        'front_features_card_columns' => 3,
+        'front_services_card_columns' => 3,
+    );
+
+    foreach ($column_defaults as $field => $fallback) {
+        $value = isset($input[$field]) ? (int) $input[$field] : $fallback;
+        if ($value < 1) {
+            $value = 1;
+        }
+        if ($value > 6) {
+            $value = 6;
+        }
+        $output[$field] = $value;
+    }
     
     // ===================================================================
     // CHECKBOX FIELDS - CRITICAL FIX
@@ -360,6 +424,10 @@ function putrafiber_sanitize_options($input) {
     // ARRAY FIELDS
     // ===================================================================
     
+    $output['front_features_cards'] = putrafiber_sanitize_card_collection($input, 'front_features_cards', 'features');
+    $output['front_services_cards'] = putrafiber_sanitize_card_collection($input, 'front_services_cards', 'services');
+    $output['front_blog_custom_cards'] = putrafiber_sanitize_card_collection($input, 'front_blog_custom_cards', 'blog');
+
     // Payment Methods (checkbox array)
     $output['payment_methods'] = array();
     if (isset($input['payment_methods']) && is_array($input['payment_methods'])) {
@@ -545,6 +613,190 @@ function putrafiber_sanitize_options($input) {
     }
 
     return $output;
+}
+
+/**
+ * Sanitize dynamic card builder payloads.
+ *
+ * @param array  $input   Raw input array from options page.
+ * @param string $key     Option key being sanitised.
+ * @param string $context Card context (features|services|blog).
+ * @return array<int,array<string,mixed>>
+ */
+function putrafiber_sanitize_card_collection($input, $key, $context = 'features') {
+    $raw = isset($input[$key]) ? $input[$key] : '';
+
+    if (is_string($raw) && $raw !== '') {
+        $decoded = json_decode(wp_unslash($raw), true);
+    } elseif (is_array($raw)) {
+        $decoded = $raw;
+    } else {
+        $decoded = array();
+    }
+
+    if (!is_array($decoded)) {
+        return array();
+    }
+
+    $sanitised = array();
+    foreach ($decoded as $item) {
+        $clean = putrafiber_sanitize_card_item($item, $context);
+        if ($clean !== null) {
+            $sanitised[] = $clean;
+        }
+    }
+
+    return $sanitised;
+}
+
+/**
+ * Normalise and sanitise a single card entry from the builder interface.
+ *
+ * @param mixed  $item    Raw card data.
+ * @param string $context Card context (features|services|blog).
+ * @return array<string,mixed>|null
+ */
+function putrafiber_sanitize_card_item($item, $context = 'features') {
+    if (!is_array($item)) {
+        return null;
+    }
+
+    $context = in_array($context, array('features', 'services', 'blog'), true) ? $context : 'features';
+
+    $title       = isset($item['title']) ? sanitize_text_field($item['title']) : '';
+    $subtitle    = isset($item['subtitle']) ? sanitize_text_field($item['subtitle']) : '';
+    $description = isset($item['description']) ? wp_kses_post($item['description']) : '';
+
+    $icon_type = isset($item['icon_type']) ? sanitize_key($item['icon_type']) : 'icon';
+    $allowed_icon_types = array('icon', 'image', 'image-large');
+    if (!in_array($icon_type, $allowed_icon_types, true)) {
+        $icon_type = 'icon';
+    }
+
+    $icon = isset($item['icon']) ? sanitize_key($item['icon']) : '';
+    $image = isset($item['image']) ? esc_url_raw($item['image']) : '';
+    $image_alt = isset($item['image_alt']) ? sanitize_text_field($item['image_alt']) : '';
+
+    $image_size = isset($item['image_size']) ? sanitize_key($item['image_size']) : 'auto';
+    $allowed_image_sizes = array('auto', 'small', 'medium', 'large', 'cover', 'contain', 'wide', 'tall', 'square', 'circle');
+    if (!in_array($image_size, $allowed_image_sizes, true)) {
+        $image_size = 'auto';
+    }
+
+    $badge     = isset($item['badge']) ? sanitize_text_field($item['badge']) : '';
+    $highlight = isset($item['highlight']) ? sanitize_text_field($item['highlight']) : '';
+
+    $list_effect = isset($item['list_effect']) ? sanitize_key($item['list_effect']) : '';
+    $allowed_effects = array('', 'check', 'spark', 'wave', 'bullet', 'arrow');
+    if (!in_array($list_effect, $allowed_effects, true)) {
+        $list_effect = '';
+    }
+
+    $list = array();
+    if (isset($item['list'])) {
+        if (is_array($item['list'])) {
+            foreach ($item['list'] as $list_item) {
+                if (!is_string($list_item)) {
+                    continue;
+                }
+                $sanitised_item = sanitize_text_field($list_item);
+                if ($sanitised_item !== '') {
+                    $list[] = $sanitised_item;
+                }
+            }
+        } elseif (is_string($item['list'])) {
+            $lines = preg_split('/\r\n|\r|\n/', $item['list']);
+            if ($lines) {
+                foreach ($lines as $line) {
+                    $sanitised_item = sanitize_text_field($line);
+                    if ($sanitised_item !== '') {
+                        $list[] = $sanitised_item;
+                    }
+                }
+            }
+        }
+    }
+
+    $accent_color = isset($item['accent_color']) ? sanitize_text_field($item['accent_color']) : '';
+    $background   = isset($item['background']) ? sanitize_text_field($item['background']) : '';
+    $text_color   = isset($item['text_color']) ? sanitize_text_field($item['text_color']) : '';
+
+    $link_text = isset($item['link_text']) ? sanitize_text_field($item['link_text']) : '';
+    $link_url  = isset($item['link_url']) ? esc_url_raw($item['link_url']) : '';
+
+    $button_label = isset($item['button_label']) ? sanitize_text_field($item['button_label']) : '';
+
+    $animation = isset($item['animation']) ? sanitize_key($item['animation']) : '';
+    $allowed_animation = array('', 'inherit', 'auto', 'rise', 'zoom', 'tilt', 'float', 'pulse', 'fade', 'slide', 'none');
+    if (!in_array($animation, $allowed_animation, true)) {
+        $animation = '';
+    }
+    if ($animation === 'inherit') {
+        $animation = '';
+    }
+
+    $custom_class = '';
+    if (!empty($item['custom_class'])) {
+        $pieces = preg_split('/\s+/', $item['custom_class']);
+        $allowed = array();
+        if (is_array($pieces)) {
+            foreach ($pieces as $piece) {
+                $piece = sanitize_html_class($piece);
+                if ($piece !== '') {
+                    $allowed[] = $piece;
+                }
+            }
+        }
+        if (!empty($allowed)) {
+            $custom_class = implode(' ', array_unique($allowed));
+        }
+    }
+
+    $result = array(
+        'title'        => $title,
+        'subtitle'     => $subtitle,
+        'description'  => $description,
+        'icon_type'    => $icon_type,
+        'icon'         => $icon,
+        'image'        => $image,
+        'image_alt'    => $image_alt,
+        'image_size'   => $image_size,
+        'badge'        => $badge,
+        'highlight'    => $highlight,
+        'list'         => $list,
+        'list_effect'  => $list_effect,
+        'accent_color' => $accent_color,
+        'background'   => $background,
+        'text_color'   => $text_color,
+        'link_text'    => $link_text,
+        'link_url'     => $link_url,
+        'button_label' => $button_label,
+        'animation'    => $animation,
+        'custom_class' => $custom_class,
+    );
+
+    if ($context === 'blog') {
+        $result['excerpt']        = isset($item['excerpt']) ? wp_kses_post($item['excerpt']) : '';
+        $result['category_label'] = isset($item['category_label']) ? sanitize_text_field($item['category_label']) : '';
+        $result['date_label']     = isset($item['date_label']) ? sanitize_text_field($item['date_label']) : '';
+        $result['reading_time']   = isset($item['reading_time']) ? sanitize_text_field($item['reading_time']) : '';
+        $result['author_label']   = isset($item['author_label']) ? sanitize_text_field($item['author_label']) : '';
+        $position                 = isset($item['position']) ? (int) $item['position'] : 0;
+        if ($position < 0) {
+            $position = 0;
+        }
+        $result['position'] = $position;
+    }
+
+    if ($context !== 'blog' && $title === '' && $description === '' && $icon === '' && $image === '') {
+        return null;
+    }
+
+    if ($context === 'blog' && $title === '' && empty($result['excerpt'])) {
+        return null;
+    }
+
+    return $result;
 }
 
 /**
@@ -789,6 +1041,291 @@ function putrafiber_enable_blog_section_render() {
     <?php
 }
 
+function putrafiber_front_features_layout_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_layout']) ? $options['front_features_layout'] : 'grid';
+    $choices = array(
+        'grid'    => __('Grid Simetris', 'putrafiber'),
+        'masonry' => __('Masonry Dinamis', 'putrafiber'),
+        'list'    => __('Daftar Horizontal', 'putrafiber'),
+        'stacked' => __('Spotlight Besar', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_features_layout]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Pilih gaya susunan kartu fitur. Grid untuk tampilan rapih, masonry untuk variasi tinggi, list untuk penekanan horizontal, atau spotlight untuk kartu besar.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_features_card_style_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_card_style']) ? $options['front_features_card_style'] : 'glass';
+    $choices = array(
+        'glass'   => __('Glassmorphism Premium', 'putrafiber'),
+        'solid'   => __('Solid Berwarna', 'putrafiber'),
+        'soft'    => __('Soft Shadow', 'putrafiber'),
+        'outline' => __('Outline Minimalis', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_features_card_style]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Sesuaikan gaya visual kartu fitur tanpa perlu mengubah CSS manual.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_features_card_size_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_card_size']) ? $options['front_features_card_size'] : 'regular';
+    $choices = array(
+        'compact' => __('Ringkas', 'putrafiber'),
+        'regular' => __('Standar', 'putrafiber'),
+        'spacious' => __('Legar', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_features_card_size]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Mengatur padding dan tinggi kartu fitur agar sesuai dengan kebutuhan konten.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_features_card_animation_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_card_animation']) ? $options['front_features_card_animation'] : 'rise';
+    $choices = array(
+        'auto'  => __('Ikuti animasi campuran', 'putrafiber'),
+        'rise'  => __('Naik lembut', 'putrafiber'),
+        'zoom'  => __('Zoom dramatis', 'putrafiber'),
+        'tilt'  => __('Tilt futuristik', 'putrafiber'),
+        'float' => __('Melayang pelan', 'putrafiber'),
+        'none'  => __('Tanpa animasi', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_features_card_animation]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Pengaturan ini menjadi default animasi untuk seluruh kartu fitur. Anda tetap dapat menimpa per kartu melalui builder.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_features_card_columns_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_card_columns']) ? (int) $options['front_features_card_columns'] : 3;
+    ?>
+    <input type="number" name="putrafiber_options[front_features_card_columns]" value="<?php echo esc_attr($value); ?>" min="1" max="6" class="small-text">
+    <p class="description"><?php _e('Atur jumlah kolom maksimum untuk kartu fitur pada layar besar.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_features_background_effect_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_background_effect']) ? $options['front_features_background_effect'] : 'none';
+    $choices = array(
+        'none'     => __('Tanpa efek tambahan', 'putrafiber'),
+        'gradient' => __('Gradasi dinamis', 'putrafiber'),
+        'bubbles'  => __('Gelembung air', 'putrafiber'),
+        'mesh'     => __('Mesh modern', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_features_background_effect]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Tambahkan aksen visual di belakang grid fitur agar lebih hidup.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_layout_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_layout']) ? $options['front_services_layout'] : 'grid';
+    $choices = array(
+        'grid'    => __('Grid Simetris', 'putrafiber'),
+        'masonry' => __('Masonry Dinamis', 'putrafiber'),
+        'list'    => __('Daftar dengan CTA', 'putrafiber'),
+        'stacked' => __('Spotlight Premium', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_services_layout]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Grid cocok untuk banyak layanan, list menonjolkan deskripsi dan tombol CTA, sedangkan spotlight menyorot layanan unggulan.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_card_style_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_card_style']) ? $options['front_services_card_style'] : 'glass';
+    $choices = array(
+        'glass'   => __('Glassmorphism Premium', 'putrafiber'),
+        'solid'   => __('Solid Profesional', 'putrafiber'),
+        'soft'    => __('Soft Pastel', 'putrafiber'),
+        'outline' => __('Outline Minimalis', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_services_card_style]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Selaraskan gaya visual layanan dengan branding utama.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_card_size_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_card_size']) ? $options['front_services_card_size'] : 'regular';
+    $choices = array(
+        'compact' => __('Ringkas', 'putrafiber'),
+        'regular' => __('Standar', 'putrafiber'),
+        'spacious' => __('Legar dengan ruang ekstra', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_services_card_size]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Mengontrol ruang putih pada kartu layanan untuk menonjolkan CTA atau daftar poin.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_card_animation_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_card_animation']) ? $options['front_services_card_animation'] : 'auto';
+    $choices = array(
+        'auto'  => __('Campuran animasi default', 'putrafiber'),
+        'rise'  => __('Naik lembut', 'putrafiber'),
+        'zoom'  => __('Zoom dramatis', 'putrafiber'),
+        'tilt'  => __('Tilt futuristik', 'putrafiber'),
+        'float' => __('Melayang pelan', 'putrafiber'),
+        'none'  => __('Tanpa animasi', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_services_card_animation]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Pengaturan global animasi layanan, bisa dioverride per kartu.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_card_columns_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_card_columns']) ? (int) $options['front_services_card_columns'] : 3;
+    ?>
+    <input type="number" name="putrafiber_options[front_services_card_columns]" value="<?php echo esc_attr($value); ?>" min="1" max="6" class="small-text">
+    <p class="description"><?php _e('Jumlah kolom maksimum untuk daftar layanan di layar lebar.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_services_background_effect_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_background_effect']) ? $options['front_services_background_effect'] : 'none';
+    $choices = array(
+        'none'     => __('Tanpa efek', 'putrafiber'),
+        'gradient' => __('Gradasi lembut', 'putrafiber'),
+        'mesh'     => __('Mesh modern', 'putrafiber'),
+        'flare'    => __('Cahaya dramatis', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_services_background_effect]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Aktifkan aksen visual unik di belakang kartu layanan.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_blog_layout_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_layout']) ? $options['front_blog_layout'] : 'grid';
+    $choices = array(
+        'grid'     => __('Grid modern', 'putrafiber'),
+        'magazine' => __('Magazine highlight', 'putrafiber'),
+        'list'     => __('Daftar editorial', 'putrafiber'),
+        'carousel' => __('Carousel sinematik', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_blog_layout]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Kontrol struktur visual untuk artikel landing page. Mode magazine akan otomatis memperbesar kartu pertama.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_blog_card_style_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_card_style']) ? $options['front_blog_card_style'] : 'glass';
+    $choices = array(
+        'glass'   => __('Glass futuristik', 'putrafiber'),
+        'solid'   => __('Solid editorial', 'putrafiber'),
+        'soft'    => __('Soft pastel', 'putrafiber'),
+        'outline' => __('Outline minimalis', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_blog_card_style]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Terapkan gaya kartu seragam untuk artikel blog.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_blog_card_density_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_card_density']) ? $options['front_blog_card_density'] : 'comfortable';
+    $choices = array(
+        'comfortable' => __('Nyaman (default)', 'putrafiber'),
+        'compact'     => __('Ringkas', 'putrafiber'),
+        'expanded'    => __('Lebih lega', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_blog_card_density]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Atur kepadatan konten kartu artikel untuk menyesuaikan panjang ringkasan.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_blog_background_effect_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_background_effect']) ? $options['front_blog_background_effect'] : 'glass';
+    $choices = array(
+        'none'    => __('Bersih tanpa efek', 'putrafiber'),
+        'glass'   => __('Glass ripple', 'putrafiber'),
+        'waves'   => __('Gelombang bergerak', 'putrafiber'),
+        'aurora'  => __('Aurora gradien', 'putrafiber'),
+    );
+    ?>
+    <select name="putrafiber_options[front_blog_background_effect]">
+        <?php foreach ($choices as $key => $label): ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($value, $key); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p class="description"><?php _e('Tentukan efek latar belakang untuk section artikel.', 'putrafiber'); ?></p>
+    <?php
+}
+
 function putrafiber_enable_cta_section_render() {
     $options = get_option('putrafiber_options', array());
     $value = isset($options['enable_cta_section']) ? $options['enable_cta_section'] : '1';
@@ -926,6 +1463,31 @@ function putrafiber_front_features_description_render() {
     <?php
 }
 
+function putrafiber_front_features_cards_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_features_cards']) && is_array($options['front_features_cards']) ? $options['front_features_cards'] : array();
+    $json_value = !empty($value) ? wp_json_encode($value) : '';
+    $config = array(
+        'section' => 'features',
+        'fields'  => array('title', 'subtitle', 'description', 'icon_type', 'icon', 'image', 'image_alt', 'image_size', 'badge', 'highlight', 'list', 'list_effect', 'accent_color', 'background', 'text_color', 'link_text', 'link_url', 'animation', 'custom_class'),
+    );
+    ?>
+    <div class="pf-card-builder" data-pf-card-builder data-config="<?php echo esc_attr(wp_json_encode($config)); ?>" data-import="features">
+        <div class="pf-card-builder__header">
+            <p><?php _e('Susun kartu fitur lengkap beserta ikon, gambar, badge, dan daftar bullet secara fleksibel.', 'putrafiber'); ?></p>
+        </div>
+        <div class="pf-card-builder__list" aria-live="polite"></div>
+        <div class="pf-card-builder__footer">
+            <button type="button" class="button button-secondary pf-card-builder__add"><?php esc_html_e('Tambah Kartu Fitur', 'putrafiber'); ?></button>
+            <button type="button" class="button-link pf-card-builder__import" data-source="features"><?php esc_html_e('Gunakan data dari kolom lama', 'putrafiber'); ?></button>
+        </div>
+        <input type="hidden" name="putrafiber_options[front_features_cards]" value="<?php echo esc_attr($json_value); ?>">
+        <p class="description"><?php _e('Jika tidak diisi, sistem otomatis memakai data dari kolom "Feature Highlights" sehingga kompatibel dengan versi sebelumnya.', 'putrafiber'); ?></p>
+        <p class="description"><?php _e('Tips: gunakan accent colour berbeda untuk menonjolkan kartu penting.', 'putrafiber'); ?></p>
+    </div>
+    <?php
+}
+
 function putrafiber_front_features_items_render() {
     $options = get_option('putrafiber_options', array());
     $value = isset($options['front_features_items']) ? $options['front_features_items'] : "Garansi 5 Tahun|Jaminan kualitas dan layanan purna jual responsif.|shield\nTim Berpengalaman|Didukung insinyur dan artisan fiberglass bersertifikat.|trophy\nTeknologi Mutakhir|Produksi modern dengan standar keamanan internasional.|gear";
@@ -948,6 +1510,31 @@ function putrafiber_front_services_description_render() {
     $value = isset($options['front_services_description']) ? $options['front_services_description'] : __('Dari masterplan, fabrikasi, hingga instalasi turn-key untuk wahana air dan playground.', 'putrafiber');
     ?>
     <textarea name="putrafiber_options[front_services_description]" rows="3" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+    <?php
+}
+
+function putrafiber_front_services_cards_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_services_cards']) && is_array($options['front_services_cards']) ? $options['front_services_cards'] : array();
+    $json_value = !empty($value) ? wp_json_encode($value) : '';
+    $config = array(
+        'section' => 'services',
+        'fields'  => array('title', 'subtitle', 'description', 'icon_type', 'icon', 'image', 'image_alt', 'image_size', 'badge', 'highlight', 'list', 'list_effect', 'accent_color', 'background', 'text_color', 'link_text', 'link_url', 'animation', 'custom_class'),
+    );
+    ?>
+    <div class="pf-card-builder" data-pf-card-builder data-config="<?php echo esc_attr(wp_json_encode($config)); ?>" data-import="services">
+        <div class="pf-card-builder__header">
+            <p><?php _e('Atur layanan unggulan lengkap dengan CTA, ikon atau gambar sesuai kebutuhan.', 'putrafiber'); ?></p>
+        </div>
+        <div class="pf-card-builder__list" aria-live="polite"></div>
+        <div class="pf-card-builder__footer">
+            <button type="button" class="button button-secondary pf-card-builder__add"><?php esc_html_e('Tambah Kartu Layanan', 'putrafiber'); ?></button>
+            <button type="button" class="button-link pf-card-builder__import" data-source="services"><?php esc_html_e('Konversi dari data lama', 'putrafiber'); ?></button>
+        </div>
+        <input type="hidden" name="putrafiber_options[front_services_cards]" value="<?php echo esc_attr($json_value); ?>">
+        <p class="description"><?php _e('Kosongkan untuk memakai daftar layanan lama secara otomatis.', 'putrafiber'); ?></p>
+        <p class="description"><?php _e('Anda dapat menambahkan daftar poin (list) untuk menjelaskan benefit tiap layanan.', 'putrafiber'); ?></p>
+    </div>
     <?php
 }
 
@@ -1047,6 +1634,30 @@ function putrafiber_front_blog_limit_render() {
     ?>
     <input type="number" name="putrafiber_options[front_blog_limit]" value="<?php echo esc_attr($value); ?>" min="3" max="9" class="small-text">
     <p class="description"><?php _e('Jumlah artikel yang ditampilkan pada landing page.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_blog_custom_cards_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = isset($options['front_blog_custom_cards']) && is_array($options['front_blog_custom_cards']) ? $options['front_blog_custom_cards'] : array();
+    $json_value = !empty($value) ? wp_json_encode($value) : '';
+    $config = array(
+        'section' => 'blog',
+        'fields'  => array('title', 'subtitle', 'excerpt', 'badge', 'category_label', 'date_label', 'reading_time', 'author_label', 'list', 'accent_color', 'background', 'text_color', 'image', 'image_alt', 'image_size', 'link_url', 'button_label', 'position', 'animation', 'custom_class'),
+    );
+    ?>
+    <div class="pf-card-builder" data-pf-card-builder data-config="<?php echo esc_attr(wp_json_encode($config)); ?>">
+        <div class="pf-card-builder__header">
+            <p><?php _e('Tambahkan artikel khusus yang ditulis langsung tanpa membuat post WordPress.', 'putrafiber'); ?></p>
+        </div>
+        <div class="pf-card-builder__list" aria-live="polite"></div>
+        <div class="pf-card-builder__footer">
+            <button type="button" class="button button-secondary pf-card-builder__add"><?php esc_html_e('Tambah Artikel Khusus', 'putrafiber'); ?></button>
+        </div>
+        <input type="hidden" name="putrafiber_options[front_blog_custom_cards]" value="<?php echo esc_attr($json_value); ?>">
+        <p class="description"><?php _e('Gunakan kolom posisi untuk menempatkan artikel custom di urutan yang diinginkan. Nilai 1 berarti muncul sebelum artikel WordPress pertama.', 'putrafiber'); ?></p>
+        <p class="description"><?php _e('Kosongkan kolom posisi untuk menaruh artikel custom di bagian akhir.', 'putrafiber'); ?></p>
+    </div>
     <?php
 }
 

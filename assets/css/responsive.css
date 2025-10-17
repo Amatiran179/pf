@@ -24,6 +24,16 @@
     .grid-4 {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .card-collection.card-layout--grid,
+    .card-collection.card-layout--masonry,
+    .card-collection.card-layout--magazine {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card-layout--list .card {
+        align-items: flex-start;
+    }
     
     .hero-section {
         min-height: 70vh;
@@ -49,6 +59,35 @@
     .grid-4 {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    .card-collection.card-layout--grid,
+    .card-collection.card-layout--masonry,
+    .card-collection.card-layout--magazine {
+        grid-template-columns: 1fr;
+    }
+
+    .card-collection.card-layout--stacked {
+        padding-top: 0;
+    }
+
+    .card-collection.card-layout--stacked > .card:not(:first-child) {
+        margin-top: 1rem;
+    }
+
+    .card-layout--list .card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.25rem;
+    }
+
+    .card-layout--list .blog-image {
+        width: 100%;
+        margin: 0 0 1rem;
+    }
+
+    .blog-card--hero .blog-content {
+        padding: 1.75rem;
     }
     
     .card {
@@ -89,6 +128,10 @@
     .feature-card,
     .service-card {
         padding: 30px 20px;
+    }
+
+    .card-collection.card-layout--carousel > * {
+        flex-basis: 85%;
     }
     
     .cta-contact-info {
