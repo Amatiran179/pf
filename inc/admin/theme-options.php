@@ -210,6 +210,16 @@ function putrafiber_settings_init() {
     add_settings_field('payment_methods', __('Payment Methods', 'putrafiber'), 'putrafiber_payment_methods_render', 'putrafiber-localbusiness', 'putrafiber_localbusiness_section');
     add_settings_field('service_areas', __('Service Areas', 'putrafiber'), 'putrafiber_service_areas_render', 'putrafiber-localbusiness', 'putrafiber_localbusiness_section');
     add_settings_field('localbusiness_pages', __('Show on Pages', 'putrafiber'), 'putrafiber_localbusiness_pages_render', 'putrafiber-localbusiness', 'putrafiber_localbusiness_section');
+
+    add_settings_section(
+        'putrafiber_schema_advanced_section',
+        __('Schema Advanced', 'putrafiber'),
+        'putrafiber_schema_advanced_section_callback',
+        'putrafiber-schema-advanced'
+    );
+
+    add_settings_field('enable_schema_advanced', __('Enable Schema Advanced Layer', 'putrafiber'), 'putrafiber_enable_schema_advanced_render', 'putrafiber-schema-advanced', 'putrafiber_schema_advanced_section');
+    add_settings_field('cta_priority_order', __('CTA Priority Order', 'putrafiber'), 'putrafiber_cta_priority_order_render', 'putrafiber-schema-advanced', 'putrafiber_schema_advanced_section');
 }
 add_action('admin_init', 'putrafiber_settings_init');
 
@@ -292,6 +302,7 @@ function putrafiber_sanitize_options($input) {
         'enable_aggregate_rating',
         'enable_pwa',
         'enable_localbusiness',
+        'enable_schema_advanced',
         'front_enable_parallax',
         'enable_hero_section',
         'enable_features_section',
@@ -362,7 +373,20 @@ function putrafiber_sanitize_options($input) {
             $output['service_areas'] = array_values(array_filter(array_map('trim', array_map('sanitize_text_field', $lines))));
         }
     }
-    
+
+    // CTA Priority Order (multi select)
+    $output['cta_priority_order'] = array();
+    if (isset($input['cta_priority_order']) && is_array($input['cta_priority_order'])) {
+        foreach ($input['cta_priority_order'] as $slug) {
+            $sanitized = sanitize_key($slug);
+            if ($sanitized !== '') {
+                $output['cta_priority_order'][] = $sanitized;
+            }
+        }
+
+        $output['cta_priority_order'] = array_values(array_unique($output['cta_priority_order']));
+    }
+
     return $output;
 }
 
@@ -399,6 +423,10 @@ function putrafiber_pwa_section_callback() {
 
 function putrafiber_localbusiness_section_callback() {
     echo '<p>' . __('Configure LocalBusiness schema for better local SEO. This will appear on selected pages.', 'putrafiber') . '</p>';
+}
+
+function putrafiber_schema_advanced_section_callback() {
+    echo '<p>' . __('Kelola Schema Advanced Layer, termasuk prioritas CTA dan output JSON-LD tunggal.', 'putrafiber') . '</p>';
 }
 
 /**
@@ -1322,6 +1350,7 @@ function putrafiber_options_page() {
             <a href="#seo" class="nav-tab"><?php _e('SEO', 'putrafiber'); ?></a>
             <a href="#pwa" class="nav-tab"><?php _e('PWA', 'putrafiber'); ?></a>
             <a href="#localbusiness" class="nav-tab"><?php _e('🏢 LocalBusiness', 'putrafiber'); ?></a>
+            <a href="#schema-advanced" class="nav-tab"><?php _e('Schema Advanced', 'putrafiber'); ?></a>
         </h2>
         
         <form action="options.php" method="post">
@@ -1350,7 +1379,11 @@ function putrafiber_options_page() {
             <div id="localbusiness" class="tab-content">
                 <?php do_settings_sections('putrafiber-localbusiness'); ?>
             </div>
-            
+
+            <div id="schema-advanced" class="tab-content">
+                <?php do_settings_sections('putrafiber-schema-advanced'); ?>
+            </div>
+
             <?php submit_button(__('Save All Settings', 'putrafiber')); ?>
         </form>
     </div>
@@ -1446,6 +1479,82 @@ function putrafiber_options_page() {
             });
         });
         
+    });
+    </script>
+    <?php
+}
+
+function putrafiber_enable_schema_advanced_render() {
+    $options = get_option('putrafiber_options', array());
+    $value = !empty($options['enable_schema_advanced']) ? '1' : '0';
+    ?>
+    <label>
+        <input type="hidden" name="putrafiber_options[enable_schema_advanced]" value="0">
+        <input type="checkbox" id="enable_schema_advanced" name="putrafiber_options[enable_schema_advanced]" value="1" <?php checked($value, '1'); ?>>
+        <?php _e('Aktifkan Schema Advanced Layer', 'putrafiber'); ?>
+    </label>
+    <p class="description"><?php _e('Aktifkan sistem schema modular (anti-duplicate, CTA mapping, single JSON-LD).', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_cta_priority_order_render() {
+    $options = get_option('putrafiber_options', array());
+    $saved   = isset($options['cta_priority_order']) && is_array($options['cta_priority_order']) ? array_values(array_unique(array_map('sanitize_key', $options['cta_priority_order']))) : array();
+    $choices = array(
+        'wa_primary'          => __('WA Primary', 'putrafiber'),
+        'wa_secondary'        => __('WA Secondary', 'putrafiber'),
+        'download_brosur'     => __('Download Brosur', 'putrafiber'),
+        'kunjungi_lokasi'     => __('Kunjungi Lokasi', 'putrafiber'),
+        'katalog_hubungi_cs'  => __('Katalog / Hubungi CS', 'putrafiber'),
+        'portfolio_wisata'    => __('Portfolio Wisata (TouristAttraction)', 'putrafiber'),
+    );
+
+    $ordered = !empty($saved) ? $saved : array_keys($choices);
+    $final   = array();
+    foreach ($ordered as $key) {
+        if (isset($choices[$key])) {
+            $final[$key] = $choices[$key];
+        }
+    }
+    foreach ($choices as $key => $label) {
+        if (!isset($final[$key])) {
+            $final[$key] = $label;
+        }
+    }
+    ?>
+    <select id="cta_priority_order" name="putrafiber_options[cta_priority_order][]" multiple size="6" class="widefat">
+        <?php foreach ($final as $key => $label): ?>
+            <?php $selected = empty($saved) || in_array($key, $saved, true); ?>
+            <option value="<?php echo esc_attr($key); ?>" <?php selected($selected, true); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <p style="margin-top:8px;">
+        <button type="button" class="button" id="cta-priority-move-up"><?php esc_html_e('Naik', 'putrafiber'); ?></button>
+        <button type="button" class="button" id="cta-priority-move-down"><?php esc_html_e('Turun', 'putrafiber'); ?></button>
+    </p>
+    <p class="description"><?php _e('Urutan prioritas CTA ketika lebih dari satu CTA aktif.', 'putrafiber'); ?></p>
+    <script>
+    jQuery(function($){
+        $('#cta-priority-move-up').on('click', function(e){
+            e.preventDefault();
+            var $select = $('#cta_priority_order');
+            $select.find('option:selected').each(function(){
+                var $prev = $(this).prev();
+                if ($prev.length) {
+                    $(this).insertBefore($prev);
+                }
+            });
+        });
+        $('#cta-priority-move-down').on('click', function(e){
+            e.preventDefault();
+            var $select = $('#cta_priority_order');
+            $($select.find('option:selected').get().reverse()).each(function(){
+                var $next = $(this).next();
+                if ($next.length) {
+                    $(this).insertAfter($next);
+                }
+            });
+        });
     });
     </script>
     <?php
