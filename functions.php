@@ -25,6 +25,20 @@ function pf_enqueue_assets() {
   $manifest_loaded = false;
   $manifest_path   = get_template_directory() . '/assets/dist/manifest.json';
 
+  $is_front_page          = is_front_page();
+  $is_product_context     = is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag'));
+  $is_portfolio_context   = is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category');
+  $requires_gallery_assets = $is_product_context || $is_portfolio_context;
+
+  $pwa_enabled = true;
+  if (function_exists('putrafiber_is_pwa_enabled')) {
+    $pwa_enabled = putrafiber_is_pwa_enabled();
+  } elseif (function_exists('putrafiber_get_option')) {
+    $raw_pwa_value = putrafiber_get_option('enable_pwa', '1');
+    $normalized    = strtolower(trim((string) $raw_pwa_value));
+    $pwa_enabled   = !in_array($normalized, array('0', 'false', 'no', 'off'), true);
+  }
+
   // Font selalu dimuat agar konsisten antara build dan fallback.
   wp_enqueue_style(
     'pf-fonts',
@@ -41,43 +55,71 @@ function pf_enqueue_assets() {
         $dist_uri      = trailingslashit(get_template_directory_uri()) . 'assets/dist/';
         $dist_relative = 'assets/dist/';
 
-        $main_js  = $manifest['assets/src/js/main.js']['file'] ?? '';
-        $main_css = $manifest['assets/src/css/main.css']['file'] ?? '';
+        $entries = array(
+          'core_css'       => 'assets/src/css/main.css',
+          'front_css'      => 'assets/src/css/front-page.css',
+          'product_css'    => 'assets/src/css/product.css',
+          'portfolio_css'  => 'assets/src/css/portfolio.css',
+          'core_js'        => 'assets/src/js/main.js',
+          'front_js'       => 'assets/src/js/front-page.js',
+          'pwa_js'         => 'assets/src/js/pwa.js',
+        );
 
-        if (!$main_css && !empty($manifest['assets/src/js/main.js']['css'][0])) {
-          $main_css = $manifest['assets/src/js/main.js']['css'][0];
+        $resolved = array();
+        foreach ($entries as $key => $entry) {
+          if (!empty($manifest[$entry]['file'])) {
+            $resolved[$key] = ltrim($manifest[$entry]['file'], '/');
+          }
         }
 
-        if ($main_css) {
-          $css_uri = $dist_uri . ltrim($main_css, '/');
-          wp_enqueue_style('pf-main', $css_uri, array(), pf_asset_version($dist_relative . ltrim($main_css, '/')));
+        $has_core_css = !empty($resolved['core_css']);
+        $has_core_js  = !empty($resolved['core_js']);
+
+        if ($has_core_css) {
+          $css_uri = $dist_uri . $resolved['core_css'];
+          wp_enqueue_style('pf-main', $css_uri, array(), pf_asset_version($dist_relative . $resolved['core_css']));
           $manifest_loaded = true;
         }
 
-        if ($main_js) {
-          $js_uri = $dist_uri . ltrim($main_js, '/');
-          wp_enqueue_script('pf-main', $js_uri, array(), pf_asset_version($dist_relative . ltrim($main_js, '/')), true);
+        if ($has_core_js) {
+          wp_enqueue_script('jquery');
+          $js_uri = $dist_uri . $resolved['core_js'];
+          wp_enqueue_script('pf-main', $js_uri, array('jquery'), pf_asset_version($dist_relative . $resolved['core_js']), true);
           wp_script_add_data('pf-main', 'type', 'module');
           $manifest_loaded = true;
+        } elseif ($manifest_loaded) {
+          // Pastikan jQuery tersedia untuk skrip lain meskipun bundle utama tidak ditemukan.
+          wp_enqueue_script('jquery');
         }
 
-        if ($manifest_loaded && (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag')) || is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category'))) {
-            wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
-            wp_enqueue_style('simplelightbox-css', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
+        $style_dependency  = $has_core_css ? array('pf-main') : array();
+        $script_dependency = $has_core_js ? array('pf-main') : array('jquery');
 
-            wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.5', true);
-            wp_enqueue_script('simplelightbox-js', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js', array('jquery'), '2.14.2', true);
+        if ($is_front_page && !empty($resolved['front_css'])) {
+          $css_uri = $dist_uri . $resolved['front_css'];
+          wp_enqueue_style('pf-front-epic', $css_uri, $style_dependency, pf_asset_version($dist_relative . $resolved['front_css']));
+        }
 
-            wp_enqueue_script(
-                'pf-gallery-unified',
-                PUTRAFIBER_URI . '/assets/js/gallery-unified.js',
-                array('jquery', 'swiper-js', 'simplelightbox-js'),
-                pf_asset_version('assets/js/gallery-unified.js'),
-                true
-            );
+        if ($is_front_page && !empty($resolved['front_js'])) {
+          $js_uri = $dist_uri . $resolved['front_js'];
+          wp_enqueue_script('pf-front-epic', $js_uri, $script_dependency, pf_asset_version($dist_relative . $resolved['front_js']), true);
+          wp_script_add_data('pf-front-epic', 'type', 'module');
+        }
 
-            wp_script_add_data('simplelightbox-js', 'defer', true);
-            wp_script_add_data('swiper-js', 'defer', true);
+        if ($is_product_context && !empty($resolved['product_css'])) {
+          $css_uri = $dist_uri . $resolved['product_css'];
+          wp_enqueue_style('pf-product', $css_uri, $style_dependency, pf_asset_version($dist_relative . $resolved['product_css']));
+        }
+
+        if ($is_portfolio_context && !empty($resolved['portfolio_css'])) {
+          $css_uri = $dist_uri . $resolved['portfolio_css'];
+          wp_enqueue_style('pf-portfolio', $css_uri, $style_dependency, pf_asset_version($dist_relative . $resolved['portfolio_css']));
+        }
+
+        if ($pwa_enabled && !empty($resolved['pwa_js'])) {
+          $js_uri = $dist_uri . $resolved['pwa_js'];
+          wp_enqueue_script('pf-pwa', $js_uri, $script_dependency, pf_asset_version($dist_relative . $resolved['pwa_js']), true);
+          wp_script_add_data('pf-pwa', 'type', 'module');
         }
       }
     }
@@ -91,17 +133,16 @@ function pf_enqueue_assets() {
     wp_enqueue_style('pf-components', PUTRAFIBER_URI . '/assets/css/components.css', array('pf-style'), pf_asset_version('assets/css/components.css'));
     wp_enqueue_style('pf-animations', PUTRAFIBER_URI . '/assets/css/animations.css', array('pf-style'), pf_asset_version('assets/css/animations.css'));
 
-    if (is_front_page()) {
+    wp_enqueue_style('pf-responsive', PUTRAFIBER_URI . '/assets/css/responsive.css', array('pf-style'), pf_asset_version('assets/css/responsive.css'));
+    if ($is_front_page) {
       wp_enqueue_style('pf-front-epic', PUTRAFIBER_URI . '/assets/css/front-page-epic.css', array('pf-components', 'pf-animations'), pf_asset_version('assets/css/front-page-epic.css'));
     }
 
-    wp_enqueue_style('pf-responsive', PUTRAFIBER_URI . '/assets/css/responsive.css', array('pf-style'), pf_asset_version('assets/css/responsive.css'));
-
-    if (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag'))) {
+    if ($is_product_context) {
       wp_enqueue_style('pf-product', PUTRAFIBER_URI . '/assets/css/product.css', array('pf-style'), pf_asset_version('assets/css/product.css'));
     }
 
-    if (is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
+    if ($is_portfolio_context) {
       wp_enqueue_style('pf-portfolio', PUTRAFIBER_URI . '/assets/css/portfolio.css', array('pf-style'), pf_asset_version('assets/css/portfolio.css'));
     }
 
@@ -112,41 +153,32 @@ function pf_enqueue_assets() {
     wp_enqueue_script('pf-lazyload', PUTRAFIBER_URI . '/assets/js/lazyload.js', array(), pf_asset_version('assets/js/lazyload.js'), true);
     wp_enqueue_script('pf-animations', PUTRAFIBER_URI . '/assets/js/animations.js', array(), pf_asset_version('assets/js/animations.js'), true);
 
-    $pwa_enabled = true;
-    if (function_exists('putrafiber_is_pwa_enabled')) {
-      $pwa_enabled = putrafiber_is_pwa_enabled();
-    } elseif (function_exists('putrafiber_get_option')) {
-      $raw_pwa_value = putrafiber_get_option('enable_pwa', '1');
-      $normalized    = strtolower(trim((string) $raw_pwa_value));
-      $pwa_enabled   = !in_array($normalized, array('0', 'false', 'no', 'off'), true);
-    }
-
     if ($pwa_enabled) {
       wp_enqueue_script('pf-pwa', PUTRAFIBER_URI . '/assets/js/pwa.js', array(), pf_asset_version('assets/js/pwa.js'), true);
     }
 
-    if (is_front_page()) {
+    if ($is_front_page) {
       wp_enqueue_script('pf-front-epic', PUTRAFIBER_URI . '/assets/js/front-page-epic.js', array('jquery'), pf_asset_version('assets/js/front-page-epic.js'), true);
     }
+  }
 
-    if (is_singular('product') || is_post_type_archive('product') || is_tax(array('product_category', 'product_tag')) || is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
-      wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
-      wp_enqueue_style('simplelightbox-css', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
+  if ($requires_gallery_assets) {
+    wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
+    wp_enqueue_style('simplelightbox-css', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
 
-      wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.5', true);
-      wp_enqueue_script('simplelightbox-js', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js', array('jquery'), '2.14.2', true);
+    wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.5', true);
+    wp_enqueue_script('simplelightbox-js', 'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js', array('jquery'), '2.14.2', true);
 
-      wp_enqueue_script(
-        'pf-gallery-unified',
-        PUTRAFIBER_URI . '/assets/js/gallery-unified.js',
-        array('jquery', 'swiper-js', 'simplelightbox-js'),
-        pf_asset_version('assets/js/gallery-unified.js'),
-        true
-      );
+    wp_enqueue_script(
+      'pf-gallery-unified',
+      PUTRAFIBER_URI . '/assets/js/gallery-unified.js',
+      array('jquery', 'swiper-js', 'simplelightbox-js'),
+      pf_asset_version('assets/js/gallery-unified.js'),
+      true
+    );
 
-      wp_script_add_data('simplelightbox-js', 'defer', true);
-      wp_script_add_data('swiper-js', 'defer', true);
-    }
+    wp_script_add_data('simplelightbox-js', 'defer', true);
+    wp_script_add_data('swiper-js', 'defer', true);
   }
 
   if (wp_script_is('pf-gallery-unified', 'enqueued')) {

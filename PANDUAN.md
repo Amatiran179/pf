@@ -19,7 +19,12 @@ Setelah menerapkan perbaikan terakhir, beberapa file menjadi tidak terpakai (red
 - [x] **Hapus stylesheet galeri lama (`assets/css/portfolio-gallery-fix.css`, `product-gallery-fix.css`)**
   * Seluruh perbaikan gaya galeri berada di stylesheet utama (`product.css`, `portfolio.css`) serta `gallery-fix.css` pada build Vite bila tersedia.
 
-> **Langkah selanjutnya:** Audit bundle Vite (`assets/dist/`) untuk memastikan `gallery-fix.css` atau stylesheet pengganti lain sudah ikut ter-build dan ter- enqueue otomatis, lalu dokumentasikan alur build terbaru.
+- [x] **Audit bundel Vite dan buat manifest baru yang memuat gaya/skrip galeri**
+  * Seluruh gaya inti kini dikompilasi ke dalam `assets/src/css/main.css` (mengimpor `style.css`, header/footer, komponen, utilities, responsive).
+  * Halaman khusus (landing epic, product, portfolio) serta skrip inti (`main`, `pwa`, `front-page`) mempunyai entry point tersendiri sehingga `manifest.json` memetakan semua kebutuhan enqueue.
+  * `functions.php` sekarang membaca `assets/dist/manifest.json`, memuat jQuery lebih awal, dan menjaga kondisi fallback agar non-Vite tetap aman.
+
+> **Langkah selanjutnya:** Otomatiskan proses build (`npm run build`) pada pipeline deploy/staging dan tambahkan dokumentasi singkat tentang cara membersihkan cache CDN setelah mengganti aset ber-hash.
 
 ---
 
@@ -30,6 +35,7 @@ Berikut adalah ringkasan dari penyempurnaan utama yang telah diimplementasikan:
 *   **Konsolidasi Aset:**
     *   Semua proses `wp_enqueue_script` dan `wp_enqueue_style` sekarang dikelola secara terpusat dari `functions.php`. Ini menghilangkan potensi pemuatan ganda dan memudahkan pengelolaan dependensi.
     *   Hanya satu skrip (`gallery-unified.js`) dan satu file CSS (`gallery-fix.css`) yang sekarang bertanggung jawab untuk semua galeri di frontend.
+    *   Jalur build Vite menyertakan bundel modular (`main`, `front-page`, `product`, `portfolio`, `pwa`) sehingga ketika `manifest.json` tersedia, WordPress otomatis memuat versi terkompilasi tanpa kehilangan fallback tradisional.
 
 *   **Pembersihan Kode Redundan:**
     *   Blok JavaScript dan CSS inline yang besar di dalam file metabox (`inc/post-types/product.php` dan `inc/post-types/portfolio.php`) telah dihapus.
