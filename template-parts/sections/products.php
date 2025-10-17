@@ -82,7 +82,7 @@ $products_query = new WP_Query(array(
                             <p class="product-excerpt"><?php echo pf_output_html(wp_trim_words(get_the_excerpt(), 18)); ?></p>
 
                             <div class="product-footer">
-                                <?php if ($price && $price !== 1000.0): ?>
+                                <?php if ($price > 0): ?>
                                     <span class="product-price">Rp <?php echo pf_output_html(number_format((float) $price, 0, ',', '.')); ?></span>
                                 <?php endif; ?>
 

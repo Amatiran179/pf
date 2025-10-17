@@ -452,9 +452,8 @@ function putrafiber_save_product_meta($post_id) {
     } elseif ($post_field === 'product_catalog_pdf') {
       $value = pf_clean_url($raw_value);
     } elseif ($post_field === 'product_price') {
-      $price = pf_clean_float($raw_value);
-      $price = $price > 0 ? (int) $price : 1000; // fallback schema anti penalty
-      $value = $price;
+      // Simpan harga asli, biarkan schema/display logic yang handle fallback
+      $value = pf_clean_float($raw_value);
     } elseif ($post_field === 'product_gallery') {
       $gallery_raw = pf_clean_text($raw_value);
       $value = function_exists('putrafiber_prepare_gallery_meta_value')

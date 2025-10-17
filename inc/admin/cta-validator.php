@@ -111,6 +111,16 @@ if (!class_exists('PutraFiber_CTA_Validator')) {
                 if (empty($brand)) {
                     $warnings[] = __('Brand perusahaan belum diatur di Theme Options → Contact. Schema akan memakai nama situs.', 'putrafiber');
                 }
+            } elseif ($post->post_type === 'portfolio') {
+                $location = get_post_meta($post->ID, '_portfolio_location', true);
+                if (empty($location)) {
+                    $warnings[] = __('Lokasi proyek belum diisi. Ini penting untuk portofolio dan SEO.', 'putrafiber');
+                }
+
+                $date = get_post_meta($post->ID, '_portfolio_date', true);
+                if (empty($date)) {
+                    $warnings[] = __('Tanggal proyek belum diisi.', 'putrafiber');
+                }
             }
 
             return $warnings;

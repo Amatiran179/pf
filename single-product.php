@@ -135,10 +135,7 @@ while (have_posts()) : the_post();
   $categories    = get_the_terms($product_id, 'product_category');
   $category_name = $categories ? $categories[0]->name : 'Produk';
 
-  // Inline anti-zoom style string (dipakai di <a> & <img>)
-  $anti_zoom_style = 'transform:none!important;-webkit-transform:none!important;transition:none!important;animation:none!important;will-change:auto!important;';
 ?>
-
 <main class="product-single-page">
   <section class="breadcrumbs-section">
     <div class="container">
@@ -173,7 +170,7 @@ while (have_posts()) : the_post();
                        class="gallery-item"
                        data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
                        data-gallery-index="<?php echo pf_output_attr($index); ?>"
-                       style="<?php echo pf_output_attr($anti_zoom_style); ?>">
+                       >
                       <img
                         src="<?php echo pf_output_url($image['url']); ?>"
                         alt="<?php echo pf_output_attr($img_alt); ?>"
@@ -182,7 +179,6 @@ while (have_posts()) : the_post();
                           width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
                         <?php endif; ?>
                         <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
-                        style="<?php echo pf_output_attr($anti_zoom_style); ?>"
                         decoding="async"
                       />
                       <span class="zoom-icon">🔍</span>

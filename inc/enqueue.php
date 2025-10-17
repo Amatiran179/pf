@@ -56,33 +56,15 @@ function putrafiber_enqueue_styles() {
         // Product CSS
         wp_enqueue_style('putrafiber-product-styles', PUTRAFIBER_URI . '/assets/css/product.css', array('putrafiber-style'), pf_asset_version('assets/css/product.css'));
 
-        // Product Gallery Fix CSS (HANDLE UNIK + depend ke product.css)
-        wp_enqueue_style(
-            'putrafiber-product-gallery-fix',
-            PUTRAFIBER_URI . '/assets/css/product-gallery-fix.css',
-            array('putrafiber-product-styles', 'swiper-css', 'simplelightbox-css'),
-            pf_asset_version('assets/css/product-gallery-fix.css')
-        );
     }
 
     // ===== PORTFOLIO PAGES =====
     if (is_singular('portfolio') || is_post_type_archive('portfolio') || is_tax('portfolio_category')) {
-
-        // Swiper + SimpleLightbox (CDN)
-        // (Handle sama gapapa, WP akan skip enqueue kedua kalinya)
         wp_enqueue_style('swiper-css',          'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.5');
         wp_enqueue_style('simplelightbox-css',  'https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css', array(), '2.14.2');
 
         // Portfolio CSS
         wp_enqueue_style('putrafiber-portfolio-styles', PUTRAFIBER_URI . '/assets/css/portfolio.css', array('putrafiber-style'), pf_asset_version('assets/css/portfolio.css'));
-
-        // Portfolio Gallery Fix CSS (HANDLE UNIK + depend ke portfolio.css)
-        wp_enqueue_style(
-            'putrafiber-portfolio-gallery-fix',
-            PUTRAFIBER_URI . '/assets/css/portfolio-gallery-fix.css',
-            array('putrafiber-portfolio-styles', 'swiper-css', 'simplelightbox-css'),
-            pf_asset_version('assets/css/portfolio-gallery-fix.css')
-        );
     }
 }
 add_action('wp_enqueue_scripts', 'putrafiber_enqueue_styles');

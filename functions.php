@@ -196,13 +196,13 @@ function putrafiber_breadcrumbs() {
     $items[] = array('title' => sprintf(__('Search results for "%s"', 'putrafiber'), $search_query));
   } elseif (is_404()) {
     $items[] = array('title' => __('Not Found', 'putrafiber'));
-  } elseif (is_post_type_archive('product')) {
-    $items[] = array('title' => 'Semua Produk');
+  } elseif (is_post_type_archive()) {
+    $items[] = array('title' => post_type_archive_title('', false));
   } elseif (is_tax('product_category')) {
-    $items[] = array('title' => 'Semua Produk', 'url' => get_post_type_archive_link('product'));
+    $items[] = array('title' => post_type_archive_title('', false), 'url' => get_post_type_archive_link('product'));
     $items[] = array('title' => single_term_title('', false));
   } elseif (is_singular('product')) {
-    $items[] = array('title' => 'Semua Produk', 'url' => get_post_type_archive_link('product'));
+    $items[] = array('title' => post_type_archive_title('', false), 'url' => get_post_type_archive_link('product'));
     $terms = get_the_terms(get_the_ID(), 'product_category');
     if ($terms && !is_wp_error($terms)) {
       $items[] = array('title' => $terms[0]->name, 'url' => get_term_link($terms[0]));
@@ -344,86 +344,3 @@ function putrafiber_add_async_defer($tag, $handle) {
   return $tag;
 }
 add_filter('script_loader_tag', 'putrafiber_add_async_defer', 10, 2);
-
-/** ==========================================================================
- * GALLERY CSS INJECTIONS (SATU TEMPAT) — anti zoom & mobile hard-fix
- * - Tidak menyentuh transform Swiper wrapper agar autoplay/slide aman
- * - Thumbs: penopang ukuran slide auto (ukuran final di product-gallery-fix.css/JS)
- * ========================================================================== */
-function putrafiber_gallery_css_overrides() {
-  if (!is_singular('product')) return;
-  ?>
-  <style id="pf-gallery-overrides">
-    /* Matikan transform/anim/transition pada IMG di area galeri saja */
-    .product-gallery img,
-    .product-gallery .gallery-image {
-      transform: none !important;
-      -webkit-transform: none !important;
-      animation: none !important;
-      transition: none !important;
-      will-change: auto !important;
-      backface-visibility: hidden;
-      transform-origin: center center !important;
-    }
-    /* Hover/active tetap non-zoom */
-    .product-gallery *:hover > img,
-    .product-gallery *:hover .gallery-image,
-    .product-gallery a:hover img,
-    .product-gallery figure:hover img {
-      transform: none !important;
-      -webkit-transform: none !important;
-      animation: none !important;
-      transition: none !important;
-    }
-    /* Tangkal utility scale-* pada IMG */
-    .product-gallery img[class*="scale"],
-    .product-gallery img[class*="hover:scale"],
-    .product-gallery .gallery-image[class*="scale"],
-    .product-gallery .gallery-image[class*="hover:scale"] {
-      transform: none !important;
-    }
-    /* Swiper layout (aman) */
-    .product-gallery .swiper-wrapper { display:flex !important; align-items:stretch; }
-    .product-gallery .swiper-slide    { flex-shrink:0 !important; box-sizing:border-box; }
-
-    /* Mobile hard-fix: kunci slide utama 100% */
-    @media (max-width: 768px) {
-      .product-gallery .product-gallery-slider .swiper-slide {
-        flex: 0 0 100% !important;
-        width: 100% !important;
-        min-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      .product-gallery,
-      .product-gallery .swiper,
-      .product-gallery .product-gallery-slider {
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow: hidden !important;
-        box-sizing: border-box !important;
-      }
-    }
-
-    /* Penopang thumbnail: slide ikut konten (lebar auto, bukan 122px) */
-    .product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide {
-      width: auto !important;
-      min-width: auto !important;
-      flex: 0 0 auto !important;
-      margin-right: 6px !important;
-      box-sizing: content-box !important;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 0;
-    }
-    .product-gallery .product-gallery-thumbs .swiper-wrapper > .swiper-slide:last-child { margin-right: 0 !important; }
-
-    /* Catatan:
-       - Ukuran IMG & frame thumb (square 84/72 atau follow image) diatur di
-         /assets/css/product-gallery-fix.css dan /assets/js/product-gallery.js (FINAL).
-       - CSS di atas hanya memastikan Swiper tidak memaksa width 122px.
-     */
-  </style>
-  <?php
-}
-add_action('wp_head', 'putrafiber_gallery_css_overrides', 9999);

@@ -210,11 +210,6 @@
  * The zoom icon provides visual feedback instead.
  * ===================================================================
  */
-/*
-.gallery-item:hover .gallery-image {
-    transform: scale(1.1);
-}
-*/
 
 .zoom-icon {
     position: absolute;
@@ -768,22 +763,69 @@
     .product-title {
         font-size: 28px;
     }
-    
+
     .price-amount {
         font-size: 32px;
     }
-    
+
     .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 15px;
     }
-    
+
     .product-card-title {
         font-size: 16px;
         min-height: auto;
     }
-    
+
     .product-card-price {
         font-size: 16px;
     }
+}
+
+/* ===================================================================
+ * CRITICAL FIX: Swiper layout & infinite zoom bug
+ * =================================================================== */
+
+/* Container sizing */
+.product-single-page .product-gallery-slider {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Wrapper - allow transform for sliding */
+.product-single-page .product-gallery-slider .swiper-wrapper {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    transition-timing-function: ease-out;
+}
+
+/* Slide dimensions */
+.product-single-page .product-gallery-slider .swiper-slide {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    flex-shrink: 0;
+    height: auto;
+    position: relative;
+}
+
+/* CRITICAL: Prevent hover zoom (root cause of infinite zoom) */
+.gallery-item:hover .gallery-image {
+    transform: scale(1);
+}
+
+/* Prevent image animations */
+.product-single-page .product-gallery-slider .gallery-image {
+    animation: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Ensure navigation is clickable */
+.product-single-page .product-gallery-slider .swiper-button-next,
+.product-single-page .product-gallery-slider .swiper-button-prev {
+    z-index: 10;
 }

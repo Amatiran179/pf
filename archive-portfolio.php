@@ -1,7 +1,7 @@
 <?php
 /**
  * Portfolio Archive Template
- * 
+ *
  * @package PutraFiber
  */
 if (!defined('ABSPATH')) exit;
@@ -13,32 +13,32 @@ get_header();
     <header class="page-header portfolio-archive-header">
         <div class="container">
             <?php putrafiber_breadcrumbs(); ?>
-            
+
             <div class="archive-header-content">
                 <h1 class="page-title"><?php _e('Our Portfolio', 'putrafiber'); ?></h1>
                 <p class="page-description">
                     <?php _e('Lihat berbagai project waterpark, waterboom, dan playground yang telah kami selesaikan dengan sukses di berbagai lokasi.', 'putrafiber'); ?>
                 </p>
             </div>
-            
+
             <!-- Portfolio Filter -->
             <div class="portfolio-filters">
-                <button class="filter-btn active" data-filter="*">
+                <a href="<?php echo esc_url(get_post_type_archive_link('portfolio')); ?>" class="filter-btn <?php echo is_post_type_archive('portfolio') && !is_tax('portfolio_category') ? 'active' : ''; ?>">
                     <?php _e('All Projects', 'putrafiber'); ?>
-                </button>
+                </a>
                 <?php
                 $categories = get_terms(array(
                     'taxonomy' => 'portfolio_category',
                     'hide_empty' => true,
                 ));
-                
+                $current_term = get_queried_object();
                 if ($categories && !is_wp_error($categories)):
                     foreach ($categories as $category):
+                        $is_active = is_tax('portfolio_category', $category->slug);
                         ?>
-                        <button class="filter-btn" data-filter=".category-<?php echo esc_attr($category->slug); ?>">
-                            <?php echo esc_html($category->name); ?>
-                            <span class="count">(<?php echo $category->count; ?>)</span>
-                        </button>
+                        <a href="<?php echo esc_url(get_term_link($category)); ?>" class="filter-btn <?php echo $is_active ? 'active' : ''; ?>">
+                            <?php echo esc_html($category->name); ?> <span class="count">(<?php echo $category->count; ?>)</span>
+                        </a>
                         <?php
                     endforeach;
                 endif;
@@ -50,16 +50,16 @@ get_header();
     <div class="portfolio-archive-content section">
         <div class="container-wide">
             <?php if (have_posts()): ?>
-                
+
                 <div class="portfolio-grid-archive">
                     <?php
                     while (have_posts()):
                         the_post();
-                        
+
                         $location = get_post_meta(get_the_ID(), '_portfolio_location', true);
                         $project_date = get_post_meta(get_the_ID(), '_portfolio_date', true);
                         $client = get_post_meta(get_the_ID(), '_portfolio_client', true);
-                        
+
                         // Get categories for filtering
                         $terms = get_the_terms(get_the_ID(), 'portfolio_category');
                         $term_classes = '';
@@ -79,7 +79,7 @@ get_header();
                                                 'decoding' => 'async'
                                             )); ?>
                                         </a>
-                                        
+
                                         <?php if ($terms && !is_wp_error($terms)): ?>
                                             <div class="portfolio-categories">
                                                 <?php foreach ($terms as $term): ?>
@@ -89,7 +89,7 @@ get_header();
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php endif; ?>
-                                        
+
                                         <div class="portfolio-overlay">
                                             <div class="portfolio-overlay-content">
                                                 <a href="<?php the_permalink(); ?>" class="portfolio-view-btn">
@@ -103,12 +103,12 @@ get_header();
                                         </div>
                                     </div>
                                 <?php endif; ?>
-                                
+
                                 <div class="portfolio-archive-content">
                                     <h3 class="portfolio-title">
                                         <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                                     </h3>
-                                    
+
                                     <div class="portfolio-meta">
                                         <?php if ($location): ?>
                                             <span class="meta-item meta-location">
@@ -119,7 +119,7 @@ get_header();
                                                 <?php echo esc_html($location); ?>
                                             </span>
                                         <?php endif; ?>
-                                        
+
                                         <?php if ($project_date): ?>
                                             <span class="meta-item meta-date">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -131,7 +131,7 @@ get_header();
                                                 <?php echo date('F Y', strtotime($project_date)); ?>
                                             </span>
                                         <?php endif; ?>
-                                        
+
                                         <?php if ($client): ?>
                                             <span class="meta-item meta-client">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -142,11 +142,11 @@ get_header();
                                             </span>
                                         <?php endif; ?>
                                     </div>
-                                    
+
                                     <div class="portfolio-excerpt">
                                         <?php echo wp_trim_words(get_the_excerpt(), 20); ?>
                                     </div>
-                                    
+
                                     <a href="<?php the_permalink(); ?>" class="portfolio-read-more">
                                         <?php _e('View Project', 'putrafiber'); ?>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -161,7 +161,7 @@ get_header();
                     endwhile;
                     ?>
                 </div>
-                
+
                 <!-- Pagination -->
                 <div class="portfolio-pagination">
                     <?php
@@ -172,9 +172,9 @@ get_header();
                     ));
                     ?>
                 </div>
-                
+
             <?php else: ?>
-                
+
                 <div class="no-portfolio-found">
                     <div class="no-results-icon">
                         <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
@@ -189,11 +189,11 @@ get_header();
                         <?php _e('Back to Home', 'putrafiber'); ?>
                     </a>
                 </div>
-                
+
             <?php endif; ?>
         </div>
     </div>
-    
+
     <!-- CTA Section -->
     <section class="portfolio-cta-section">
         <div class="container">
@@ -552,55 +552,26 @@ get_header();
     .archive-header-content .page-title {
         font-size: 36px;
     }
-    
+
     .portfolio-filters {
         gap: 10px;
     }
-    
+
     .filter-btn {
         padding: 8px 20px;
         font-size: 14px;
     }
-    
+
     .portfolio-grid-archive {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .portfolio-cta-content h2 {
         font-size: 28px;
     }
 }
 </style>
-
-<script>
-jQuery(document).ready(function($) {
-    // Portfolio Filter Functionality
-    $('.filter-btn').on('click', function() {
-        var filter = $(this).data('filter');
-        
-        $('.filter-btn').removeClass('active');
-        $(this).addClass('active');
-        
-        if (filter === '*') {
-            $('.portfolio-archive-item').removeClass('filtered-out').addClass('visible');
-        } else {
-            $('.portfolio-archive-item').each(function() {
-                if ($(this).hasClass(filter.replace('.', ''))) {
-                    $(this).removeClass('filtered-out').addClass('visible');
-                } else {
-                    $(this).addClass('filtered-out').removeClass('visible');
-                }
-            });
-        }
-    });
-    
-    // Show all items on load
-    setTimeout(function() {
-        $('.portfolio-archive-item').addClass('visible');
-    }, 100);
-});
-</script>
 
 <?php
 get_footer();

@@ -9,8 +9,8 @@
 (function($) {
     'use strict';
 
-    // Gunakan window.load untuk memastikan semua gambar dan aset sudah dimuat
-    $(window).on('load', function() {
+    // Gunakan document.ready untuk inisialisasi lebih cepat setelah DOM siap
+    $(document).ready(function() {
 
         // Hanya jalankan jika elemen slider portofolio ada di halaman
         if ($('.portfolio-gallery-slider').length === 0) {
@@ -87,8 +87,8 @@
 
             // Inisialisasi slider utama
             const portfolioMain = new Swiper('.portfolio-gallery-slider', portfolioMainConfig);
-            
-            console.log('✅ [PF Portfolio Gallery] Initialized successfully on window.load.');
+
+            console.log('✅ [PF Portfolio Gallery] Initialized successfully.');
 
         } catch (error) {
             console.error('[PF Portfolio Gallery] Initialization error:', error);

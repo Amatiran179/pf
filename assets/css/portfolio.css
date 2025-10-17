@@ -1,6 +1,6 @@
 /**
  * Portfolio Styles - MIRIP DENGAN PRODUCT
- * 
+ *
  * @package PutraFiber
  * @version 1.0.0
  */
@@ -170,7 +170,7 @@
 }
 
 /* ========================================
-   BAGIAN-BAGIAN LAIN YANG SUDAH ADA 
+   BAGIAN-BAGIAN LAIN YANG SUDAH ADA
    (TETAP PERTAHANKAN SEMUA)
 ========================================= */
 
@@ -781,30 +781,30 @@
     .portfolio-title {
         font-size: 28px;
     }
-    
+
     .portfolio-grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 20px;
     }
-    
+
     .project-specs-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .attribute-item {
         flex-direction: column;
         gap: 5px;
     }
-    
+
     .attribute-item strong {
         min-width: auto;
     }
-    
+
     .portfolio-gallery-thumbs .swiper-slide {
         width: 60px;
         height: 60px;
     }
-    
+
     .full-gallery-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -814,20 +814,20 @@
     .portfolio-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .btn-portfolio-detail-large,
     .btn-whatsapp-cta,
     .btn-whatsapp-large {
         padding: 15px 30px;
         font-size: 16px;
     }
-    
+
     .portfolio-meta-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .full-gallery-grid {
         grid-template-columns: 1fr;
     }
@@ -865,83 +865,83 @@
 }
 
 /* Container sizing */
-.portfolio-gallery-slider {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    position: relative !important;
+.single-portfolio-page .portfolio-gallery-slider {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
 }
 
 /* Wrapper - allow transform for sliding */
-.portfolio-gallery-slider .swiper-wrapper {
-    width: 100% !important;
-    max-width: 100% !important;
-    display: flex !important;
-    transition-timing-function: ease-out !important;
+.single-portfolio-page .portfolio-gallery-slider .swiper-wrapper {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    transition-timing-function: ease-out;
 }
 
 /* Slide dimensions - CRITICAL FIX for 9730px width bug */
-.portfolio-gallery-slider .swiper-slide {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    flex-shrink: 0 !important;
-    height: auto !important;
-    position: relative !important;
+.single-portfolio-page .portfolio-gallery-slider .swiper-slide {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    flex-shrink: 0;
+    height: auto;
+    position: relative;
 }
 
 /* Gallery item container */
-.portfolio-gallery-slider .gallery-item {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    position: relative !important;
+.single-portfolio-page .portfolio-gallery-slider .gallery-item {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
 }
 
 /* Image - prevent zoom on hover */
-.portfolio-gallery-slider .gallery-image {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-    transition: opacity 0.3s ease !important;
+.single-portfolio-page .portfolio-gallery-slider .gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.3s ease;
 }
 
 /* CRITICAL: Prevent hover zoom (root cause of infinite zoom) */
 .gallery-item:hover .gallery-image {
-    transform: scale(1) !important;
+    transform: scale(1);
 }
 
 /* Prevent image animations */
-.portfolio-gallery-slider .gallery-image {
-    animation: none !important;
+.single-portfolio-page .portfolio-gallery-slider .gallery-image {
+    animation: none;
 }
 
 /* Ensure navigation is clickable */
-.portfolio-gallery-slider .swiper-button-next,
-.portfolio-gallery-slider .swiper-button-prev {
-    z-index: 10 !important;
-    cursor: pointer !important;
+.single-portfolio-page .portfolio-gallery-slider .swiper-button-next,
+.single-portfolio-page .portfolio-gallery-slider .swiper-button-prev {
+    z-index: 10;
+    cursor: pointer;
 }
 
 /* Ensure pagination is clickable */
-.portfolio-gallery-slider .swiper-pagination {
-    z-index: 10 !important;
+.single-portfolio-page .portfolio-gallery-slider .swiper-pagination {
+    z-index: 10;
 }
 
-.portfolio-gallery-slider .swiper-pagination-bullet {
-    cursor: pointer !important;
+.single-portfolio-page .portfolio-gallery-slider .swiper-pagination-bullet {
+    cursor: pointer;
 }
 
 /* Thumbnail slider clickable */
-.portfolio-gallery-thumbs .swiper-slide {
-    cursor: pointer !important;
-    opacity: 0.6 !important;
-    transition: opacity 0.3s ease !important;
+.single-portfolio-page .portfolio-gallery-thumbs .swiper-slide {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
 }
 
-.portfolio-gallery-thumbs .swiper-slide-thumb-active {
-    opacity: 1 !important;
-    border-color: #00BCD4 !important;
+.single-portfolio-page .portfolio-gallery-thumbs .swiper-slide-thumb-active {
+    opacity: 1;
+    border-color: #00BCD4;
 }
