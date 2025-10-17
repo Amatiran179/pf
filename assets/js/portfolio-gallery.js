@@ -1,9 +1,8 @@
 /**
  * DEDICATED Portfolio Gallery with Swiper & Lightbox
- * VERSI FINAL YANG SUDAH DIPERBAIKI
  *
  * @package PutraFiber
- * @version 1.1.0 - Switched to window.load for better layout calculation.
+ * @version 1.1.1 - Use document.ready for faster initialization.
  */
 
 (function($) {

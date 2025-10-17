@@ -702,27 +702,27 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
             }
 
             $post_id = $context['post_id'];
-$allowed_pages = isset($options['localbusiness_pages']) ? (array) $options['localbusiness_pages'] : array();
+            $allowed_pages = isset($options['localbusiness_pages']) ? (array) $options['localbusiness_pages'] : array();
 
-// If no pages are selected in theme options, do not output the schema.
-if (empty($allowed_pages)) {
-    return array();
-}
+            // If no pages are selected in theme options, do not output the schema.
+            if (empty($allowed_pages)) {
+                return array();
+            }
 
-$is_on_allowed_page = false;
-if (is_front_page()) {
-    if (in_array('homepage', $allowed_pages, true)) {
-        $is_on_allowed_page = true;
-    }
-} elseif ($post_id) {
-    if (in_array((string) $post_id, $allowed_pages, true)) {
-        $is_on_allowed_page = true;
-    }
-}
+            $is_on_allowed_page = false;
+            if (is_front_page()) {
+                if (in_array('homepage', $allowed_pages, true)) {
+                    $is_on_allowed_page = true;
+                }
+            } elseif ($post_id) {
+                if (in_array((string) $post_id, $allowed_pages, true)) {
+                    $is_on_allowed_page = true;
+                }
+            }
 
-if (!$is_on_allowed_page) {
-    return array();
-}
+            if (!$is_on_allowed_page) {
+                return array();
+            }
             $business_type = !empty($options['business_type']) ? pf_schema_sanitize_text($options['business_type']) : 'LocalBusiness';
 
             $local_business = array(
@@ -770,12 +770,13 @@ if (!$is_on_allowed_page) {
             );
 
             $post = isset($context['post']) ? $context['post'] : null;
-            if ($post instanceof WP_Post) {
+            if (is_singular()) { // Handle singular pages
                 if ($context['post_type'] === 'product') {
+                    $product_post_type = get_post_type_object('product');
                     $items[] = array(
                         '@type'    => 'ListItem',
                         'position' => $position++,
-                        'name'     => __('Produk', 'putrafiber'),
+                        'name'     => $product_post_type ? $product_post_type->labels->name : __('Produk', 'putrafiber'),
                         'item'     => get_post_type_archive_link('product'),
                     );
 
@@ -804,6 +805,17 @@ if (!$is_on_allowed_page) {
                             );
                         }
                     }
+                } elseif ($context['post_type'] === 'portfolio') {
+                    $portfolio_post_type = get_post_type_object('portfolio');
+                    if ($portfolio_post_type) {
+                        $items[] = array(
+                            '@type'    => 'ListItem',
+                            'position' => $position++,
+                            'name'     => $portfolio_post_type->labels->name,
+                            'item'     => get_post_type_archive_link('portfolio'),
+                        );
+                    }
+                    // Catatan: Bisa ditambahkan logika untuk taksonomi portofolio di sini jika ada.
                 }
 
                 $items[] = array(
@@ -812,6 +824,31 @@ if (!$is_on_allowed_page) {
                     'name'     => pf_schema_sanitize_text(get_the_title($post)),
                     'item'     => get_permalink($post),
                 );
+            } elseif (is_category() || is_tag() || is_tax()) { // Handle taxonomy archives
+                $term = get_queried_object();
+                if ($term) {
+                    if ($term->parent) {
+                        $ancestors = get_ancestors($term->term_id, $term->taxonomy);
+                        $ancestors = array_reverse($ancestors);
+                        foreach ($ancestors as $ancestor_id) {
+                            $ancestor = get_term($ancestor_id, $term->taxonomy);
+                            if ($ancestor && !is_wp_error($ancestor)) {
+                                $items[] = array(
+                                    '@type'    => 'ListItem',
+                                    'position' => $position++,
+                                    'name'     => pf_schema_sanitize_text($ancestor->name),
+                                    'item'     => get_term_link($ancestor),
+                                );
+                            }
+                        }
+                    }
+                    $items[] = array(
+                        '@type'    => 'ListItem',
+                        'position' => $position++,
+                        'name'     => pf_schema_sanitize_text($term->name),
+                        'item'     => get_term_link($term),
+                    );
+                }
             }
 
             if (count($items) <= 1) {

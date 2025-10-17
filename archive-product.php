@@ -50,15 +50,23 @@ get_header();
                 <div class="archive-filter">
                     <form method="get" class="filter-form">
                         <?php
-                        // PERBAIKAN: Menyimpan nilai orderby saat ini untuk kemudahan
-                        $current_orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : '';
+                        // Perbaikan: Set default ke 'date' agar dropdown konsisten saat halaman pertama kali dimuat.
+                        $current_orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'date';
                         ?>
                         <select name="orderby" onchange="this.form.submit()">
-                            <option value="date" <?php selected($current_orderby, ''); ?><?php selected($current_orderby, 'date'); ?>>Urutkan berdasarkan terbaru</option>
+                            <option value="date" <?php selected($current_orderby, 'date'); ?>>Urutkan berdasarkan terbaru</option>
                             <option value="popularity" <?php selected($current_orderby, 'popularity'); ?>>Urutkan berdasarkan popularitas</option>
                             <option value="title_asc" <?php selected($current_orderby, 'title_asc'); ?>>Urutkan berdasarkan nama: A-Z</option>
                             <option value="title_desc" <?php selected($current_orderby, 'title_desc'); ?>>Urutkan berdasarkan nama: Z-A</option>
                         </select>
+                        <?php
+                        // Pertahankan query string yang ada (misal: kategori, pencarian) saat sorting.
+                        // Hapus parameter 'paged' untuk kembali ke halaman pertama setelah sorting.
+                        foreach ($_GET as $key => $value) {
+                            if ('orderby' === $key || 'paged' === $key) continue;
+                            echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr(stripslashes($value)) . '" />';
+                        }
+                        ?>
                         <noscript><button type="submit">Urutkan</button></noscript>
                     </form>
                 </div>

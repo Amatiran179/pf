@@ -54,19 +54,13 @@ function putrafiber_get_current_request_url() {
         return '';
     }
 
-    $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
-    if ($request_uri === '') {
-        return '';
-    }
+    // Gunakan add_query_arg dengan $wp->request untuk cara yang lebih andal dalam merekonstruksi URL.
+    // Ini lebih aman daripada mengandalkan $_SERVER['REQUEST_URI'] secara langsung.
+    global $wp;
+    $current_url = home_url(add_query_arg(array(), $wp->request));
 
-    $home = home_url();
-    $home = trailingslashit($home);
-
-    if (strpos($request_uri, 'http') === 0) {
-        return esc_url_raw($request_uri);
-    }
-
-    return esc_url_raw(rtrim($home, '/') . $request_uri);
+    // Pastikan URL di-escape dengan benar sebelum dikembalikan.
+    return esc_url_raw($current_url);
 }
 
 /**
@@ -126,6 +120,9 @@ function putrafiber_track_visit() {
         return;
     }
 
+    // Hapus query string dari URL untuk mengelompokkan statistik per halaman dengan benar.
+    $url = strtok($url, '?');
+
     $analytics = putrafiber_get_analytics_data();
 
     $analytics['visits_total'] = isset($analytics['visits_total']) ? (int) $analytics['visits_total'] + 1 : 1;
@@ -170,24 +167,20 @@ add_action('template_redirect', 'putrafiber_track_visit', 20);
  * Ajax handler for WhatsApp click tracking.
  */
 function putrafiber_track_whatsapp_click() {
-    check_ajax_referer('pf_ajax_nonce', 'security');
-    if (!current_user_can('edit_posts')) {
-        wp_send_json_error('Unauthorized', 403);
-    }
-
+    // Cukup verifikasi nonce yang dikirim dari client-side.
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-    $nonce_valid = $nonce ? wp_verify_nonce($nonce, 'putrafiber_analytics') : false;
-
-    if (!$nonce_valid && $nonce) {
-        $nonce_valid = wp_verify_nonce($nonce, 'putrafiber_nonce');
-    }
+    $nonce_valid = $nonce ? wp_verify_nonce($nonce, 'putrafiber_wa_click_nonce') : false; // Gunakan nonce yang lebih spesifik
 
     if (!$nonce_valid) {
-        wp_send_json_error(array('message' => __('Invalid analytics nonce.', 'putrafiber')), 403);
+        wp_send_json_error(array('message' => __('Invalid security nonce.', 'putrafiber')), 403);
     }
 
-    $target = isset($_POST['target']) ? pf_clean_url($_POST['target']) : '';
-    $source = isset($_POST['source']) ? pf_clean_url($_POST['source']) : '';
+    // Hardening: Batasi panjang input untuk mencegah penyalahgunaan.
+    $max_url_length = 512;
+    $raw_target = isset($_POST['target']) ? substr(wp_unslash($_POST['target']), 0, $max_url_length) : '';
+    $raw_source = isset($_POST['source']) ? substr(wp_unslash($_POST['source']), 0, $max_url_length) : '';
+    $target = pf_clean_url($raw_target);
+    $source = pf_clean_url($raw_source);
 
     if ($target === '') {
         wp_send_json_error(array('message' => __('Missing WhatsApp link.', 'putrafiber')), 400);
@@ -421,14 +414,9 @@ add_action('wp_dashboard_setup', 'putrafiber_register_analytics_widget');
  * Allow administrators to reset analytics buckets from the dashboard.
  */
 function putrafiber_reset_analytics() {
-    check_ajax_referer('pf_ajax_nonce', 'security');
+    check_ajax_referer('putrafiber_reset_analytics', 'nonce');
     if (!current_user_can('manage_options')) {
         wp_send_json_error(array('message' => __('Anda tidak memiliki akses untuk menghapus data analytics.', 'putrafiber')), 403);
-    }
-
-    $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-    if (!$nonce || !wp_verify_nonce($nonce, 'putrafiber_reset_analytics')) {
-        wp_send_json_error(array('message' => __('Nonce analytics tidak valid.', 'putrafiber')), 403);
     }
 
     delete_option('putrafiber_analytics');
