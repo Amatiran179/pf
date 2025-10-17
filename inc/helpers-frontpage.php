@@ -15,22 +15,245 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Registry of available core sections with descriptive labels.
+ *
+ * @return array<string,array<string,string|bool>>
+ */
+function putrafiber_frontpage_section_catalog() {
+    return array(
+        'hero' => array(
+            'label'       => __('Hero', 'putrafiber'),
+            'description' => __('Bagian pembuka dengan CTA utama dan highlight value proposition.', 'putrafiber'),
+        ),
+        'features' => array(
+            'label'       => __('Features', 'putrafiber'),
+            'description' => __('Sorotan keunggulan yang membedakan bisnis Anda.', 'putrafiber'),
+        ),
+        'services' => array(
+            'label'       => __('Services', 'putrafiber'),
+            'description' => __('Daftar layanan utama atau paket yang ditawarkan.', 'putrafiber'),
+        ),
+        'portfolio' => array(
+            'label'       => __('Portfolio', 'putrafiber'),
+            'description' => __('Kumpulan proyek atau studi kasus terbaik.', 'putrafiber'),
+        ),
+        'cta' => array(
+            'label'       => __('CTA', 'putrafiber'),
+            'description' => __('Ajakan bertindak kuat untuk memicu konversi.', 'putrafiber'),
+        ),
+        'products' => array(
+            'label'       => __('Products', 'putrafiber'),
+            'description' => __('Katalog produk unggulan yang ingin ditonjolkan.', 'putrafiber'),
+        ),
+        'blog' => array(
+            'label'       => __('Blog', 'putrafiber'),
+            'description' => __('Artikel terbaru sebagai bukti keahlian dan SEO.', 'putrafiber'),
+        ),
+        'testimonials' => array(
+            'label'       => __('Testimonials', 'putrafiber'),
+            'description' => __('Testimoni pelanggan dan social proof lainnya.', 'putrafiber'),
+        ),
+        'partners' => array(
+            'label'       => __('Partners', 'putrafiber'),
+            'description' => __('Logo partner, klien, atau sertifikasi penting.', 'putrafiber'),
+        ),
+    );
+}
+
+/**
  * Default section registry used for ordering/toggles fallback.
  *
  * @return array<string,array<string,mixed>>
  */
 function putrafiber_frontpage_section_defaults() {
-    return array(
-        'hero'         => array('enabled' => true),
-        'features'     => array('enabled' => true),
-        'services'     => array('enabled' => true),
-        'portfolio'    => array('enabled' => true),
-        'cta'          => array('enabled' => true),
-        'products'     => array('enabled' => true),
-        'blog'         => array('enabled' => true),
-        'testimonials' => array('enabled' => false),
-        'partners'     => array('enabled' => false),
+    $catalog = putrafiber_frontpage_section_catalog();
+
+    $defaults = array(
+        'hero'         => true,
+        'features'     => true,
+        'services'     => true,
+        'portfolio'    => true,
+        'cta'          => true,
+        'products'     => true,
+        'blog'         => true,
+        'testimonials' => false,
+        'partners'     => false,
     );
+
+    $result = array();
+    foreach ($defaults as $slug => $enabled_default) {
+        $result[$slug] = array(
+            'enabled' => (bool) $enabled_default,
+        );
+
+        if (isset($catalog[$slug]['label'])) {
+            $result[$slug]['label'] = $catalog[$slug]['label'];
+        }
+        if (isset($catalog[$slug]['description'])) {
+            $result[$slug]['description'] = $catalog[$slug]['description'];
+        }
+    }
+
+    return $result;
+}
+
+/**
+ * Legacy toggle resolver used for backwards compatibility.
+ *
+ * @param string $slug
+ * @param bool   $default_on
+ * @return bool
+ */
+function putrafiber_frontpage_section_enabled_legacy($slug, $default_on = true) {
+    $defaults = putrafiber_frontpage_section_defaults();
+    if ($default_on === null && isset($defaults[$slug])) {
+        $default_on = !empty($defaults[$slug]['enabled']);
+    }
+
+    $default_flag = $default_on ? '1' : '0';
+
+    if ($slug === 'testimonials') {
+        $legacy = putrafiber_get_option('enable_testimonials', $default_flag);
+        if ($legacy !== '' && $legacy !== null) {
+            return $legacy === '1' || $legacy === 1 || $legacy === true;
+        }
+    } elseif ($slug === 'partners') {
+        $legacy = putrafiber_get_option('enable_partners', $default_flag);
+        if ($legacy !== '' && $legacy !== null) {
+            return $legacy === '1' || $legacy === 1 || $legacy === true;
+        }
+    }
+
+    $value = putrafiber_get_option('enable_' . $slug . '_section', $default_flag);
+
+    return $value === '1' || $value === 1 || $value === true;
+}
+
+/**
+ * Retrieve the saved builder configuration, normalised with defaults.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function putrafiber_frontpage_builder_config() {
+    $catalog   = putrafiber_frontpage_section_catalog();
+    $defaults  = putrafiber_frontpage_section_defaults();
+    $stored    = putrafiber_get_option('front_sections_builder', array());
+    $config    = array();
+
+    if (is_array($stored) && !empty($stored)) {
+        foreach ($stored as $item) {
+            if (!is_array($item) || empty($item['id'])) {
+                continue;
+            }
+
+            $id   = sanitize_key($item['id']);
+            $type = (isset($item['type']) && $item['type'] === 'custom') ? 'custom' : 'core';
+
+            $entry = array(
+                'id'      => $id,
+                'type'    => $type,
+                'enabled' => !empty($item['enabled']),
+            );
+
+            if ($type === 'core') {
+                if (isset($catalog[$id]['label'])) {
+                    $entry['label'] = $catalog[$id]['label'];
+                } elseif (isset($item['label'])) {
+                    $entry['label'] = sanitize_text_field($item['label']);
+                }
+
+                if (isset($catalog[$id]['description'])) {
+                    $entry['description'] = $catalog[$id]['description'];
+                }
+            } else {
+                $entry['label']       = isset($item['label']) && $item['label'] !== '' ? sanitize_text_field($item['label']) : __('Section Kustom', 'putrafiber');
+                $entry['title']       = isset($item['title']) ? sanitize_text_field($item['title']) : '';
+                $entry['subtitle']    = isset($item['subtitle']) ? sanitize_text_field($item['subtitle']) : '';
+                $entry['content']     = isset($item['content']) ? wp_kses_post($item['content']) : '';
+                $entry['background']  = isset($item['background']) ? sanitize_text_field($item['background']) : '';
+                $entry['text_color']  = isset($item['text_color']) ? sanitize_text_field($item['text_color']) : '';
+                $entry['button_text'] = isset($item['button_text']) ? sanitize_text_field($item['button_text']) : '';
+                $entry['button_url']  = isset($item['button_url']) ? esc_url($item['button_url']) : '';
+            }
+
+            $config[] = $entry;
+        }
+    }
+
+    if (empty($config)) {
+        $order_option = putrafiber_get_option('front_sections_order', '');
+        $order        = array();
+
+        if (!empty($order_option)) {
+            $pieces = array_map('trim', explode(',', $order_option));
+            foreach ($pieces as $slug) {
+                if ($slug !== '' && !in_array($slug, $order, true)) {
+                    $order[] = $slug;
+                }
+            }
+        }
+
+        if (empty($order)) {
+            $order = array_keys($defaults);
+        }
+
+        foreach ($order as $slug) {
+            if (!isset($defaults[$slug])) {
+                continue;
+            }
+
+            $config[] = array(
+                'id'          => $slug,
+                'type'        => 'core',
+                'enabled'     => putrafiber_frontpage_section_enabled_legacy($slug, !empty($defaults[$slug]['enabled'])),
+                'label'       => isset($catalog[$slug]['label']) ? $catalog[$slug]['label'] : ucfirst($slug),
+                'description' => isset($catalog[$slug]['description']) ? $catalog[$slug]['description'] : '',
+            );
+        }
+    }
+
+    return $config;
+}
+
+/**
+ * Locate custom section payload by slug.
+ *
+ * @param string $slug
+ * @return array<string,mixed>|null
+ */
+function putrafiber_frontpage_custom_section($slug) {
+    $config = putrafiber_frontpage_builder_config();
+
+    foreach ($config as $section) {
+        if (!is_array($section) || empty($section['id'])) {
+            continue;
+        }
+
+        if ($section['id'] !== $slug) {
+            continue;
+        }
+
+        if (!isset($section['type']) || $section['type'] !== 'custom') {
+            return null;
+        }
+
+        $title = isset($section['title']) && $section['title'] !== ''
+            ? $section['title']
+            : (isset($section['label']) ? $section['label'] : '');
+
+        $section['title']      = $title;
+        $section['label']      = isset($section['label']) && $section['label'] !== '' ? $section['label'] : $title;
+        $section['subtitle']   = isset($section['subtitle']) ? $section['subtitle'] : '';
+        $section['content']    = isset($section['content']) ? $section['content'] : '';
+        $section['background'] = isset($section['background']) ? $section['background'] : '';
+        $section['text_color'] = isset($section['text_color']) ? $section['text_color'] : '';
+        $section['button_text']= isset($section['button_text']) ? $section['button_text'] : '';
+        $section['button_url'] = isset($section['button_url']) ? $section['button_url'] : '';
+
+        return $section;
+    }
+
+    return null;
 }
 
 /**
@@ -39,6 +262,25 @@ function putrafiber_frontpage_section_defaults() {
  * @return string[]
  */
 function putrafiber_frontpage_sections() {
+    $builder_config = putrafiber_frontpage_builder_config();
+    $builder_order  = array();
+
+    if (!empty($builder_config)) {
+        foreach ($builder_config as $section) {
+            if (!is_array($section) || empty($section['id'])) {
+                continue;
+            }
+
+            if (!empty($section['enabled']) && !in_array($section['id'], $builder_order, true)) {
+                $builder_order[] = $section['id'];
+            }
+        }
+
+        if (!empty($builder_order)) {
+            return $builder_order;
+        }
+    }
+
     $defaults = putrafiber_frontpage_section_defaults();
     $default_order = array_keys($defaults);
 
@@ -80,27 +322,21 @@ function putrafiber_frontpage_sections() {
  * @return bool
  */
 function putrafiber_frontpage_section_enabled($slug) {
-    $defaults   = putrafiber_frontpage_section_defaults();
-    $default_on = isset($defaults[$slug]) ? !empty($defaults[$slug]['enabled']) : true;
+    $builder_config = putrafiber_frontpage_builder_config();
 
-    $key = 'enable_' . $slug . '_section';
+    if (!empty($builder_config)) {
+        foreach ($builder_config as $section) {
+            if (!is_array($section) || empty($section['id'])) {
+                continue;
+            }
 
-    // Legacy support for older option keys.
-    if ($slug === 'testimonials') {
-        $legacy = putrafiber_get_option('enable_testimonials', $default_on ? '1' : '0');
-        if ($legacy !== '' && $legacy !== null) {
-            return $legacy === '1' || $legacy === 1 || $legacy === true;
-        }
-    } elseif ($slug === 'partners') {
-        $legacy = putrafiber_get_option('enable_partners', $default_on ? '1' : '0');
-        if ($legacy !== '' && $legacy !== null) {
-            return $legacy === '1' || $legacy === 1 || $legacy === true;
+            if ($section['id'] === $slug) {
+                return !empty($section['enabled']);
+            }
         }
     }
 
-    $value = putrafiber_get_option($key, $default_on ? '1' : '0');
-
-    return $value === '1' || $value === 1 || $value === true;
+    return putrafiber_frontpage_section_enabled_legacy($slug);
 }
 
 /**
@@ -110,6 +346,12 @@ function putrafiber_frontpage_section_enabled($slug) {
  * @return void
  */
 function putrafiber_render_frontpage_section($slug) {
+    $custom = putrafiber_frontpage_custom_section($slug);
+    if ($custom) {
+        get_template_part('template-parts/sections/custom', null, array('section' => $custom));
+        return;
+    }
+
     $allowed = array(
         'hero',
         'features',

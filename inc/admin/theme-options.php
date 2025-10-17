@@ -31,6 +31,42 @@ function putrafiber_add_admin_menu() {
 add_action('admin_menu', 'putrafiber_add_admin_menu');
 
 /**
+ * Enqueue Theme Options specific assets (drag & drop builder, presets UI).
+ *
+ * @param string $hook
+ * @return void
+ */
+function putrafiber_theme_options_assets($hook) {
+    if ($hook !== 'toplevel_page_putrafiber-options') {
+        return;
+    }
+
+    wp_enqueue_style(
+        'putrafiber-theme-options',
+        get_template_directory_uri() . '/assets/admin/theme-options.css',
+        array(),
+        function_exists('pf_asset_version') ? pf_asset_version('assets/admin/theme-options.css') : PUTRAFIBER_VERSION
+    );
+
+    wp_enqueue_script(
+        'sortablejs',
+        'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js',
+        array(),
+        '1.15.0',
+        true
+    );
+
+    wp_enqueue_script(
+        'putrafiber-theme-options',
+        get_template_directory_uri() . '/assets/admin/theme-options.js',
+        array('jquery', 'sortablejs'),
+        function_exists('pf_asset_version') ? pf_asset_version('assets/admin/theme-options.js') : PUTRAFIBER_VERSION,
+        true
+    );
+}
+add_action('admin_enqueue_scripts', 'putrafiber_theme_options_assets');
+
+/**
  * Register Settings - WITH SANITIZE CALLBACK
  */
 function putrafiber_settings_init() {
@@ -76,13 +112,14 @@ function putrafiber_settings_init() {
     add_settings_field('enable_testimonials_section', __('Tampilkan Testimonials', 'putrafiber'), 'putrafiber_enable_testimonials_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('enable_partners_section', __('Tampilkan Partners', 'putrafiber'), 'putrafiber_enable_partners_section_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
 
-    add_settings_field('front_sections_order', __('Section Order', 'putrafiber'), 'putrafiber_front_sections_order_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_sections_order', __('Section Builder', 'putrafiber'), 'putrafiber_front_sections_order_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('front_enable_parallax', __('Enable Hero Parallax', 'putrafiber'), 'putrafiber_front_enable_parallax_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('front_water_intensity', __('Water Bubble Intensity', 'putrafiber'), 'putrafiber_front_water_intensity_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('front_primary_color', __('Primary Accent Colour', 'putrafiber'), 'putrafiber_front_primary_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('front_gold_color', __('Gold Accent Colour', 'putrafiber'), 'putrafiber_front_gold_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('front_dark_color', __('Dark Accent Colour', 'putrafiber'), 'putrafiber_front_dark_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
     add_settings_field('front_water_color', __('Water Overlay Colour', 'putrafiber'), 'putrafiber_front_water_color_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
+    add_settings_field('front_color_presets', __('Colour Presets', 'putrafiber'), 'putrafiber_front_color_presets_render', 'putrafiber-landing', 'putrafiber_landing_layout_section');
 
     add_settings_section(
         'putrafiber_landing_copy_section',
@@ -283,7 +320,6 @@ function putrafiber_sanitize_options($input) {
         'whatsapp_number', 'company_phone', 'business_hours',
         'pwa_name', 'pwa_short_name',
         'business_type', 'company_name', 'company_city', 'company_province', 'company_postal_code', 'price_range',
-        'front_sections_order',
         'front_features_title', 'front_services_title', 'front_portfolio_title', 'front_products_title', 'front_blog_title', 'front_cta_title',
         'front_cta_primary_text', 'front_cta_secondary_text',
         'front_water_color', 'meta_keywords', 'twitter_username'
@@ -385,6 +421,127 @@ function putrafiber_sanitize_options($input) {
         }
 
         $output['cta_priority_order'] = array_values(array_unique($output['cta_priority_order']));
+    }
+
+    // Sections Builder (drag & drop)
+    $output['front_sections_builder'] = array();
+    $builder_raw = isset($input['front_sections_builder']) ? $input['front_sections_builder'] : '';
+    $builder_decoded = array();
+
+    if (!empty($builder_raw)) {
+        if (is_string($builder_raw)) {
+            $decoded = json_decode(wp_unslash($builder_raw), true);
+            if (is_array($decoded)) {
+                $builder_decoded = $decoded;
+            }
+        } elseif (is_array($builder_raw)) {
+            $builder_decoded = $builder_raw;
+        }
+    }
+
+    $builder_order = array();
+
+    if (!empty($builder_decoded)) {
+        foreach ($builder_decoded as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $id = isset($item['id']) ? sanitize_key($item['id']) : '';
+            if ($id === '') {
+                continue;
+            }
+
+            $type    = (isset($item['type']) && $item['type'] === 'custom') ? 'custom' : 'core';
+            $enabled = (!empty($item['enabled']) && ($item['enabled'] === '1' || $item['enabled'] === 1 || $item['enabled'] === true)) ? '1' : '0';
+
+            $entry = array(
+                'id'      => $id,
+                'type'    => $type,
+                'enabled' => $enabled,
+            );
+
+            if (isset($item['label'])) {
+                $entry['label'] = sanitize_text_field($item['label']);
+            }
+
+            if ($type === 'custom') {
+                $entry['title']       = isset($item['title']) ? sanitize_text_field($item['title']) : '';
+                $entry['subtitle']    = isset($item['subtitle']) ? sanitize_text_field($item['subtitle']) : '';
+                $entry['content']     = isset($item['content']) ? wp_kses_post($item['content']) : '';
+                $entry['background']  = isset($item['background']) ? sanitize_hex_color($item['background']) : '';
+                $entry['text_color']  = isset($item['text_color']) ? sanitize_hex_color($item['text_color']) : '';
+                $entry['button_text'] = isset($item['button_text']) ? sanitize_text_field($item['button_text']) : '';
+                $entry['button_url']  = isset($item['button_url']) ? esc_url_raw($item['button_url']) : '';
+            }
+
+            $output['front_sections_builder'][] = $entry;
+
+            if ($enabled === '1') {
+                $builder_order[] = $id;
+            }
+        }
+    }
+
+    if (!empty($builder_order)) {
+        $builder_order = array_values(array_unique($builder_order));
+        $output['front_sections_order'] = implode(',', $builder_order);
+    } else {
+        $output['front_sections_order'] = isset($input['front_sections_order']) ? sanitize_text_field($input['front_sections_order']) : '';
+    }
+
+    // Colour presets system
+    $output['front_color_presets'] = array();
+    $presets_raw = isset($input['front_color_presets']) ? $input['front_color_presets'] : '';
+    $presets_decoded = array();
+
+    if (!empty($presets_raw)) {
+        if (is_string($presets_raw)) {
+            $decoded = json_decode(wp_unslash($presets_raw), true);
+            if (is_array($decoded)) {
+                $presets_decoded = $decoded;
+            }
+        } elseif (is_array($presets_raw)) {
+            $presets_decoded = $presets_raw;
+        }
+    }
+
+    if (!empty($presets_decoded)) {
+        foreach ($presets_decoded as $preset) {
+            if (!is_array($preset)) {
+                continue;
+            }
+
+            $preset_id = isset($preset['id']) ? sanitize_key($preset['id']) : '';
+            if ($preset_id === '') {
+                continue;
+            }
+
+            $preset_name = isset($preset['name']) ? sanitize_text_field($preset['name']) : '';
+            $colors      = array();
+
+            if (isset($preset['colors']) && is_array($preset['colors'])) {
+                foreach ($preset['colors'] as $color_key => $color_value) {
+                    $color_key_clean = sanitize_key($color_key);
+                    if ($color_key_clean === '') {
+                        continue;
+                    }
+
+                    $colors[$color_key_clean] = sanitize_text_field($color_value);
+                }
+            }
+
+            $output['front_color_presets'][] = array(
+                'id'     => $preset_id,
+                'name'   => $preset_name,
+                'colors' => $colors,
+            );
+        }
+    }
+
+    $output['front_active_preset'] = '';
+    if (!empty($input['front_active_preset'])) {
+        $output['front_active_preset'] = sanitize_key($input['front_active_preset']);
     }
 
     return $output;
@@ -500,11 +657,51 @@ function putrafiber_hero_secondary_url_render() {
 }
 
 function putrafiber_front_sections_order_render() {
-    $options = get_option('putrafiber_options', array());
-    $value = isset($options['front_sections_order']) ? $options['front_sections_order'] : 'hero,features,services,portfolio,cta,products,blog';
+    $options        = get_option('putrafiber_options', array());
+    $builder_option = isset($options['front_sections_builder']) && is_array($options['front_sections_builder'])
+        ? $options['front_sections_builder']
+        : array();
+    $order          = isset($options['front_sections_order']) ? $options['front_sections_order'] : '';
+
+    $catalog = array();
+    if (function_exists('putrafiber_frontpage_section_catalog')) {
+        $catalog = putrafiber_frontpage_section_catalog();
+    }
+
+    $defaults  = function_exists('putrafiber_frontpage_section_defaults')
+        ? putrafiber_frontpage_section_defaults()
+        : array();
+    $state_map = array();
+
+    foreach ($defaults as $slug => $meta) {
+        $enabled_key           = 'enable_' . $slug . '_section';
+        $is_enabled            = isset($options[$enabled_key]) ? $options[$enabled_key] === '1' : (!empty($meta['enabled']));
+        $state_map[$slug]      = array(
+            'enabled' => $is_enabled,
+        );
+        if (isset($meta['label'])) {
+            $state_map[$slug]['label'] = $meta['label'];
+        }
+    }
+
+    $builder_json = !empty($builder_option) ? wp_json_encode($builder_option) : '';
+    $state_json   = !empty($state_map) ? wp_json_encode($state_map) : '';
+    $catalog_json = !empty($catalog) ? wp_json_encode($catalog) : '';
     ?>
-    <input type="text" name="putrafiber_options[front_sections_order]" value="<?php echo esc_attr($value); ?>" class="large-text">
-    <p class="description"><?php _e('Masukkan slug section dipisah koma untuk menentukan urutan. Slug tersedia: hero, features, services, portfolio, cta, products, blog, testimonials, partners.', 'putrafiber'); ?></p>
+    <div
+        class="pf-sections-builder"
+        data-pf-sections-builder
+        <?php if ($builder_json) : ?>data-sections="<?php echo esc_attr($builder_json); ?>"<?php endif; ?>
+        <?php if ($state_json) : ?>data-default-state="<?php echo esc_attr($state_json); ?>"<?php endif; ?>
+        <?php if ($catalog_json) : ?>data-catalog="<?php echo esc_attr($catalog_json); ?>"<?php endif; ?>
+        data-custom-label="<?php echo esc_attr__('Section Kustom', 'putrafiber'); ?>"
+    >
+        <div class="pf-sections-builder__list" aria-live="polite"></div>
+        <p class="description pf-sections-builder__hint"><?php esc_html_e('Seret untuk mengatur urutan, centang/centang ulang untuk menonaktifkan, dan tambahkan section custom sesuai kebutuhan.', 'putrafiber'); ?></p>
+        <button type="button" class="button button-secondary pf-sections-builder__add"><?php esc_html_e('Tambah Section Kustom', 'putrafiber'); ?></button>
+        <input type="hidden" name="putrafiber_options[front_sections_builder]" value="<?php echo esc_attr($builder_json); ?>">
+        <input type="hidden" name="putrafiber_options[front_sections_order]" value="<?php echo esc_attr($order); ?>">
+    </div>
     <?php
 }
 
@@ -666,10 +863,50 @@ function putrafiber_front_dark_color_render() {
 
 function putrafiber_front_water_color_render() {
     $options = get_option('putrafiber_options', array());
-    $value = isset($options['front_water_color']) ? $options['front_water_color'] : 'rgba(15, 76, 129, 0.12)';
+    $value = isset($options['front_water_color']) ? $options['front_water_color'] : 'rgba(15, 117, 255, 0.14)';
     ?>
     <input type="text" name="putrafiber_options[front_water_color]" value="<?php echo esc_attr($value); ?>" class="regular-text">
     <p class="description"><?php _e('Nilai warna (menerima rgba) untuk overlay efek air.', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_front_color_presets_render() {
+    $options = get_option('putrafiber_options', array());
+
+    $presets = isset($options['front_color_presets']) && is_array($options['front_color_presets'])
+        ? $options['front_color_presets']
+        : array();
+    $active_preset = isset($options['front_active_preset']) ? $options['front_active_preset'] : '';
+
+    $current_colors = array(
+        'front_primary_color' => isset($options['front_primary_color']) ? $options['front_primary_color'] : '#0f75ff',
+        'front_gold_color'    => isset($options['front_gold_color']) ? $options['front_gold_color'] : '#f9c846',
+        'front_dark_color'    => isset($options['front_dark_color']) ? $options['front_dark_color'] : '#0b142b',
+        'front_water_color'   => isset($options['front_water_color']) ? $options['front_water_color'] : 'rgba(15, 117, 255, 0.14)',
+    );
+
+    $presets_json = !empty($presets) ? wp_json_encode($presets) : '';
+    $colors_json  = wp_json_encode($current_colors);
+    ?>
+    <div
+        class="pf-color-presets"
+        data-pf-color-presets
+        data-current="<?php echo esc_attr($colors_json); ?>"
+        data-active="<?php echo esc_attr($active_preset); ?>"
+        <?php if ($presets_json) : ?>data-presets="<?php echo esc_attr($presets_json); ?>"<?php endif; ?>
+    >
+        <div class="pf-color-presets__list" aria-live="polite"></div>
+        <div class="pf-color-presets__create">
+            <label for="pf-color-preset-name" class="pf-color-presets__label"><?php esc_html_e('Nama preset baru', 'putrafiber'); ?></label>
+            <div class="pf-color-presets__new">
+                <input type="text" id="pf-color-preset-name" class="regular-text" placeholder="<?php esc_attr_e('Contoh: Tema Korporat Elegan', 'putrafiber'); ?>">
+                <button type="button" class="button button-secondary pf-color-presets__save"><?php esc_html_e('Simpan dari warna saat ini', 'putrafiber'); ?></button>
+            </div>
+        </div>
+        <p class="description"><?php esc_html_e('Preset menyimpan kombinasi warna sehingga Anda dapat berganti tema landing page hanya dengan satu klik.', 'putrafiber'); ?></p>
+        <input type="hidden" name="putrafiber_options[front_color_presets]" value="<?php echo esc_attr($presets_json); ?>">
+        <input type="hidden" name="putrafiber_options[front_active_preset]" value="<?php echo esc_attr($active_preset); ?>">
+    </div>
     <?php
 }
 
