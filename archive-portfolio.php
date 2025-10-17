@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 ?>
@@ -73,7 +74,10 @@ get_header();
                                 <?php if (has_post_thumbnail()): ?>
                                     <div class="portfolio-archive-image">
                                         <a href="<?php the_permalink(); ?>">
-                                            <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                            <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                                'loading' => 'lazy',
+                                                'decoding' => 'async'
+                                            )); ?>
                                         </a>
                                         
                                         <?php if ($terms && !is_wp_error($terms)): ?>

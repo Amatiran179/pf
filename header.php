@@ -5,6 +5,7 @@
  * @package PutraFiber
  * @version 1.2.0
  */
+if (!defined('ABSPATH')) exit;
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>

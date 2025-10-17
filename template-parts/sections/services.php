@@ -4,6 +4,7 @@
  *
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $services_title = putrafiber_frontpage_text('services', 'title', __('Solusi Water Attraction Lengkap', 'putrafiber'));
 $services_desc  = putrafiber_frontpage_text('services', 'description', __('Dari masterplan, fabrikasi, hingga instalasi turn-key untuk wahana air dan playground.', 'putrafiber'));

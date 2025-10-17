@@ -4,6 +4,7 @@
  *
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $cta_title        = putrafiber_frontpage_text('cta', 'title', __('Siap Memulai Proyek Ikonik?', 'putrafiber'));
 $cta_description  = putrafiber_frontpage_text('cta', 'description', __('Tim konsultan kami siap membantu menghitung kebutuhan, estimasi biaya, hingga timeline pembangunan.', 'putrafiber'));

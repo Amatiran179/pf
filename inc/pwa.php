@@ -67,9 +67,10 @@ function putrafiber_generate_manifest() {
         return;
     }
 
-    if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], 'manifest.json') !== false) {
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
+    if ($request_uri && strpos($request_uri, 'manifest.json') !== false) {
         header('Content-Type: application/json');
-        
+
         $manifest = array(
             'name' => putrafiber_get_option('pwa_name', 'PutraFiber'),
             'short_name' => putrafiber_get_option('pwa_short_name', 'PutraFiber'),
@@ -114,7 +115,7 @@ function putrafiber_serve_static_pwa_files() {
         return;
     }
 
-    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
     if (!$request_uri) {
         return;
     }
@@ -150,43 +151,80 @@ function putrafiber_generate_service_worker() {
         return;
     }
 
-    if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], 'sw.js') !== false) {
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
+    if ($request_uri && strpos($request_uri, 'sw.js') !== false) {
         header('Content-Type: application/javascript');
         header('Service-Worker-Allowed: /');
         
         ?>
-const CACHE_NAME = 'putrafiber-v1';
-const urlsToCache = [
-    '/',
-    '/wp-content/themes/putrafiber-enterprise/assets/css/components.css',
-    '/wp-content/themes/putrafiber-enterprise/assets/js/main.js'
-];
+const CACHE_VERSION = 'v2';
+const CACHE_PREFIX = 'pf-cache';
+const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
 
 self.addEventListener('install', event => {
+    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
-    );
-});
-
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => response || fetch(event.request))
+        caches
+            .open(CACHE_NAME)
+            .then(cache =>
+                Promise.all(
+                    ['/', '/offline'].map(url => cache.add(url).catch(() => null))
+                )
+            )
+            .catch(() => Promise.resolve())
     );
 });
 
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
+        caches.keys().then(cacheNames =>
+            Promise.all(
+                cacheNames.map(name => {
+                    if (name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME) {
+                        return caches.delete(name);
                     }
+                    return Promise.resolve(false);
                 })
-            );
-        })
+            )
+        )
+    );
+    clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+    const { request } = event;
+
+    if (request.method !== 'GET') {
+        return;
+    }
+
+    const requestUrl = new URL(request.url);
+
+    if (requestUrl.origin !== self.location.origin) {
+        return;
+    }
+
+    if (requestUrl.pathname.startsWith('/wp-admin') || requestUrl.pathname.includes('admin-ajax.php')) {
+        return;
+    }
+
+    event.respondWith(
+        caches.open(CACHE_NAME).then(cache =>
+            cache.match(request).then(match => {
+                if (match) {
+                    return match;
+                }
+
+                return fetch(request)
+                    .then(response => {
+                        if (response && response.status === 200 && response.type === 'basic') {
+                            cache.put(request, response.clone());
+                        }
+                        return response;
+                    })
+                    .catch(() => cache.match('/offline'));
+            })
+        )
     );
 });
         <?php
@@ -239,7 +277,7 @@ function putrafiber_manage_service_worker_registration() {
         return;
     }
 
-    if (putrafiber_is_pwa_enabled()) {
+    if (putrafiber_is_pwa_enabled() && file_exists(get_template_directory() . '/service-worker.js')) {
         echo "<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.warn('PWA register failed',e);});}</script>";
         return;
     }

@@ -64,6 +64,14 @@ Tema WordPress premium untuk brand PutraFiber, dikembangkan khusus untuk kebutuh
 - Mode multi-bahasa (WPML/Polylang) dengan string siap diterjemahkan penuh.
 - Komponen blok Gutenberg khusus (hero, CTA, layanan) agar konsisten di halaman lain.
 
+## Hardening Sweep
+- Guard ABSPATH dan linting ulang seluruh file PHP memastikan tidak ada fatal error baru.
+- Audit CRUD/AJAX: tambah verifikasi nonce, pengecekan kapabilitas kondisional, serta sanitasi input memakai helper `pf_clean_*`.
+- Schema Advanced kini mendeteksi output legacy/SEO plugin lain sehingga hanya satu JSON-LD yang dirender.
+- Enqueue & PWA: fallback manifest, versi aset dinamis, service worker dengan cache versioning dan pengecualian admin.
+- Performance kecil: atribut `loading="lazy"` + `decoding="async"` untuk gambar non-hero, guard breadcrumb di konteks non-singular, dan catatan i18n yang konsisten.
+- Semua perubahan bersifat additive dan mempertahankan kompatibilitas CTA, CRUD, serta schema lama.
+
 ## Struktur Folder Penting
 - `assets/css/` – stylesheet utama (global, komponen, header, responsive, admin).
 - `assets/js/` – skrip front end (animasi, lazyload, PWA) dan admin.

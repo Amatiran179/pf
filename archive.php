@@ -4,6 +4,7 @@
  * 
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 get_header();
 ?>
@@ -47,7 +48,10 @@ get_header();
                                 <?php if (has_post_thumbnail()): ?>
                                     <div class="portfolio-thumbnail">
                                         <a href="<?php the_permalink(); ?>">
-                                            <?php the_post_thumbnail('putrafiber-portfolio'); ?>
+                                            <?php the_post_thumbnail('putrafiber-portfolio', array(
+                                                'loading' => 'lazy',
+                                                'decoding' => 'async'
+                                            )); ?>
                                         </a>
                                         <div class="portfolio-overlay">
                                             <a href="<?php the_permalink(); ?>" class="view-project">
@@ -81,7 +85,10 @@ get_header();
                                 <?php if (has_post_thumbnail()): ?>
                                     <div class="post-thumbnail">
                                         <a href="<?php the_permalink(); ?>">
-                                            <?php the_post_thumbnail('putrafiber-thumb'); ?>
+                                            <?php the_post_thumbnail('putrafiber-thumb', array(
+                                                'loading' => 'lazy',
+                                                'decoding' => 'async'
+                                            )); ?>
                                         </a>
                                     </div>
                                 <?php endif; ?>

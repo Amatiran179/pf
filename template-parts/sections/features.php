@@ -4,6 +4,7 @@
  *
  * @package PutraFiber
  */
+if (!defined('ABSPATH')) exit;
 
 $features_title = putrafiber_frontpage_text('features', 'title', __('Kelebihan PutraFiber', 'putrafiber'));
 $features_desc  = putrafiber_frontpage_text('features', 'description', __('Kami menggabungkan inovasi fiberglass dengan rekayasa konstruksi berkelas dunia.', 'putrafiber'));

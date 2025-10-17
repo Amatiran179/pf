@@ -5,6 +5,7 @@
  * @package PutraFiber
  * @since 1.0.0
  */
+if (!defined('ABSPATH')) exit;
 
 $product_id = get_the_ID();
 $price_raw = get_post_meta($product_id, '_product_price', true);
