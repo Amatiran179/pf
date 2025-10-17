@@ -59,18 +59,17 @@ function putrafiber_lazy_load_images($content) {
             return $img;
         }
 
-        if (preg_match('/class=("|\')(.*?)\1/i', $img, $class_match)) {
+        if (preg_match('/class=("|\")(.*?)\1/i', $img, $class_match)) {
             $existing_classes = $class_match[2];
             if (!preg_match('/\blazy-load\b/', $existing_classes)) {
                 $new_classes = trim($existing_classes . ' lazy-load');
                 $img = str_replace($class_match[0], 'class="' . esc_attr($new_classes) . '"', $img);
             }
-        } else {
-            $img = preg_replace('/<img\s+/i', '<img class="lazy-load" ', $img, 1);
-        }
-
-        if (stripos($img, 'loading=') === false) {
+            // Since we returned early if `loading=` exists, we can always add it here.
             $img = preg_replace('/<img\s+/i', '<img loading="lazy" ', $img, 1);
+        } else {
+            // No class attribute, so add both `loading` and `class`.
+            $img = preg_replace('/<img\s+/i', '<img loading="lazy" class="lazy-load" ', $img, 1);
         }
 
         return $img;
