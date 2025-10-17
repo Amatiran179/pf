@@ -701,14 +701,27 @@ if (!class_exists('PutraFiber_Schema_Manager')) {
             }
 
             $post_id = $context['post_id'];
-            if ($post_id && get_post_meta($post_id, '_enable_local_business', true) !== '1') {
-                return array();
-            }
+$allowed_pages = isset($options['localbusiness_pages']) ? (array) $options['localbusiness_pages'] : array();
 
-            $allowed_pages = isset($options['localbusiness_pages']) ? (array) $options['localbusiness_pages'] : array();
-            if (!empty($allowed_pages) && $post_id && !in_array((string) $post_id, array_map('strval', $allowed_pages), true)) {
-                return array();
-            }
+// If no pages are selected in theme options, do not output the schema.
+if (empty($allowed_pages)) {
+    return array();
+}
+
+$is_on_allowed_page = false;
+if (is_front_page()) {
+    if (in_array('homepage', $allowed_pages, true)) {
+        $is_on_allowed_page = true;
+    }
+} elseif ($post_id) {
+    if (in_array((string) $post_id, $allowed_pages, true)) {
+        $is_on_allowed_page = true;
+    }
+}
+
+if (!$is_on_allowed_page) {
+    return array();
+}
 
             $business_type = !empty($options['business_type']) ? pf_schema_sanitize_text($options['business_type']) : 'LocalBusiness';
 
