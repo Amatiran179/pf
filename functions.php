@@ -20,6 +20,7 @@ if (!defined('PUTRAFIBER_URI'))     define('PUTRAFIBER_URI', get_template_direct
 
 require_once get_template_directory() . '/inc/helpers-sanitize.php';
 require_once get_template_directory() . '/inc/core/versioning.php';
+require_once get_template_directory() . '/inc/blocks.php';
 
 function pf_enqueue_assets() {
   $manifest_loaded = false;

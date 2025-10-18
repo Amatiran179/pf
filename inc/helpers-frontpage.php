@@ -102,6 +102,73 @@ function putrafiber_frontpage_sanitize_color_value($value) {
 }
 
 /**
+ * Retrieve normalised colour presets from theme options.
+ *
+ * @return array<string,array{colors:array<string,string>,name:string}>
+ */
+function putrafiber_frontpage_color_presets() {
+    $raw = putrafiber_get_option('front_color_presets', array());
+    $presets = array();
+
+    if (!is_array($raw)) {
+        return $presets;
+    }
+
+    foreach ($raw as $preset) {
+        if (!is_array($preset) || empty($preset['id'])) {
+            continue;
+        }
+
+        $id   = sanitize_key($preset['id']);
+        $name = isset($preset['name']) ? sanitize_text_field($preset['name']) : $id;
+
+        $colors = array();
+        if (!empty($preset['colors']) && is_array($preset['colors'])) {
+            foreach ($preset['colors'] as $key => $value) {
+                $color_key = sanitize_key($key);
+                if ($color_key === '') {
+                    continue;
+                }
+
+                $colors[$color_key] = putrafiber_frontpage_sanitize_color_value((string) $value);
+            }
+        }
+
+        $presets[$id] = array(
+            'name'   => $name,
+            'colors' => $colors,
+        );
+    }
+
+    return $presets;
+}
+
+/**
+ * Return currently active colour preset.
+ *
+ * @return array<string,string>
+ */
+function putrafiber_frontpage_active_preset_colors() {
+    $presets = putrafiber_frontpage_color_presets();
+
+    if (empty($presets)) {
+        return array();
+    }
+
+    $active_id = putrafiber_get_option('front_active_preset', '');
+    if ($active_id && isset($presets[$active_id])) {
+        return array_filter($presets[$active_id]['colors']);
+    }
+
+    $first = reset($presets);
+    if ($first && isset($first['colors']) && is_array($first['colors'])) {
+        return array_filter($first['colors']);
+    }
+
+    return array();
+}
+
+/**
  * Default section registry used for ordering/toggles fallback.
  *
  * @return array<string,array<string,mixed>>
@@ -1047,11 +1114,92 @@ function putrafiber_frontpage_icon_svg($icon) {
  * @return string
  */
 function putrafiber_frontpage_color($key, $default) {
-    $value = putrafiber_get_option($key, $default);
-    if (!empty($value) && preg_match('/^#([0-9a-fA-F]{3}){1,2}$/', $value)) {
+    $palette = putrafiber_frontpage_active_preset_colors();
+    $value   = '';
+
+    if (isset($palette[$key]) && $palette[$key] !== '') {
+        $value = $palette[$key];
+    } else {
+        $value = putrafiber_get_option($key, '');
+    }
+
+    $value = putrafiber_frontpage_sanitize_color_value($value);
+    if ($value !== '') {
         return $value;
     }
-    return $default;
+
+    $default = putrafiber_frontpage_sanitize_color_value($default);
+
+    return $default !== '' ? $default : '#0f75ff';
+}
+
+/**
+ * Retrieve palette colours used across landing components & custom blocks.
+ *
+ * @return array<string,string>
+ */
+function putrafiber_frontpage_palette_colors() {
+    return array(
+        'front_primary_color' => putrafiber_frontpage_color('front_primary_color', '#0f75ff'),
+        'front_gold_color'    => putrafiber_frontpage_color('front_gold_color', '#f9c846'),
+        'front_dark_color'    => putrafiber_frontpage_color('front_dark_color', '#0b142b'),
+        'front_water_color'   => putrafiber_frontpage_color('front_water_color', 'rgba(15, 117, 255, 0.14)'),
+    );
+}
+
+/**
+ * Generate inline style tag for palette custom properties.
+ *
+ * @return string
+ */
+function putrafiber_frontpage_palette_style() {
+    $palette = putrafiber_frontpage_palette_colors();
+
+    if (empty($palette)) {
+        return '';
+    }
+
+    $map = array(
+        'front_primary_color' => '--pf-front-primary',
+        'front_gold_color'    => '--pf-front-gold',
+        'front_dark_color'    => '--pf-front-dark',
+        'front_water_color'   => '--pf-front-water',
+    );
+
+    $declarations = array();
+    foreach ($map as $key => $variable) {
+        if (!empty($palette[$key])) {
+            $declarations[] = $variable . ':' . esc_attr($palette[$key]);
+        }
+    }
+
+    if (empty($declarations)) {
+        return '';
+    }
+
+    return '<style id="putrafiber-frontpage-vars">:root{' . implode(';', $declarations) . ';}</style>';
+}
+
+/**
+ * Ensure palette styles are only printed once per request.
+ *
+ * @return string
+ */
+function putrafiber_frontpage_palette_style_once() {
+    static $printed = false;
+
+    if ($printed) {
+        return '';
+    }
+
+    $style = putrafiber_frontpage_palette_style();
+    if ($style === '') {
+        return '';
+    }
+
+    $printed = true;
+
+    return $style;
 }
 
 /**
@@ -1060,21 +1208,10 @@ function putrafiber_frontpage_color($key, $default) {
  * @return void
  */
 function putrafiber_frontpage_print_color_vars() {
-    if (!is_front_page()) {
-        return;
+    $style = putrafiber_frontpage_palette_style_once();
+    if ($style !== '') {
+        echo $style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
-
-    $primary = putrafiber_frontpage_color('front_primary_color', '#0f75ff');
-    $gold    = putrafiber_frontpage_color('front_gold_color', '#f9c846');
-    $dark    = putrafiber_frontpage_color('front_dark_color', '#0b142b');
-    $water   = putrafiber_frontpage_color('front_water_color', 'rgba(15, 117, 255, 0.14)');
-
-    echo '<style id="putrafiber-frontpage-vars">:root{';
-    echo '--pf-front-primary:' . esc_attr($primary) . ';';
-    echo '--pf-front-gold:' . esc_attr($gold) . ';';
-    echo '--pf-front-dark:' . esc_attr($dark) . ';';
-    echo '--pf-front-water:' . esc_attr($water) . ';';
-    echo '}</style>';
 }
 add_action('wp_head', 'putrafiber_frontpage_print_color_vars', 20);
 

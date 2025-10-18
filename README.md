@@ -9,11 +9,14 @@ Tema WordPress premium untuk brand PutraFiber, dikembangkan khusus untuk kebutuh
 - Kartu fitur, layanan, produk, portofolio, dan blog dengan glassmorphism, highlight emas, serta animasi yang dapat diatur.
 - Grid blog tanpa paginasi dengan slot artikel manual (Artikel 1, Artikel 2, dst) yang dapat dikurasi dari Theme Options.
 - CTA section baru dengan latar dramatis, badge interaktif, dan tombol ganda yang konsisten.
+- Builder visual landing page berbasis drag & drop lengkap dengan pratinjau media dan kontrol real-time untuk section kustom.
 - Navigasi mobile yang berpindah otomatis ke sisi kanan pada tablet & smartphone agar akses menu lebih intuitif.
 
 ### Manajemen Konten & CRUD
 - Custom Post Type: **Portfolio** & **Product** lengkap dengan uploader galeri, PDF, dan meta SEO.
 - Pengaturan landing page fleksibel: urutan section, copywriting, warna, CTA, hero, layanan, dan produk.
+- Sistem preset warna yang dapat disimpan & dipanggil ulang; semua warna landing page otomatis mengikuti kombinasi aktif.
+- Blok Gutenberg kustom (Hero, CTA premium, Testimoni) agar tampilan halaman lain konsisten dengan gaya landing page.
 - Editor deskripsi blog menggunakan TinyMCE mini (teeny) untuk copy yang tetap bersih.
 - Dukungan dark mode di front end.
 
@@ -38,6 +41,7 @@ Tema WordPress premium untuk brand PutraFiber, dikembangkan khusus untuk kebutuh
 
 ## Pengalaman Admin
 - Theme Options panel dengan tab, color picker, uploader, dan validasi otomatis.
+- UI admin untuk builder section visual dan manajemen preset warna (rename, duplikasi, hapus, satu-klik terapkan).
 - Library media terintegrasi untuk logo, hero image, ikon schema, hingga dokumen PDF.
 - Dukungan sortable untuk galeri produk serta section-section tertentu.
 - Tombol reset analytics dengan status loading, pesan konfirmasi, dan alert keberhasilan.
@@ -57,12 +61,9 @@ Tema WordPress premium untuk brand PutraFiber, dikembangkan khusus untuk kebutuh
 - Filter `putrafiber_schema_skip_common` dapat digunakan untuk menonaktifkan schema core jika plugin SEO eksternal mengambil alih.
 
 ## Potensi Pengembangan Berikutnya
-- Builder visual untuk section landing page (drag & drop, pratinjau real-time).
-- Sistem preset warna/tema agar admin bisa menyimpan beberapa kombinasi palet.
 - Integrasi analytics tambahan (mis. data device/OS) dan ekspor CSV.
 - Widget dashboard tambahan untuk konversi WhatsApp per halaman.
 - Mode multi-bahasa (WPML/Polylang) dengan string siap diterjemahkan penuh.
-- Komponen blok Gutenberg khusus (hero, CTA, layanan) agar konsisten di halaman lain.
 
 ## Hardening Sweep
 - Guard ABSPATH dan linting ulang seluruh file PHP memastikan tidak ada fatal error baru.
