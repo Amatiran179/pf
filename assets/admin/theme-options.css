@@ -88,6 +88,23 @@
   gap: 12px;
 }
 
+.pf-section-card[data-layout] {
+  position: relative;
+}
+
+.pf-section-card[data-layout="split-left"]::after,
+.pf-section-card[data-layout="split-right"]::after {
+  content: attr(data-layout);
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #4f6f9f;
+}
+
 .pf-section-field {
   display: flex;
   flex-direction: column;
@@ -104,6 +121,10 @@
   max-width: 280px;
 }
 
+.pf-section-field--inline select {
+  max-width: 280px;
+}
+
 .pf-section-card textarea {
   min-height: 120px;
 }
@@ -116,6 +137,47 @@
 
 .pf-section-card--custom {
   background: #f8f9ff;
+}
+
+.pf-section-media {
+  border: 1px dashed #d0d7e3;
+  border-radius: 6px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.65);
+  display: grid;
+  gap: 12px;
+}
+
+.pf-section-media__preview {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5fb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pf-section-media__preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.pf-section-media__placeholder {
+  color: #768397;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.pf-section-media__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-section-media__actions .button-link-delete[disabled] {
+  color: #b4bcc7;
+  cursor: not-allowed;
 }
 
 .pf-card-builder {

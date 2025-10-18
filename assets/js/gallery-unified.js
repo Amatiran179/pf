@@ -20,6 +20,7 @@
     let portfolioGalleryMain = null;
     let portfolioGalleryThumbs = null;
     let lightboxInstance = null;
+    const zoomObservers = new WeakMap();
 
     const config = window.pfGalleryConfig || {
         autoplayDelay: 4000,
@@ -61,6 +62,21 @@
         }, 100);
     }
 
+    function neutraliseZoomTarget(element) {
+        if (!element) return;
+
+        element.style.setProperty('transform', 'none', 'important');
+        element.style.setProperty('animation', 'none', 'important');
+
+        if (element.classList && element.classList.contains('animate-zoom-in')) {
+            element.classList.remove('animate-zoom-in');
+        }
+
+        if (element.classList && element.classList.contains('fade-in') && !element.classList.contains('visible')) {
+            element.classList.add('visible');
+        }
+    }
+
     function enforceNoZoomOnHover(container) {
         if (!container) return;
 
@@ -69,15 +85,8 @@
                 const image = item.querySelector('.gallery-image');
                 if (!image) return;
 
-                image.style.setProperty('transform', 'none', 'important');
-                image.style.setProperty('animation', 'none', 'important');
-
-                if (image.classList.contains('animate-zoom-in')) {
-                    image.classList.remove('animate-zoom-in');
-                }
-                if (image.classList.contains('fade-in') && !image.classList.contains('visible')) {
-                    image.classList.add('visible');
-                }
+                neutraliseZoomTarget(item);
+                neutraliseZoomTarget(image);
             };
 
             enforce();
@@ -97,25 +106,38 @@
     function resetGalleryTransforms(selector) {
         if (!selector) return;
 
-        const container = document.querySelector(selector);
+        document.querySelectorAll(selector).forEach((container) => {
+            guardGalleryContainer(container);
+        });
+    }
+
+    function guardGalleryContainer(container) {
         if (!container) return;
 
         container.querySelectorAll('.gallery-item, .gallery-image').forEach((element) => {
-            if (element.style.transform && element.style.transform !== 'none') {
-                element.style.transform = 'none';
-            }
-            if (element.style.animation && element.style.animation !== 'none') {
-                element.style.animation = 'none';
-            }
-            if (element.classList.contains('animate-zoom-in')) {
-                element.classList.remove('animate-zoom-in');
-            }
-            if (element.classList.contains('fade-in') && !element.classList.contains('visible')) {
-                element.classList.add('visible');
-            }
+            neutraliseZoomTarget(element);
         });
 
         enforceNoZoomOnHover(container);
+
+        if (!zoomObservers.has(container) && typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(() => {
+                container.querySelectorAll('.gallery-item, .gallery-image').forEach((element) => {
+                    neutraliseZoomTarget(element);
+                });
+                enforceNoZoomOnHover(container);
+            });
+
+            observer.observe(container, { childList: true, subtree: true });
+            zoomObservers.set(container, observer);
+        }
+    }
+
+    function guardAllGalleries() {
+        requestAnimationFrame(() => {
+            resetGalleryTransforms('.product-gallery-slider');
+            resetGalleryTransforms('.portfolio-gallery-slider');
+        });
     }
 
     function initProductGallery() {
@@ -142,6 +164,7 @@
             const mainSliderConfig = buildSwiperConfig(totalSlides, galleryThumbs, '.product-gallery-slider');
             galleryMain = new Swiper('.product-gallery-slider', mainSliderConfig);
             resetGalleryTransforms('.product-gallery-slider');
+            guardAllGalleries();
             log('Product gallery initialized successfully!', 'success');
 
         } catch (error) {
@@ -175,6 +198,7 @@
             const portfolioSliderConfig = buildSwiperConfig(totalSlides, portfolioGalleryThumbs, '.portfolio-gallery-slider');
             portfolioGalleryMain = new Swiper('.portfolio-gallery-slider', portfolioSliderConfig);
             resetGalleryTransforms('.portfolio-gallery-slider');
+            guardAllGalleries();
             log('Portfolio gallery initialized successfully!', 'success');
 
         } catch (error) {
@@ -245,6 +269,22 @@
                 };
             }
         }
+
+        sliderConfig.observer = true;
+        sliderConfig.observeParents = true;
+        sliderConfig.observeSlideChildren = true;
+
+        sliderConfig.on = sliderConfig.on || {};
+        ['init', 'imagesReady', 'slideChangeTransitionStart', 'slideChangeTransitionEnd', 'resize', 'observerUpdate'].forEach((eventName) => {
+            const previousHandler = sliderConfig.on[eventName];
+            sliderConfig.on[eventName] = function() {
+                guardGalleryContainer(this && this.el ? this.el : null);
+                if (typeof previousHandler === 'function') {
+                    previousHandler.apply(this, arguments);
+                }
+            };
+        });
+
         return sliderConfig;
     }
 
@@ -255,6 +295,9 @@
                     captionsData: 'title',
                     captionPosition: 'bottom',
                 });
+                lightboxInstance.on('shown.simplelightbox', guardAllGalleries);
+                lightboxInstance.on('changed.simplelightbox', guardAllGalleries);
+                lightboxInstance.on('closed.simplelightbox', guardAllGalleries);
                 log('SimpleLightbox initialized.', 'success');
             } catch (error) {
                 log('SimpleLightbox error: ' + error.message, 'error');
