@@ -48,11 +48,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: opacity 0.4s ease;
+    transform: none !important;
+    will-change: auto;
 }
 
 .product-card:hover .product-thumbnail img {
-    transform: scale(1.1);
+    transform: none !important;
 }
 
 .stock-badge {

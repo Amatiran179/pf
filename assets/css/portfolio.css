@@ -687,11 +687,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: opacity 0.4s ease;
+    transform: none !important;
+    will-change: auto;
 }
 
 .portfolio-card:hover .portfolio-thumbnail img {
-    transform: scale(1.1);
+    transform: none !important;
 }
 
 .portfolio-type-badge {

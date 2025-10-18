@@ -1,6 +1,15 @@
 (function () {
   'use strict';
 
+  function dispatchFieldChange(element) {
+    if (!element) {
+      return;
+    }
+
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initSectionsBuilder();
     initCardBuilders();
@@ -64,15 +73,6 @@
     function normaliseHeadingTag(value) {
       var tag = (value || '').toString().toLowerCase();
       return allowedHeadingTags.indexOf(tag) !== -1 ? tag : 'h2';
-    }
-
-    function triggerFieldChange(element) {
-      if (!element) {
-        return;
-      }
-
-      element.dispatchEvent(new Event('input', { bubbles: true }));
-      element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     function openMediaPicker(onSelect) {
@@ -586,7 +586,7 @@
           var mediaInput = card.querySelector('input[data-field="media"]');
           if (mediaInput) {
             mediaInput.value = mediaUrl;
-            triggerFieldChange(mediaInput);
+            dispatchFieldChange(mediaInput);
           }
 
           var removeButton = card.querySelector('[data-action="media-remove"]');
@@ -596,7 +596,7 @@
 
           var altInputField = card.querySelector('input[data-field="media_alt"]');
           if (altInputField) {
-            triggerFieldChange(altInputField);
+            dispatchFieldChange(altInputField);
           }
         });
       } else if (action === 'media-remove') {
@@ -606,7 +606,7 @@
         var hiddenInput = card.querySelector('input[data-field="media"]');
         if (hiddenInput) {
           hiddenInput.value = '';
-          triggerFieldChange(hiddenInput);
+          dispatchFieldChange(hiddenInput);
         }
 
         var previewEl = card.querySelector('[data-role="media-preview"]');
@@ -655,13 +655,13 @@
               return;
             }
             event.target.value = ui.color.toString();
-            triggerFieldChange(event.target);
+            dispatchFieldChange(event.target);
           },
           clear: function (event) {
             if (!event.target) {
               return;
             }
-            triggerFieldChange(event.target);
+            dispatchFieldChange(event.target);
           }
         });
       });
@@ -670,11 +670,13 @@
     function updateOutputs() {
       if (builderInput) {
         builderInput.value = JSON.stringify(sections);
+        dispatchFieldChange(builderInput);
       }
 
       if (orderInput) {
         var enabledIds = sections.filter(function (section) { return section.enabled; }).map(function (section) { return section.id; });
         orderInput.value = enabledIds.join(',');
+        dispatchFieldChange(orderInput);
       }
     }
   }
@@ -1306,6 +1308,7 @@
 
       if (!cards.length) {
         inputEl.value = '[]';
+        dispatchFieldChange(inputEl);
         return;
       }
 
@@ -1332,6 +1335,7 @@
       });
 
       inputEl.value = JSON.stringify(payload);
+      dispatchFieldChange(inputEl);
     }
 
     function initSortable() {
