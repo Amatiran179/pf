@@ -218,6 +218,18 @@ function putrafiber_frontpage_section_enabled_legacy($slug, $default_on = true) 
         $default_on = !empty($defaults[$slug]['enabled']);
     }
 
+    if (function_exists('putrafiber_get_bool_option')) {
+        if ($slug === 'testimonials') {
+            return putrafiber_get_bool_option('enable_testimonials', $default_on);
+        }
+
+        if ($slug === 'partners') {
+            return putrafiber_get_bool_option('enable_partners', $default_on);
+        }
+
+        return putrafiber_get_bool_option('enable_' . $slug . '_section', $default_on);
+    }
+
     $default_flag = $default_on ? '1' : '0';
 
     if ($slug === 'testimonials') {

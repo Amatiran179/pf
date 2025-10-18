@@ -14,7 +14,7 @@ get_header();
 
 $sections      = function_exists('putrafiber_frontpage_sections') ? putrafiber_frontpage_sections() : array();
 $water_bubbles = function_exists('putrafiber_frontpage_water_intensity') ? putrafiber_frontpage_water_intensity() : 8;
-$parallax_on   = putrafiber_get_option('front_enable_parallax', '1');
+$parallax_on   = function_exists('putrafiber_get_bool_option') ? putrafiber_get_bool_option('front_enable_parallax', true) : putrafiber_get_option('front_enable_parallax', '1');
 ?>
 
 <main

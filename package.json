@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node ./scripts/build.mjs",
     "watch": "echo 'Development mode - watching for changes...'",
     "lint:css": "echo 'Linting CSS files...'",
     "lint:js": "echo 'Linting JavaScript files...'",

@@ -116,7 +116,20 @@ get_header();
                                                              <?php if (!empty($image['width']) && !empty($image['height'])): ?>
                                                                  width="<?php echo (int) $image['width']; ?>" height="<?php echo (int) $image['height']; ?>"
                                                              <?php endif; ?>
-                                                             <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
+                                                             <?php
+                                                             $loading_attrs = function_exists('putrafiber_gallery_loading_attributes')
+                                                                 ? putrafiber_gallery_loading_attributes($index, 'portfolio-gallery')
+                                                                 : array();
+                                                             echo function_exists('putrafiber_format_html_attributes')
+                                                                 ? putrafiber_format_html_attributes($loading_attrs)
+                                                                 : '';
+                                                             ?>
+                                                             <?php if (!empty($image['srcset'])): ?>
+                                                                 srcset="<?php echo pf_output_attr($image['srcset']); ?>"
+                                                             <?php endif; ?>
+                                                             <?php if (!empty($image['sizes'])): ?>
+                                                                 sizes="<?php echo pf_output_attr($image['sizes']); ?>"
+                                                             <?php endif; ?>
                                                              decoding="async">
                                                         <span class="zoom-icon">🔍</span>
                                                     </a>
