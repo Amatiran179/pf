@@ -62,9 +62,13 @@ function putrafiber_output_schema() {
         $schemas[] = putrafiber_breadcrumb_schema();
         
     } elseif (is_singular('portfolio')) {
-        
+
         // Check if TouristAttraction enabled for this portfolio
-        if (get_post_meta(get_the_ID(), '_enable_tourist_schema', true) === '1') {
+        $tourist_enabled = function_exists('pf_schema_module_enabled')
+            ? pf_schema_module_enabled(get_the_ID(), 'tourist', '_enable_tourist_schema')
+            : (get_post_meta(get_the_ID(), '_enable_tourist_schema', true) === '1');
+
+        if ($tourist_enabled) {
             $schemas[] = putrafiber_tourist_attraction_schema();
         } else {
             $schemas[] = putrafiber_portfolio_schema();
@@ -399,8 +403,16 @@ function putrafiber_portfolio_schema() {
 function putrafiber_tourist_attraction_schema() {
     $post_id = get_the_ID();
     
+    if (!$post_id) {
+        return null;
+    }
+
     // Only for portfolio with tourist attraction enabled
-    if (!$post_id || get_post_meta($post_id, '_enable_tourist_schema', true) !== '1') {
+    if (function_exists('pf_schema_module_enabled')) {
+        if (!pf_schema_module_enabled($post_id, 'tourist', '_enable_tourist_schema')) {
+            return null;
+        }
+    } elseif (get_post_meta($post_id, '_enable_tourist_schema', true) !== '1') {
         return null;
     }
     
@@ -638,7 +650,11 @@ function putrafiber_generate_product_schema($product_id) {
     $all_schemas = [$product_schema];
     
     // Video Schema
-    if (get_post_meta($product_id, '_enable_video_schema', true) === '1' && ($video_url = get_post_meta($product_id, '_video_url', true))) {
+    $video_enabled = function_exists('pf_schema_module_enabled')
+        ? pf_schema_module_enabled($product_id, 'video', '_enable_video_schema')
+        : (get_post_meta($product_id, '_enable_video_schema', true) === '1');
+
+    if ($video_enabled && ($video_url = get_post_meta($product_id, '_video_url', true))) {
         $video_schema = [
             '@context' => 'https://schema.org',
             '@type' => 'VideoObject',
@@ -655,7 +671,11 @@ function putrafiber_generate_product_schema($product_id) {
     }
     
     // FAQ Schema
-    if (get_post_meta($product_id, '_enable_faq_schema', true) === '1' && ($faq_items = get_post_meta($product_id, '_faq_items', true))) {
+    $faq_enabled = function_exists('pf_schema_module_enabled')
+        ? pf_schema_module_enabled($product_id, 'faq', '_enable_faq_schema')
+        : (get_post_meta($product_id, '_enable_faq_schema', true) === '1');
+
+    if ($faq_enabled && ($faq_items = get_post_meta($product_id, '_faq_items', true))) {
         if (is_array($faq_items) && !empty($faq_items)) {
             $main_entity = [];
             foreach ($faq_items as $item) {
@@ -681,12 +701,16 @@ function putrafiber_generate_product_schema($product_id) {
     }
     
     // HowTo Schema
-    if (get_post_meta($product_id, '_enable_howto_schema', true) === '1' && ($howto_steps = get_post_meta($product_id, '_howto_steps', true))) {
+    $howto_enabled = function_exists('pf_schema_module_enabled')
+        ? pf_schema_module_enabled($product_id, 'howto', '_enable_howto_schema')
+        : (get_post_meta($product_id, '_enable_howto_schema', true) === '1');
+
+    if ($howto_enabled && ($howto_steps = get_post_meta($product_id, '_howto_steps', true))) {
         if (is_array($howto_steps) && !empty($howto_steps)) {
             $howto_schema = [
-                '@context' => 'https://schema.org', 
-                '@type' => 'HowTo', 
-                'name' => 'Cara Menggunakan ' . get_the_title($product_id), 
+                '@context' => 'https://schema.org',
+                '@type' => 'HowTo',
+                'name' => 'Cara Menggunakan ' . get_the_title($product_id),
                 'description' => get_the_excerpt($product_id), 
                 'step' => []
             ];
@@ -807,36 +831,173 @@ function putrafiber_format_manual_service_area_entry($entry) {
         return null;
     }
 
-    $type = isset($entry['type']) ? sanitize_text_field($entry['type']) : 'Place';
-    $name = isset($entry['name']) ? sanitize_text_field($entry['name']) : '';
+    $allowed_types = array('Country', 'AdministrativeArea', 'City', 'Place', 'PostalAddress');
 
-    if ($name === '') {
+    $type = isset($entry['type']) ? sanitize_text_field($entry['type']) : 'Place';
+    if (!in_array($type, $allowed_types, true)) {
+        $type = 'Place';
+    }
+
+    $name = isset($entry['name']) ? sanitize_text_field($entry['name']) : '';
+    if ($name === '' && $type !== 'PostalAddress') {
         return null;
     }
 
     $country_code = isset($entry['country_code']) ? strtoupper(sanitize_text_field($entry['country_code'])) : '';
-    $identifier = isset($entry['identifier']) ? $entry['identifier'] : '';
-    $note = isset($entry['note']) ? $entry['note'] : '';
+    $identifier   = isset($entry['identifier']) ? $entry['identifier'] : '';
+    $note         = isset($entry['note']) ? wp_kses_post($entry['note']) : '';
 
-    $item = array(
-        '@type' => $type ?: 'Place',
-        'name' => $name,
-    );
+    $subdivision_code = isset($entry['subdivision_code']) ? sanitize_text_field($entry['subdivision_code']) : '';
+    $province         = isset($entry['province']) ? sanitize_text_field($entry['province']) : '';
+    $street           = isset($entry['street']) ? sanitize_text_field($entry['street']) : '';
+    $locality         = isset($entry['locality']) ? sanitize_text_field($entry['locality']) : '';
+    $region           = isset($entry['region']) ? sanitize_text_field($entry['region']) : '';
+    $postal_code      = isset($entry['postal_code']) ? sanitize_text_field($entry['postal_code']) : '';
 
-    if ($type === 'Country' && $country_code !== '') {
-        if (empty($identifier)) {
-            $item['identifier'] = $country_code;
+    $latitude  = isset($entry['latitude']) ? $entry['latitude'] : '';
+    $longitude = isset($entry['longitude']) ? $entry['longitude'] : '';
+
+    $identifier_clean = '';
+    if (is_string($identifier) && $identifier !== '') {
+        $identifier_clean = esc_url_raw($identifier);
+        if ($identifier_clean === '') {
+            $identifier_clean = sanitize_text_field($identifier);
         }
-    } elseif ($country_code !== '') {
-        $item['addressCountry'] = $country_code;
     }
 
-    if (!empty($identifier)) {
-        $item['identifier'] = $identifier;
+    $geo = array();
+    if ($latitude !== '' || $longitude !== '') {
+        $lat = is_numeric($latitude) ? (float) $latitude : null;
+        $lng = is_numeric($longitude) ? (float) $longitude : null;
+
+        if ($lat !== null || $lng !== null) {
+            $geo = array('@type' => 'GeoCoordinates');
+            if ($lat !== null) {
+                $geo['latitude'] = $lat;
+            }
+            if ($lng !== null) {
+                $geo['longitude'] = $lng;
+            }
+        }
+    }
+
+    $address_region = $region !== '' ? $region : $province;
+
+    $address = array();
+    if ($country_code !== '') {
+        $address['addressCountry'] = $country_code;
+    }
+    if ($address_region !== '') {
+        $address['addressRegion'] = $address_region;
+    }
+    if ($locality !== '') {
+        $address['addressLocality'] = $locality;
+    }
+    if ($street !== '') {
+        $address['streetAddress'] = $street;
+    }
+    if ($postal_code !== '') {
+        $address['postalCode'] = $postal_code;
+    }
+
+    $item = array('@type' => $type);
+
+    if ($type !== 'PostalAddress') {
+        $resolved_name = $name;
+        if ($resolved_name === '') {
+            if (!empty($address['addressLocality'])) {
+                $resolved_name = $address['addressLocality'];
+            } elseif ($address_region !== '') {
+                $resolved_name = $address_region;
+            } elseif ($country_code !== '') {
+                $resolved_name = $country_code;
+            }
+        }
+
+        if ($resolved_name === '') {
+            return null;
+        }
+
+        $item['name'] = $resolved_name;
+    }
+
+    if ($identifier_clean !== '') {
+        $item['identifier'] = $identifier_clean;
+    }
+
+    if ($type === 'Country') {
+        if ($country_code !== '' && $identifier_clean === '') {
+            $item['identifier'] = $country_code;
+        }
+        if ($subdivision_code !== '') {
+            $item['alternateName'] = $subdivision_code;
+        }
+    } elseif ($type === 'AdministrativeArea') {
+        if ($country_code !== '') {
+            $item['addressCountry'] = $country_code;
+        }
+        if ($subdivision_code !== '') {
+            $item['identifier'] = $identifier_clean !== '' ? $identifier_clean : $subdivision_code;
+            $item['alternateName'] = $subdivision_code;
+        }
+        if ($address_region !== '') {
+            $item['name'] = $name !== '' ? $name : $address_region;
+        }
+        if (!empty($geo)) {
+            $item['geo'] = $geo;
+        }
+    } elseif ($type === 'City') {
+        if ($country_code !== '') {
+            $item['addressCountry'] = $country_code;
+        }
+        if ($address_region !== '') {
+            $item['addressRegion'] = $address_region;
+        }
+        if (!empty($address)) {
+            $item['address'] = array_merge(array('@type' => 'PostalAddress'), $address);
+        }
+        if (!empty($geo)) {
+            $item['geo'] = $geo;
+        }
+    } elseif ($type === 'Place') {
+        if (!empty($address)) {
+            $item['address'] = array_merge(array('@type' => 'PostalAddress'), $address);
+        } elseif ($country_code !== '') {
+            $item['addressCountry'] = $country_code;
+        }
+        if (!empty($geo)) {
+            $item['geo'] = $geo;
+        }
+    } elseif ($type === 'PostalAddress') {
+        if ($street !== '') {
+            $item['streetAddress'] = $street;
+        }
+        if ($locality !== '') {
+            $item['addressLocality'] = $locality;
+        }
+        if ($address_region !== '') {
+            $item['addressRegion'] = $address_region;
+        }
+        if ($postal_code !== '') {
+            $item['postalCode'] = $postal_code;
+        }
+        if ($country_code !== '') {
+            $item['addressCountry'] = $country_code;
+        }
+        if ($name !== '') {
+            $item['name'] = $name;
+        }
+
+        if (empty($item['streetAddress']) && empty($item['addressLocality']) && empty($item['addressRegion']) && empty($item['postalCode']) && empty($item['addressCountry']) && empty($item['name'])) {
+            return null;
+        }
     }
 
     if (!empty($note)) {
-        $item['description'] = $note;
+        $description = trim(wp_strip_all_tags($note));
+        if ($description !== '') {
+            $item['description'] = $description;
+        }
     }
 
     return $item;
@@ -848,7 +1009,11 @@ function putrafiber_format_manual_service_area_entry($entry) {
  * ===================================================================
  */
 function putrafiber_get_service_area($post_id) {
-    if (get_post_meta($post_id, '_enable_service_area', true) !== '1') {
+    $enabled = function_exists('pf_schema_module_enabled')
+        ? pf_schema_module_enabled($post_id, 'service_area', '_enable_service_area')
+        : (get_post_meta($post_id, '_enable_service_area', true) === '1');
+
+    if (!$enabled) {
         return array();
     }
 

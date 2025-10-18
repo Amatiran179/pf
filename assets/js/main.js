@@ -292,22 +292,24 @@
         // Sticky Sidebar
         if ($(window).width() > 992) {
             var sidebar = $('.sidebar');
-            var sidebarTop = sidebar.offset().top;
-            
-            $(window).on('scroll', function() {
-                var scrollTop = $(window).scrollTop();
-                
-                if (scrollTop > sidebarTop) {
-                    sidebar.css({
-                        position: 'fixed',
-                        top: '100px'
-                    });
-                } else {
-                    sidebar.css({
-                        position: 'static'
-                    });
-                }
-            });
+            if (sidebar.length) {
+                var sidebarTop = sidebar.offset().top;
+
+                $(window).on('scroll', function() {
+                    var scrollTop = $(window).scrollTop();
+
+                    if (scrollTop > sidebarTop) {
+                        sidebar.css({
+                            position: 'fixed',
+                            top: '100px'
+                        });
+                    } else {
+                        sidebar.css({
+                            position: 'static'
+                        });
+                    }
+                });
+            }
         }
 
         // Accordion

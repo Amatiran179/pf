@@ -1391,6 +1391,12 @@
     gap: 1.5rem;
   }
 
+  .card-collection.card-layout--grid,
+  .card-collection.card-layout--masonry,
+  .card-collection.card-layout--magazine {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  }
+
   .feature-grid,
   .services-grid,
   .products-grid,
@@ -1426,6 +1432,16 @@
   .card {
     --card-padding: 1.8rem;
     border-radius: 22px;
+  }
+
+  .card-collection[class*="card-columns--"] {
+    --card-columns: 1 !important;
+  }
+
+  .card-collection.card-layout--grid,
+  .card-collection.card-layout--masonry,
+  .card-collection.card-layout--magazine {
+    grid-template-columns: 1fr !important;
   }
 
   .section-title .section-lead {

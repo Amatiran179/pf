@@ -339,3 +339,75 @@ if (!function_exists('pf_schema_yes')) {
         return !empty($options['enable_schema_advanced']);
     }
 }
+
+if (!function_exists('pf_schema_get_global_modules')) {
+    /**
+     * Retrieve global schema modules configured in Theme Options.
+     *
+     * @return array<int,string>
+     */
+    function pf_schema_get_global_modules()
+    {
+        $options = get_option('putrafiber_options', array());
+        if (empty($options['schema_global_modules']) || !is_array($options['schema_global_modules'])) {
+            return array();
+        }
+
+        $allowed = array('service_area', 'video', 'faq', 'howto', 'tourist');
+        $sanitised = array();
+        foreach ($options['schema_global_modules'] as $module) {
+            $module_key = sanitize_key($module);
+            if ($module_key && in_array($module_key, $allowed, true)) {
+                $sanitised[] = $module_key;
+            }
+        }
+
+        return array_values(array_unique($sanitised));
+    }
+}
+
+if (!function_exists('pf_schema_global_module_enabled')) {
+    /**
+     * Check whether a schema module is globally enabled by default.
+     *
+     * @param string $module Module slug.
+     * @return bool
+     */
+    function pf_schema_global_module_enabled($module)
+    {
+        $module = sanitize_key($module);
+        if ($module === '') {
+            return false;
+        }
+
+        return in_array($module, pf_schema_get_global_modules(), true);
+    }
+}
+
+if (!function_exists('pf_schema_module_enabled')) {
+    /**
+     * Determine if a schema module should be enabled for a given post.
+     *
+     * @param int    $post_id Post ID.
+     * @param string $module  Module slug (service_area, video, faq, howto, tourist).
+     * @param string $meta_key Meta key storing the toggle.
+     * @return bool
+     */
+    function pf_schema_module_enabled($post_id, $module, $meta_key)
+    {
+        $post_id = absint($post_id);
+        if ($post_id <= 0) {
+            return pf_schema_global_module_enabled($module);
+        }
+
+        $meta_value = get_post_meta($post_id, $meta_key, true);
+        if ($meta_value === '1') {
+            return true;
+        }
+        if ($meta_value === '0') {
+            return false;
+        }
+
+        return pf_schema_global_module_enabled($module);
+    }
+}
