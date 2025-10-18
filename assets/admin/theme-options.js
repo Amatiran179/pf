@@ -29,6 +29,9 @@
     }
 
     var sortableInstance = null;
+    var allowedLayouts = ['full', 'split-left', 'split-right'];
+    var allowedHeadingTags = ['h2', 'h3', 'h4'];
+    var mediaFrame = null;
 
     renderAll();
     updateInput();
@@ -51,6 +54,58 @@
 
     function parseBool(value) {
       return value === true || value === '1' || value === 1;
+    }
+
+    function normaliseLayout(value) {
+      var layout = (value || '').toString().toLowerCase();
+      return allowedLayouts.indexOf(layout) !== -1 ? layout : 'full';
+    }
+
+    function normaliseHeadingTag(value) {
+      var tag = (value || '').toString().toLowerCase();
+      return allowedHeadingTags.indexOf(tag) !== -1 ? tag : 'h2';
+    }
+
+    function triggerFieldChange(element) {
+      if (!element) {
+        return;
+      }
+
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function openMediaPicker(onSelect) {
+      if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+        window.alert('WordPress media library belum siap. Silakan muat ulang halaman.');
+        return;
+      }
+
+      if (mediaFrame && typeof mediaFrame.off === 'function') {
+        mediaFrame.off('select');
+      }
+
+      mediaFrame = wp.media({
+        title: 'Pilih gambar section',
+        button: { text: 'Gunakan gambar ini' },
+        multiple: false
+      });
+
+      mediaFrame.on('select', function () {
+        if (typeof onSelect !== 'function') {
+          return;
+        }
+
+        var attachment = mediaFrame.state().get('selection').first();
+        if (!attachment) {
+          onSelect(null);
+          return;
+        }
+
+        onSelect(attachment.toJSON());
+      });
+
+      mediaFrame.open();
     }
 
     function normaliseSections(items) {
@@ -88,6 +143,11 @@
           base.text_color = item.text_color || '';
           base.button_text = item.button_text || '';
           base.button_url = item.button_url || '';
+          base.layout = normaliseLayout(item.layout);
+          base.media = typeof item.media === 'string' ? item.media : '';
+          base.media_alt = typeof item.media_alt === 'string' ? item.media_alt : '';
+          base.anchor = typeof item.anchor === 'string' ? slugify(item.anchor) : '';
+          base.heading_tag = normaliseHeadingTag(item.heading_tag);
         }
 
         acc.push(base);
@@ -163,6 +223,11 @@
         text_color: '',
         button_text: '',
         button_url: '',
+        layout: 'full',
+        media: '',
+        media_alt: '',
+        anchor: '',
+        heading_tag: 'h2',
         enabled: true
       };
     }
@@ -191,6 +256,8 @@
       sections.forEach(function (section, index) {
         listEl.appendChild(buildCard(section, index));
       });
+
+      initColorPickers(listEl);
 
       initSortable();
       syncLegacyCheckboxes();
@@ -229,7 +296,17 @@
           '</label>' +
         '</div>';
 
+      card.dataset.layout = normaliseLayout(section.layout);
+
       if (section.type === 'custom') {
+        var previewMarkup = '';
+        var previewAlt = section.media_alt || section.title || section.label || '';
+        if (section.media) {
+          previewMarkup = '<img src="' + escapeAttr(section.media) + '" alt="' + escapeAttr(previewAlt) + '" decoding="async" loading="lazy">';
+        } else {
+          previewMarkup = '<span class="pf-section-media__placeholder">Belum ada gambar</span>';
+        }
+
         card.innerHTML += '' +
           '<div class="pf-section-card__body">' +
             '<div class="pf-section-field">' +
@@ -244,6 +321,43 @@
               '<label>Konten</label>' +
               '<textarea rows="4" data-field="content">' + escapeTextarea(section.content || '') + '</textarea>' +
               '<p class="description">Gunakan enter untuk paragraf baru. HTML sederhana diperbolehkan.</p>' +
+            '</div>' +
+            '<div class="pf-section-field pf-section-field--inline">' +
+              '<label>Tata Letak</label>' +
+              '<select data-field="layout">' +
+                '<option value="full"' + (section.layout === 'full' ? ' selected' : '') + '>Konten penuh</option>' +
+                '<option value="split-left"' + (section.layout === 'split-left' ? ' selected' : '') + '>Gambar kiri, konten kanan</option>' +
+                '<option value="split-right"' + (section.layout === 'split-right' ? ' selected' : '') + '>Konten kiri, gambar kanan</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="pf-section-field">' +
+              '<label>Gambar pendukung</label>' +
+              '<div class="pf-section-media" data-role="media-fields">' +
+                '<div class="pf-section-media__preview" data-role="media-preview">' + previewMarkup + '</div>' +
+                '<div class="pf-section-media__actions">' +
+                  '<button type="button" class="button pf-section-media__upload" data-action="media-upload">Pilih gambar</button>' +
+                  '<button type="button" class="button-link-delete pf-section-media__remove" data-action="media-remove"' + (section.media ? '' : ' disabled') + '>Hapus gambar</button>' +
+                '</div>' +
+                '<input type="hidden" data-field="media" value="' + escapeAttr(section.media || '') + '">' +
+              '</div>' +
+              '<p class="description">Direkomendasikan ukuran minimal 1200x800px agar tampilan tetap tajam.</p>' +
+            '</div>' +
+            '<div class="pf-section-field pf-section-field--inline">' +
+              '<label>Alt text gambar</label>' +
+              '<input type="text" data-field="media_alt" value="' + escapeAttr(section.media_alt || '') + '">' +
+            '</div>' +
+            '<div class="pf-section-field pf-section-field--inline">' +
+              '<label>ID Anchor</label>' +
+              '<input type="text" data-field="anchor" placeholder="contoh: keunggulan" value="' + escapeAttr(section.anchor || '') + '">' +
+              '<p class="description">Opsional: gunakan huruf kecil tanpa spasi untuk navigasi cepat (misal #keunggulan).</p>' +
+            '</div>' +
+            '<div class="pf-section-field pf-section-field--inline">' +
+              '<label>Heading SEO</label>' +
+              '<select data-field="heading_tag">' +
+                '<option value="h2"' + (section.heading_tag === 'h2' ? ' selected' : '') + '>H2</option>' +
+                '<option value="h3"' + (section.heading_tag === 'h3' ? ' selected' : '') + '>H3</option>' +
+                '<option value="h4"' + (section.heading_tag === 'h4' ? ' selected' : '') + '>H4</option>' +
+              '</select>' +
             '</div>' +
             '<div class="pf-section-field pf-section-field--inline">' +
               '<label>Warna latar</label>' +
@@ -358,13 +472,48 @@
         return;
       }
 
-      sections[index][field] = target.value;
+      var newValue = target.value;
 
-      if (sections[index].type === 'custom' && field === 'title') {
-        sections[index].label = target.value || customLabel;
-        var nameEl = card.querySelector('.pf-section-card__name');
-        if (nameEl) {
-          nameEl.textContent = target.value ? target.value : customLabel;
+      if (field === 'layout') {
+        newValue = normaliseLayout(newValue);
+        target.value = newValue;
+        card.setAttribute('data-layout', newValue);
+      } else if (field === 'anchor') {
+        newValue = slugify(newValue);
+        target.value = newValue;
+      } else if (field === 'heading_tag') {
+        newValue = normaliseHeadingTag(newValue);
+        target.value = newValue;
+      }
+
+      sections[index][field] = newValue;
+
+      if (sections[index].type === 'custom') {
+        if (field === 'title') {
+          sections[index].label = newValue || customLabel;
+          var nameEl = card.querySelector('.pf-section-card__name');
+          if (nameEl) {
+            nameEl.textContent = newValue ? newValue : customLabel;
+          }
+        } else if (field === 'media') {
+          var preview = card.querySelector('[data-role="media-preview"]');
+          if (preview) {
+            if (newValue) {
+              preview.innerHTML = '<img src="' + escapeAttr(newValue) + '" alt="' + escapeAttr(sections[index].media_alt || sections[index].title || sections[index].label || '') + '" decoding="async" loading="lazy">';
+            } else {
+              preview.innerHTML = '<span class="pf-section-media__placeholder">Belum ada gambar</span>';
+            }
+          }
+
+          var removeButton = card.querySelector('[data-action="media-remove"]');
+          if (removeButton) {
+            removeButton.disabled = !newValue;
+          }
+        } else if (field === 'media_alt') {
+          var previewImg = card.querySelector('[data-role="media-preview"] img');
+          if (previewImg) {
+            previewImg.alt = newValue;
+          }
         }
       }
 
@@ -377,22 +526,97 @@
         return;
       }
 
-      if (target.getAttribute('data-action') === 'remove') {
+      var action = target.getAttribute('data-action');
+      if (!action) {
+        return;
+      }
+
+      var card = target.closest('.pf-section-card');
+      if (!card) {
+        return;
+      }
+
+      var index = parseInt(card.dataset.index, 10);
+      if (isNaN(index) || !sections[index]) {
+        return;
+      }
+
+      if (action === 'remove') {
         event.preventDefault();
-        var card = target.closest('.pf-section-card');
-        if (!card) {
-          return;
-        }
-
-        var index = parseInt(card.dataset.index, 10);
-        if (isNaN(index) || !sections[index]) {
-          return;
-        }
-
         if (window.confirm('Hapus section kustom ini?')) {
           sections.splice(index, 1);
           renderAll();
           updateOutputs();
+        }
+        return;
+      }
+
+      if (sections[index].type !== 'custom') {
+        return;
+      }
+
+      if (action === 'media-upload') {
+        event.preventDefault();
+        openMediaPicker(function (attachment) {
+          if (!attachment) {
+            return;
+          }
+
+          var mediaUrl = attachment.url || '';
+          var mediaAlt = attachment.alt || attachment.title || '';
+
+          sections[index].media = mediaUrl;
+          if (!sections[index].media_alt && mediaAlt) {
+            sections[index].media_alt = mediaAlt;
+            var altInput = card.querySelector('input[data-field="media_alt"]');
+            if (altInput && !altInput.value) {
+              altInput.value = mediaAlt;
+            }
+          }
+
+          var preview = card.querySelector('[data-role="media-preview"]');
+          if (preview) {
+            if (mediaUrl) {
+              preview.innerHTML = '<img src="' + escapeAttr(mediaUrl) + '" alt="' + escapeAttr(sections[index].media_alt || sections[index].title || sections[index].label || '') + '" decoding="async" loading="lazy">';
+            } else {
+              preview.innerHTML = '<span class="pf-section-media__placeholder">Belum ada gambar</span>';
+            }
+          }
+
+          var mediaInput = card.querySelector('input[data-field="media"]');
+          if (mediaInput) {
+            mediaInput.value = mediaUrl;
+            triggerFieldChange(mediaInput);
+          }
+
+          var removeButton = card.querySelector('[data-action="media-remove"]');
+          if (removeButton) {
+            removeButton.disabled = !mediaUrl;
+          }
+
+          var altInputField = card.querySelector('input[data-field="media_alt"]');
+          if (altInputField) {
+            triggerFieldChange(altInputField);
+          }
+        });
+      } else if (action === 'media-remove') {
+        event.preventDefault();
+        sections[index].media = '';
+
+        var hiddenInput = card.querySelector('input[data-field="media"]');
+        if (hiddenInput) {
+          hiddenInput.value = '';
+          triggerFieldChange(hiddenInput);
+        }
+
+        var previewEl = card.querySelector('[data-role="media-preview"]');
+        if (previewEl) {
+          previewEl.innerHTML = '<span class="pf-section-media__placeholder">Belum ada gambar</span>';
+        }
+
+        var removeBtn = card.querySelector('[data-action="media-remove"]');
+        if (removeBtn) {
+          removeBtn.disabled = true;
         }
       }
     }
@@ -409,6 +633,37 @@
         if (section.type === 'core') {
           syncLegacyCheckbox(section.id, section.enabled);
         }
+      });
+    }
+
+    function initColorPickers(scope) {
+      if (typeof jQuery === 'undefined' || !jQuery.fn || typeof jQuery.fn.wpColorPicker !== 'function') {
+        return;
+      }
+
+      var $scope = jQuery(scope || document.body);
+      $scope.find('input[data-field="background"], input[data-field="text_color"]').each(function () {
+        var $input = jQuery(this);
+        if ($input.hasClass('pf-color-picker-ready')) {
+          return;
+        }
+
+        $input.addClass('pf-color-picker-ready');
+        $input.wpColorPicker({
+          change: function (event, ui) {
+            if (!event.target) {
+              return;
+            }
+            event.target.value = ui.color.toString();
+            triggerFieldChange(event.target);
+          },
+          clear: function (event) {
+            if (!event.target) {
+              return;
+            }
+            triggerFieldChange(event.target);
+          }
+        });
       });
     }
 

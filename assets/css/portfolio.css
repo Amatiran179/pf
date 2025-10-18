@@ -926,6 +926,12 @@
     transition: opacity 0.3s ease;
 }
 
+.single-portfolio-page .portfolio-gallery-slider .swiper-slide .gallery-image,
+.single-portfolio-page .portfolio-gallery-slider .swiper-slide-duplicate .gallery-image {
+    transform: none !important;
+    will-change: auto !important;
+}
+
 /* Ensure navigation is clickable */
 .single-portfolio-page .portfolio-gallery-slider .swiper-button-next,
 .single-portfolio-page .portfolio-gallery-slider .swiper-button-prev {

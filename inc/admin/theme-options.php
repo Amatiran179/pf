@@ -41,6 +41,10 @@ function putrafiber_theme_options_assets($hook) {
         return;
     }
 
+    wp_enqueue_media();
+    wp_enqueue_style('wp-color-picker');
+    wp_enqueue_script('wp-color-picker');
+
     wp_enqueue_style(
         'putrafiber-theme-options',
         get_template_directory_uri() . '/assets/admin/theme-options.css',
@@ -537,10 +541,32 @@ function putrafiber_sanitize_options($input) {
                 $entry['title']       = isset($item['title']) ? sanitize_text_field($item['title']) : '';
                 $entry['subtitle']    = isset($item['subtitle']) ? sanitize_text_field($item['subtitle']) : '';
                 $entry['content']     = isset($item['content']) ? wp_kses_post($item['content']) : '';
-                $entry['background']  = isset($item['background']) ? sanitize_hex_color($item['background']) : '';
-                $entry['text_color']  = isset($item['text_color']) ? sanitize_hex_color($item['text_color']) : '';
+                if (function_exists('putrafiber_frontpage_sanitize_color_value')) {
+                    $entry['background'] = isset($item['background']) ? putrafiber_frontpage_sanitize_color_value($item['background']) : '';
+                    $entry['text_color'] = isset($item['text_color']) ? putrafiber_frontpage_sanitize_color_value($item['text_color']) : '';
+                } else {
+                    $entry['background'] = isset($item['background']) ? sanitize_text_field($item['background']) : '';
+                    $entry['text_color'] = isset($item['text_color']) ? sanitize_text_field($item['text_color']) : '';
+                }
                 $entry['button_text'] = isset($item['button_text']) ? sanitize_text_field($item['button_text']) : '';
                 $entry['button_url']  = isset($item['button_url']) ? esc_url_raw($item['button_url']) : '';
+                if (function_exists('putrafiber_frontpage_normalise_layout')) {
+                    $entry['layout'] = isset($item['layout']) ? putrafiber_frontpage_normalise_layout($item['layout'], 'full') : 'full';
+                } else {
+                    $entry['layout'] = isset($item['layout']) ? sanitize_text_field($item['layout']) : 'full';
+                }
+                $entry['media']     = isset($item['media']) ? esc_url_raw($item['media']) : '';
+                $entry['media_alt'] = isset($item['media_alt']) ? sanitize_text_field($item['media_alt']) : '';
+                if (function_exists('putrafiber_frontpage_sanitize_anchor')) {
+                    $entry['anchor'] = isset($item['anchor']) ? putrafiber_frontpage_sanitize_anchor($item['anchor']) : '';
+                } else {
+                    $entry['anchor'] = isset($item['anchor']) ? sanitize_title($item['anchor']) : '';
+                }
+                if (function_exists('putrafiber_frontpage_normalise_heading_tag')) {
+                    $entry['heading_tag'] = isset($item['heading_tag']) ? putrafiber_frontpage_normalise_heading_tag($item['heading_tag'], 'h2') : 'h2';
+                } else {
+                    $entry['heading_tag'] = isset($item['heading_tag']) ? sanitize_text_field($item['heading_tag']) : 'h2';
+                }
             }
 
             $output['front_sections_builder'][] = $entry;

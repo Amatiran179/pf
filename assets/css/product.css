@@ -831,6 +831,12 @@
     transition: opacity 0.3s ease;
 }
 
+.product-single-page .product-gallery-slider .swiper-slide .gallery-image,
+.product-single-page .product-gallery-slider .swiper-slide-duplicate .gallery-image {
+    transform: none !important;
+    will-change: auto !important;
+}
+
 /* Ensure navigation is clickable */
 .product-single-page .product-gallery-slider .swiper-button-next,
 .product-single-page .product-gallery-slider .swiper-button-prev {

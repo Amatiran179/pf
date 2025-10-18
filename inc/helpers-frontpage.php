@@ -60,6 +60,47 @@ function putrafiber_frontpage_section_catalog() {
     );
 }
 
+function putrafiber_frontpage_allowed_custom_layouts() {
+    return array('full', 'split-left', 'split-right');
+}
+
+function putrafiber_frontpage_normalise_layout($layout, $default = 'full') {
+    $layout  = is_string($layout) ? strtolower(trim($layout)) : '';
+    $allowed = putrafiber_frontpage_allowed_custom_layouts();
+
+    return in_array($layout, $allowed, true) ? $layout : $default;
+}
+
+function putrafiber_frontpage_allowed_heading_tags() {
+    return array('h2', 'h3', 'h4');
+}
+
+function putrafiber_frontpage_normalise_heading_tag($tag, $default = 'h2') {
+    $tag     = is_string($tag) ? strtolower(trim($tag)) : '';
+    $allowed = putrafiber_frontpage_allowed_heading_tags();
+
+    return in_array($tag, $allowed, true) ? $tag : $default;
+}
+
+function putrafiber_frontpage_sanitize_anchor($anchor) {
+    return sanitize_title($anchor);
+}
+
+function putrafiber_frontpage_sanitize_color_value($value) {
+    if (!is_string($value)) {
+        return '';
+    }
+
+    $value = trim($value);
+    if ($value === '') {
+        return '';
+    }
+
+    $value = wp_strip_all_tags($value);
+
+    return preg_replace('/[^#a-z0-9(),.%\s\-]/i', '', $value);
+}
+
 /**
  * Default section registry used for ordering/toggles fallback.
  *
@@ -170,10 +211,15 @@ function putrafiber_frontpage_builder_config() {
                 $entry['title']       = isset($item['title']) ? sanitize_text_field($item['title']) : '';
                 $entry['subtitle']    = isset($item['subtitle']) ? sanitize_text_field($item['subtitle']) : '';
                 $entry['content']     = isset($item['content']) ? wp_kses_post($item['content']) : '';
-                $entry['background']  = isset($item['background']) ? sanitize_text_field($item['background']) : '';
-                $entry['text_color']  = isset($item['text_color']) ? sanitize_text_field($item['text_color']) : '';
+                $entry['background']  = isset($item['background']) ? putrafiber_frontpage_sanitize_color_value($item['background']) : '';
+                $entry['text_color']  = isset($item['text_color']) ? putrafiber_frontpage_sanitize_color_value($item['text_color']) : '';
                 $entry['button_text'] = isset($item['button_text']) ? sanitize_text_field($item['button_text']) : '';
                 $entry['button_url']  = isset($item['button_url']) ? esc_url($item['button_url']) : '';
+                $entry['layout']      = isset($item['layout']) ? putrafiber_frontpage_normalise_layout($item['layout'], 'full') : 'full';
+                $entry['media']       = isset($item['media']) ? esc_url($item['media']) : '';
+                $entry['media_alt']   = isset($item['media_alt']) ? sanitize_text_field($item['media_alt']) : '';
+                $entry['anchor']      = isset($item['anchor']) ? putrafiber_frontpage_sanitize_anchor($item['anchor']) : '';
+                $entry['heading_tag'] = isset($item['heading_tag']) ? putrafiber_frontpage_normalise_heading_tag($item['heading_tag'], 'h2') : 'h2';
             }
 
             $config[] = $entry;
@@ -249,6 +295,11 @@ function putrafiber_frontpage_custom_section($slug) {
         $section['text_color'] = isset($section['text_color']) ? $section['text_color'] : '';
         $section['button_text']= isset($section['button_text']) ? $section['button_text'] : '';
         $section['button_url'] = isset($section['button_url']) ? $section['button_url'] : '';
+        $section['layout']      = isset($section['layout']) ? putrafiber_frontpage_normalise_layout($section['layout'], 'full') : 'full';
+        $section['media']       = isset($section['media']) ? $section['media'] : '';
+        $section['media_alt']   = isset($section['media_alt']) ? $section['media_alt'] : '';
+        $section['anchor']      = isset($section['anchor']) ? putrafiber_frontpage_sanitize_anchor($section['anchor']) : '';
+        $section['heading_tag'] = isset($section['heading_tag']) ? putrafiber_frontpage_normalise_heading_tag($section['heading_tag'], 'h2') : 'h2';
 
         return $section;
     }
