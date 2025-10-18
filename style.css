@@ -4,10 +4,12 @@ Theme URI: https://putrafiber.com
 Author: PutraFiber Development Team
 Author URI: https://putrafiber.com
 Description: Premium Enterprise WordPress Theme untuk PUTRA FIBER - Kontraktor Waterpark, Waterboom, dan Playground Fiberglass. Dilengkapi dengan CRUD lengkap, SEO optimization, PWA ready, dan performa maksimal.
-Version: 1.0.0
+Version: 2.0.1
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
+GitHub Theme URI: https://github.com/Amatiran179/pf
+GitHub Branch: main
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: putrafiber
@@ -292,3 +294,4 @@ a {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
+
