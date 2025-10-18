@@ -1,0 +1,177 @@
+.pf-block-editor {
+    position: relative;
+    padding: 1.8rem;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(10, 28, 60, 0.08), rgba(8, 20, 46, 0.04));
+    border: 1px solid rgba(15, 117, 255, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    margin-bottom: 2rem;
+    color: #0b142b;
+    overflow: hidden;
+}
+
+.pf-block-editor__media {
+    position: relative;
+    min-height: 180px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(12, 48, 92, 0.12);
+    margin-bottom: 1.5rem;
+    background-size: cover;
+    background-position: center;
+}
+
+.pf-block-editor__media-placeholder,
+.pf-block-editor__media-label {
+    position: absolute;
+    inset: auto 16px 16px 16px;
+    padding: 0.45rem 0.85rem;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.pf-block-editor__media-placeholder {
+    background: rgba(15, 117, 255, 0.7);
+}
+
+.pf-block-editor__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(13, 37, 80, 0.7), rgba(6, 15, 36, 0.9));
+}
+
+.pf-block-editor__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pf-block-editor__eyebrow {
+    display: inline-block;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0f75ff;
+}
+
+.pf-block-editor__title {
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.2;
+}
+
+.pf-block-editor__description {
+    margin: 0;
+    color: rgba(7, 21, 48, 0.72);
+    line-height: 1.6;
+}
+
+.pf-block-editor__buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.pf-block-editor__badge,
+.pf-block-editor__testimonial {
+    padding: 1rem;
+    background: rgba(15, 117, 255, 0.08);
+    border-radius: 16px;
+    border: 1px solid rgba(15, 117, 255, 0.16);
+    margin-bottom: 1rem;
+}
+
+.pf-block-editor__badge-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    margin-right: 0.75rem;
+    border-radius: 14px;
+    background: rgba(249, 200, 70, 0.15);
+    border: 1px solid rgba(249, 200, 70, 0.35);
+}
+
+.pf-block-editor__badge-chip-title {
+    font-weight: 600;
+}
+
+.pf-block-editor__badge-chip-desc {
+    font-size: 0.85rem;
+    color: rgba(7, 21, 48, 0.7);
+}
+
+.pf-block-editor--cta .pf-block-editor__media {
+    min-height: 140px;
+}
+
+.pf-block-editor--cta .pf-block-editor__body {
+    gap: 0.75rem;
+}
+
+.pf-block-editor__testimonial-list {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pf-block-editor__testimonial-list--cols-2 {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.pf-block-editor__testimonial-list--cols-3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.pf-block-editor__testimonial-list--cols-4 {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.pf-block-editor__testimonial-quote {
+    padding: 0.75rem 0.85rem;
+    background: rgba(15, 117, 255, 0.08);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+}
+
+.pf-block-editor__testimonial-quote p {
+    margin: 0 0 0.65rem;
+}
+
+.pf-block-editor__testimonial-quote p:last-child {
+    margin-bottom: 0;
+}
+
+.pf-block-editor__empty {
+    margin: 0;
+    font-style: italic;
+    color: rgba(7, 21, 48, 0.6);
+}
+
+.pf-block-editor__header {
+    margin-bottom: 1.5rem;
+}
+
+.wp-block .pf-block-editor .components-base-control__label {
+    font-weight: 600;
+}
+
+.pf-block-editor__badge .components-base-control + .components-base-control {
+    margin-top: 0.75rem;
+}
+
+.pf-block-editor__badge .components-button.is-link,
+.pf-block-editor__testimonial .components-button.is-link {
+    color: #b22f2f;
+}
+
+.pf-block-editor__badge .components-button.is-secondary,
+.pf-block-editor__testimonial .components-button.is-secondary {
+    margin-top: 0.75rem;
+}
