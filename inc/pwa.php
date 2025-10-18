@@ -13,6 +13,10 @@ if (!function_exists('putrafiber_is_pwa_enabled')) {
      * Safely handles different truthy values returned from the database.
      */
     function putrafiber_is_pwa_enabled() {
+        if (function_exists('putrafiber_get_bool_option')) {
+            return putrafiber_get_bool_option('enable_pwa', true);
+        }
+
         if (!function_exists('putrafiber_get_option')) {
             return true;
         }

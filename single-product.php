@@ -167,25 +167,38 @@ while (have_posts()) : the_post();
                     $img_height= !empty($image['height']) ? (int) $image['height'] : 0;
                   ?>
                   <div class="swiper-slide">
-                    <a href="<?php echo pf_output_url($image['full']); ?>"
-                       data-lightbox="product-<?php echo (int) $product_id; ?>"
-                       data-title="<?php echo pf_output_attr($img_alt); ?>"
-                       class="gallery-item"
+                      <a href="<?php echo pf_output_url($image['full']); ?>"
+                         data-lightbox="product-<?php echo (int) $product_id; ?>"
+                         data-title="<?php echo pf_output_attr($img_alt); ?>"
+                         class="gallery-item"
                        data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
                        data-gallery-index="<?php echo pf_output_attr($index); ?>"
                        style="<?php echo pf_output_attr($no_zoom_anchor_style); ?>"
                        >
-                      <img
-                        src="<?php echo pf_output_url($image['url']); ?>"
-                        alt="<?php echo pf_output_attr($img_alt); ?>"
-                        class="gallery-image"
-                        style="<?php echo pf_output_attr($no_zoom_image_style); ?>"
-                        <?php if ($img_width && $img_height): ?>
-                          width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
-                        <?php endif; ?>
-                        <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
-                        decoding="async"
-                      />
+                        <img
+                          src="<?php echo pf_output_url($image['url']); ?>"
+                          alt="<?php echo pf_output_attr($img_alt); ?>"
+                          class="gallery-image"
+                          style="<?php echo pf_output_attr($no_zoom_image_style); ?>"
+                          <?php if ($img_width && $img_height): ?>
+                            width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
+                          <?php endif; ?>
+                          <?php
+                          $loading_attrs = function_exists('putrafiber_gallery_loading_attributes')
+                              ? putrafiber_gallery_loading_attributes($index, 'product-gallery')
+                              : array();
+                          echo function_exists('putrafiber_format_html_attributes')
+                              ? putrafiber_format_html_attributes($loading_attrs)
+                              : '';
+                          ?>
+                          <?php if (!empty($image['srcset'])): ?>
+                            srcset="<?php echo pf_output_attr($image['srcset']); ?>"
+                          <?php endif; ?>
+                          <?php if (!empty($image['sizes'])): ?>
+                            sizes="<?php echo pf_output_attr($image['sizes']); ?>"
+                          <?php endif; ?>
+                          decoding="async"
+                        />
                       <span class="zoom-icon">🔍</span>
                     </a>
                   </div>

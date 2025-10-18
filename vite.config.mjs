@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
-import { resolve, parse } from 'path';
+import { dirname, resolve, parse } from 'path';
+import { fileURLToPath } from 'url';
 
-const rootDir = __dirname;
+const rootDir = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   base: '',

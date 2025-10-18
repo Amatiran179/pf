@@ -13,10 +13,15 @@
 
 /* Medium Devices (Tablets, 768px to 991px) */
 @media (max-width: 991px) {
+    .container,
+    .container-wide {
+        padding: 0 24px;
+    }
+
     .section {
         padding: 60px 0;
     }
-    
+
     .section-title h2 {
         font-size: 36px;
     }
@@ -42,6 +47,11 @@
 
 /* Small Devices (Phones, 576px to 767px) */
 @media (max-width: 767px) {
+    .container,
+    .container-wide {
+        padding: 0 18px;
+    }
+
     .section {
         padding: 40px 0;
     }

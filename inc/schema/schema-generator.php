@@ -18,7 +18,11 @@ if (!defined('ABSPATH')) exit;
  * Output Schema in Head
  */
 function putrafiber_output_schema() {
-    if (!putrafiber_get_option('enable_schema', '1')) return;
+    $schema_enabled = function_exists('putrafiber_get_bool_option')
+        ? putrafiber_get_bool_option('enable_schema', true)
+        : (bool) putrafiber_get_option('enable_schema', '1');
+
+    if (!$schema_enabled) return;
 
     if (function_exists('pf_schema_yes') && pf_schema_yes()) {
         return;
@@ -126,7 +130,11 @@ function putrafiber_organization_schema() {
         ))
     );
     
-    if (putrafiber_get_option('enable_aggregate_rating', '1')) {
+    $aggregate_enabled = function_exists('putrafiber_get_bool_option')
+        ? putrafiber_get_bool_option('enable_aggregate_rating', true)
+        : (bool) putrafiber_get_option('enable_aggregate_rating', '1');
+
+    if ($aggregate_enabled) {
         $schema['aggregateRating'] = array(
             '@type' => 'AggregateRating',
             'ratingValue' => putrafiber_get_option('company_rating', '4.8'),
@@ -230,7 +238,11 @@ function putrafiber_local_business_schema() {
     }
     
     // Aggregate Rating
-    if (putrafiber_get_option('enable_aggregate_rating', '1')) {
+    $aggregate_enabled = function_exists('putrafiber_get_bool_option')
+        ? putrafiber_get_bool_option('enable_aggregate_rating', true)
+        : (bool) putrafiber_get_option('enable_aggregate_rating', '1');
+
+    if ($aggregate_enabled) {
         $schema['aggregateRating'] = array(
             '@type' => 'AggregateRating',
             'ratingValue' => putrafiber_get_option('company_rating', '4.8'),

@@ -160,6 +160,17 @@
     margin: 40px 0;
 }
 
+@media (max-width: 1024px) {
+    .product-layout {
+        gap: 40px;
+    }
+
+    .product-gallery {
+        position: relative;
+        top: auto;
+    }
+}
+
 @media (max-width: 768px) {
     .product-layout {
         grid-template-columns: 1fr;
@@ -256,6 +267,27 @@
 .swiper-button-next:after,
 .swiper-button-prev:after {
     font-size: 18px;
+}
+
+@media (max-width: 576px) {
+    .product-layout {
+        margin: 30px 0;
+    }
+
+    .product-gallery-slider .swiper-slide {
+        aspect-ratio: 4 / 3;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        width: 32px;
+        height: 32px;
+    }
+
+    .swiper-button-next:after,
+    .swiper-button-prev:after {
+        font-size: 14px;
+    }
 }
 
 .swiper-pagination-bullet {

@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
 /** ==========================================================================
  * Constants
  * ========================================================================== */
-if (!defined('PUTRAFIBER_VERSION')) define('PUTRAFIBER_VERSION', '1.0.0');
+if (!defined('PUTRAFIBER_VERSION')) define('PUTRAFIBER_VERSION', '2.1.0');
 if (!defined('PUTRAFIBER_DIR'))     define('PUTRAFIBER_DIR', get_template_directory());
 if (!defined('PUTRAFIBER_URI'))     define('PUTRAFIBER_URI', get_template_directory_uri());
 
@@ -34,6 +34,8 @@ function pf_enqueue_assets() {
   $pwa_enabled = true;
   if (function_exists('putrafiber_is_pwa_enabled')) {
     $pwa_enabled = putrafiber_is_pwa_enabled();
+  } elseif (function_exists('putrafiber_get_bool_option')) {
+    $pwa_enabled = putrafiber_get_bool_option('enable_pwa', true);
   } elseif (function_exists('putrafiber_get_option')) {
     $raw_pwa_value = putrafiber_get_option('enable_pwa', '1');
     $normalized    = strtolower(trim((string) $raw_pwa_value));
@@ -305,8 +307,52 @@ add_action('widgets_init', 'putrafiber_widgets_init');
  * Helpers: Theme Options, WhatsApp, Links
  * ========================================================================== */
 function putrafiber_get_option($key, $default = '') {
-  $options = get_option('putrafiber_options', array());
-  return (isset($options[$key]) && $options[$key] !== '') ? $options[$key] : $default;
+  static $options = null;
+
+  if ($options === null) {
+    $stored = get_option('putrafiber_options', array());
+    $options = is_array($stored) ? $stored : array();
+  }
+
+  if (!array_key_exists($key, $options)) {
+    return $default;
+  }
+
+  $value = $options[$key];
+
+  if (is_array($default) && !is_array($value)) {
+    return $default;
+  }
+
+  if ($value === '' && $default !== '') {
+    return $default;
+  }
+
+  return apply_filters('putrafiber_get_option', $value, $key, $default);
+}
+
+function putrafiber_get_bool_option($key, $default = false) {
+  $raw_default = $default ? '1' : '0';
+  $value = putrafiber_get_option($key, $raw_default);
+
+  if (is_bool($value)) {
+    return $value;
+  }
+
+  if (is_numeric($value)) {
+    return (int) $value === 1;
+  }
+
+  if (is_string($value)) {
+    $normalized = strtolower(trim($value));
+    if ($normalized === '') {
+      return (bool) $default;
+    }
+
+    return in_array($normalized, array('1', 'true', 'yes', 'on', 'enabled'), true);
+  }
+
+  return (bool) $default;
 }
 
 function putrafiber_whatsapp_number() {

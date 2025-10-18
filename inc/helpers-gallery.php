@@ -8,8 +8,6 @@
  * @package PutraFiber
  * @version 1.0.0
  */
-if (!defined('ABSPATH')) exit;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -155,7 +153,23 @@ if (!function_exists('putrafiber_build_gallery_items')) {
             'skip_missing'  => true,
         );
 
-        $args    = wp_parse_args($args, $defaults);
+        $args = wp_parse_args($args, $defaults);
+
+        $cache_key = md5(wp_json_encode(array(
+            'ids'       => array_map('absint', (array) $ids),
+            'image'     => $args['image_size'],
+            'thumb'     => $args['thumb_size'],
+            'fallback'  => $args['fallback_alt'],
+            'exclude'   => array_map('absint', (array) $args['exclude']),
+            'skip'      => (bool) $args['skip_missing'],
+        )));
+
+        $found  = false;
+        $cached = wp_cache_get($cache_key, 'putrafiber_gallery', false, $found);
+        if ($found) {
+            return $cached;
+        }
+
         $exclude = array_map('absint', (array) $args['exclude']);
         $items   = array();
 
@@ -188,17 +202,80 @@ if (!function_exists('putrafiber_build_gallery_items')) {
                 $alt = get_the_title($id);
             }
 
+            $srcset = wp_get_attachment_image_srcset($id, $args['image_size']);
+            $sizes  = wp_get_attachment_image_sizes($id, $args['image_size']);
+
             $items[] = array(
-                'id'     => $id,
-                'url'    => $image_url ?: $full_url,
-                'full'   => $full_url ?: $image_url,
-                'thumb'  => $thumb_url ?: ($image_url ?: $full_url),
-                'alt'    => $alt ?: __('Gallery image', 'putrafiber'),
-                'width'  => $width,
-                'height' => $height,
+                'id'         => $id,
+                'url'        => $image_url ?: $full_url,
+                'full'       => $full_url ?: $image_url,
+                'thumb'      => $thumb_url ?: ($image_url ?: $full_url),
+                'alt'        => $alt ?: __('Gallery image', 'putrafiber'),
+                'width'      => $width,
+                'height'     => $height,
+                'srcset'     => $srcset ?: '',
+                'sizes'      => $sizes ?: '',
+                'mime_type'  => get_post_mime_type($id),
+                'orientation'=> ($width && $height) ? ($width >= $height ? 'landscape' : 'portrait') : '',
+                'ratio'      => ($width && $height) ? round($width / max($height, 1), 4) : 0,
             );
         }
 
+        wp_cache_set($cache_key, $items, 'putrafiber_gallery', MINUTE_IN_SECONDS);
+
         return $items;
+    }
+}
+
+if (!function_exists('putrafiber_gallery_loading_attributes')) {
+    /**
+     * Prepare loading and fetchpriority attributes optimised for galleries.
+     *
+     * @param int    $index   Image index inside the gallery slider.
+     * @param string $context Unique context identifier.
+     *
+     * @return array<string,string>
+     */
+    function putrafiber_gallery_loading_attributes($index = 0, $context = 'putrafiber-gallery')
+    {
+        $priority = $index === 0 ? 'high' : 'low';
+
+        $attrs = array(
+            'loading'       => $index === 0 ? 'eager' : 'lazy',
+            'fetchpriority' => $priority,
+        );
+
+        if (function_exists('wp_get_loading_optimization_attributes')) {
+            $attrs = wp_get_loading_optimization_attributes('img', $attrs, $context);
+        }
+
+        return $attrs;
+    }
+}
+
+if (!function_exists('putrafiber_format_html_attributes')) {
+    /**
+     * Convert associative array of attributes into escaped HTML string.
+     *
+     * @param array<string,string> $attributes
+     * @return string
+     */
+    function putrafiber_format_html_attributes($attributes)
+    {
+        if (empty($attributes) || !is_array($attributes)) {
+            return '';
+        }
+
+        $compiled = '';
+
+        foreach ($attributes as $name => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            $compiled .= sprintf(' %s="%s"', esc_attr($name), esc_attr($value));
+        }
+
+        return $compiled;
     }
 }
