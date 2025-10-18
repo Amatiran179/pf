@@ -28,8 +28,7 @@
             }
 
             if (galleryUploader) {
-                galleryUploader.open();
-                return;
+                galleryUploader.off('select');
             }
 
             galleryUploader = wp.media({

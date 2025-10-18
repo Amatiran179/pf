@@ -282,6 +282,7 @@ function putrafiber_settings_init() {
     );
 
     add_settings_field('enable_schema_advanced', __('Enable Schema Advanced Layer', 'putrafiber'), 'putrafiber_enable_schema_advanced_render', 'putrafiber-schema-advanced', 'putrafiber_schema_advanced_section');
+    add_settings_field('schema_global_modules', __('Global Schema Modules', 'putrafiber'), 'putrafiber_schema_global_modules_render', 'putrafiber-schema-advanced', 'putrafiber_schema_advanced_section');
     add_settings_field('cta_priority_order', __('CTA Priority Order', 'putrafiber'), 'putrafiber_cta_priority_order_render', 'putrafiber-schema-advanced', 'putrafiber_schema_advanced_section');
 }
 add_action('admin_init', 'putrafiber_settings_init');
@@ -359,12 +360,12 @@ function putrafiber_sanitize_options($input) {
         'front_features_layout'            => array('grid', 'masonry', 'list', 'stacked'),
         'front_features_card_style'        => array('glass', 'solid', 'soft', 'outline'),
         'front_features_card_size'         => array('compact', 'regular', 'spacious'),
-        'front_features_card_animation'    => array('auto', 'rise', 'zoom', 'tilt', 'float', 'none'),
+        'front_features_card_animation'    => array('auto', 'rise', 'zoom', 'tilt', 'float', 'pulse', 'fade', 'slide', 'none'),
         'front_features_background_effect' => array('none', 'gradient', 'bubbles', 'mesh'),
         'front_services_layout'            => array('grid', 'masonry', 'list', 'stacked'),
         'front_services_card_style'        => array('glass', 'solid', 'soft', 'outline'),
         'front_services_card_size'         => array('compact', 'regular', 'spacious'),
-        'front_services_card_animation'    => array('auto', 'rise', 'zoom', 'tilt', 'float', 'none'),
+        'front_services_card_animation'    => array('auto', 'rise', 'zoom', 'tilt', 'float', 'pulse', 'fade', 'slide', 'none'),
         'front_services_background_effect' => array('none', 'gradient', 'mesh', 'flare'),
         'front_blog_layout'                => array('grid', 'magazine', 'list', 'carousel'),
         'front_blog_card_style'            => array('glass', 'solid', 'soft', 'outline'),
@@ -431,6 +432,18 @@ function putrafiber_sanitize_options($input) {
     $output['front_features_cards'] = putrafiber_sanitize_card_collection($input, 'front_features_cards', 'features');
     $output['front_services_cards'] = putrafiber_sanitize_card_collection($input, 'front_services_cards', 'services');
     $output['front_blog_custom_cards'] = putrafiber_sanitize_card_collection($input, 'front_blog_custom_cards', 'blog');
+
+    $output['schema_global_modules'] = array();
+    if (isset($input['schema_global_modules']) && is_array($input['schema_global_modules'])) {
+        $allowed_modules = array('service_area', 'video', 'faq', 'howto', 'tourist');
+        foreach ($input['schema_global_modules'] as $module) {
+            $module_key = sanitize_key($module);
+            if (in_array($module_key, $allowed_modules, true)) {
+                $output['schema_global_modules'][] = $module_key;
+            }
+        }
+        $output['schema_global_modules'] = array_values(array_unique($output['schema_global_modules']));
+    }
 
     // Payment Methods (checkbox array)
     $output['payment_methods'] = array();
@@ -1132,6 +1145,9 @@ function putrafiber_front_features_card_animation_render() {
         'zoom'  => __('Zoom dramatis', 'putrafiber'),
         'tilt'  => __('Tilt futuristik', 'putrafiber'),
         'float' => __('Melayang pelan', 'putrafiber'),
+        'pulse' => __('Pulse lembut', 'putrafiber'),
+        'fade'  => __('Fade in halus', 'putrafiber'),
+        'slide' => __('Slide dinamis', 'putrafiber'),
         'none'  => __('Tanpa animasi', 'putrafiber'),
     );
     ?>
@@ -1237,6 +1253,9 @@ function putrafiber_front_services_card_animation_render() {
         'zoom'  => __('Zoom dramatis', 'putrafiber'),
         'tilt'  => __('Tilt futuristik', 'putrafiber'),
         'float' => __('Melayang pelan', 'putrafiber'),
+        'pulse' => __('Pulse elegan', 'putrafiber'),
+        'fade'  => __('Fade in halus', 'putrafiber'),
+        'slide' => __('Slide dinamis', 'putrafiber'),
         'none'  => __('Tanpa animasi', 'putrafiber'),
     );
     ?>
@@ -2368,6 +2387,33 @@ function putrafiber_enable_schema_advanced_render() {
         <?php _e('Aktifkan Schema Advanced Layer', 'putrafiber'); ?>
     </label>
     <p class="description"><?php _e('Aktifkan sistem schema modular (anti-duplicate, CTA mapping, single JSON-LD).', 'putrafiber'); ?></p>
+    <?php
+}
+
+function putrafiber_schema_global_modules_render() {
+    $options = get_option('putrafiber_options', array());
+    $selected = array();
+    if (!empty($options['schema_global_modules']) && is_array($options['schema_global_modules'])) {
+        $selected = array_map('sanitize_key', $options['schema_global_modules']);
+    }
+
+    $modules = array(
+        'service_area' => __('Service Area (areaServed)', 'putrafiber'),
+        'video'        => __('VideoObject', 'putrafiber'),
+        'faq'          => __('FAQPage', 'putrafiber'),
+        'howto'        => __('HowTo', 'putrafiber'),
+        'tourist'      => __('TouristAttraction', 'putrafiber'),
+    );
+    ?>
+    <fieldset class="pf-schema-modules">
+        <?php foreach ($modules as $slug => $label): ?>
+            <label style="display:block;margin-bottom:6px;">
+                <input type="checkbox" name="putrafiber_options[schema_global_modules][]" value="<?php echo esc_attr($slug); ?>" <?php checked(in_array($slug, $selected, true)); ?>>
+                <?php echo esc_html($label); ?>
+            </label>
+        <?php endforeach; ?>
+    </fieldset>
+    <p class="description"><?php _e('Modul yang dicentang akan aktif secara default untuk semua post type dan bisa dioverride per konten.', 'putrafiber'); ?></p>
     <?php
 }
 

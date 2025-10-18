@@ -585,7 +585,7 @@ function putrafiber_frontpage_card_settings($section) {
     $settings = array(
         'layout'            => putrafiber_frontpage_normalise_choice($layout, array('grid', 'masonry', 'list', 'stacked', 'magazine', 'carousel'), $defaults['layout']),
         'style'             => putrafiber_frontpage_normalise_choice($style, array('glass', 'solid', 'soft', 'outline'), $defaults['style']),
-        'animation'         => putrafiber_frontpage_normalise_choice($animation, array('auto', 'rise', 'zoom', 'tilt', 'float', 'none'), $defaults['animation']),
+        'animation'         => putrafiber_frontpage_normalise_choice($animation, array('auto', 'rise', 'zoom', 'tilt', 'float', 'pulse', 'fade', 'slide', 'none'), $defaults['animation']),
         'columns'           => max(1, min(6, $columns)),
         'background_effect' => putrafiber_frontpage_normalise_choice($background_effect, array('none', 'gradient', 'bubbles', 'mesh', 'flare', 'glass', 'waves', 'aurora'), $defaults['background_effect']),
     );

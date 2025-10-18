@@ -55,46 +55,307 @@ function putrafiber_schema_metabox_callback($post) {
         $manual_service_areas = array();
     }
 
+    $global_schema_modules = function_exists('pf_schema_get_global_modules') ? pf_schema_get_global_modules() : array();
+
+    $manual_service_area_fieldsets = array(
+        'Country' => array(
+            'label'  => __('Country', 'putrafiber'),
+            'fields' => array(
+                array(
+                    'key'         => 'name',
+                    'label'       => __('Nama Negara', 'putrafiber'),
+                    'placeholder' => __('Indonesia', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'country_code',
+                    'label'       => __('Kode Negara (ISO 3166-1)', 'putrafiber'),
+                    'placeholder' => __('ID', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                    'maxlength'   => 2,
+                    'class'       => 'manual-area-country-code',
+                    'helper'      => __('Gunakan kode dua huruf, misal ID untuk Indonesia.', 'putrafiber'),
+                ),
+                array(
+                    'key'         => 'identifier',
+                    'label'       => __('Identifier / URL Resmi (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: ID atau https://...', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'note',
+                    'label'       => __('Catatan Tambahan (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Area utama layanan', 'putrafiber'),
+                    'type'        => 'textarea',
+                ),
+            ),
+        ),
+        'AdministrativeArea' => array(
+            'label'  => __('Administrative Area (Province/Region)', 'putrafiber'),
+            'fields' => array(
+                array(
+                    'key'         => 'name',
+                    'label'       => __('Nama Provinsi / Region', 'putrafiber'),
+                    'placeholder' => __('Jawa Barat', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'subdivision_code',
+                    'label'       => __('Kode Wilayah (ISO 3166-2)', 'putrafiber'),
+                    'placeholder' => __('ID-JB', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'country_code',
+                    'label'       => __('Kode Negara', 'putrafiber'),
+                    'placeholder' => __('ID', 'putrafiber'),
+                    'type'        => 'text',
+                    'class'       => 'manual-area-country-code',
+                    'maxlength'   => 2,
+                ),
+                array(
+                    'key'         => 'identifier',
+                    'label'       => __('Identifier (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: ID-JB atau URL resmi', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'note',
+                    'label'       => __('Catatan Tambahan (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Fokus area provinsi', 'putrafiber'),
+                    'type'        => 'textarea',
+                ),
+            ),
+        ),
+        'City' => array(
+            'label'  => __('City', 'putrafiber'),
+            'fields' => array(
+                array(
+                    'key'         => 'name',
+                    'label'       => __('Nama Kota/Kabupaten', 'putrafiber'),
+                    'placeholder' => __('Bandung', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'province',
+                    'label'       => __('Provinsi', 'putrafiber'),
+                    'placeholder' => __('Jawa Barat', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'postal_code',
+                    'label'       => __('Kode Pos (Opsional)', 'putrafiber'),
+                    'placeholder' => __('40115', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'country_code',
+                    'label'       => __('Kode Negara', 'putrafiber'),
+                    'placeholder' => __('ID', 'putrafiber'),
+                    'type'        => 'text',
+                    'class'       => 'manual-area-country-code',
+                    'maxlength'   => 2,
+                ),
+                array(
+                    'key'         => 'identifier',
+                    'label'       => __('Identifier (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Kode kota resmi', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'note',
+                    'label'       => __('Catatan Tambahan (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Area prioritas kota', 'putrafiber'),
+                    'type'        => 'textarea',
+                ),
+            ),
+        ),
+        'Place' => array(
+            'label'  => __('Place / Landmark', 'putrafiber'),
+            'fields' => array(
+                array(
+                    'key'         => 'name',
+                    'label'       => __('Nama Tempat / Landmark', 'putrafiber'),
+                    'placeholder' => __('Waterpark Andalan', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'street',
+                    'label'       => __('Alamat Jalan (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Jl. Merdeka No. 1', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'locality',
+                    'label'       => __('Kota/Kabupaten (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Bandung', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'region',
+                    'label'       => __('Provinsi/Region (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Jawa Barat', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'postal_code',
+                    'label'       => __('Kode Pos (Opsional)', 'putrafiber'),
+                    'placeholder' => __('40115', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'country_code',
+                    'label'       => __('Kode Negara', 'putrafiber'),
+                    'placeholder' => __('ID', 'putrafiber'),
+                    'type'        => 'text',
+                    'class'       => 'manual-area-country-code',
+                    'maxlength'   => 2,
+                ),
+                array(
+                    'key'         => 'latitude',
+                    'label'       => __('Latitude (Opsional)', 'putrafiber'),
+                    'placeholder' => __('-6.9175', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'longitude',
+                    'label'       => __('Longitude (Opsional)', 'putrafiber'),
+                    'placeholder' => __('107.6191', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'identifier',
+                    'label'       => __('Identifier (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: ID internal lokasi', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'note',
+                    'label'       => __('Catatan Tambahan (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Area favorit keluarga', 'putrafiber'),
+                    'type'        => 'textarea',
+                ),
+            ),
+        ),
+        'PostalAddress' => array(
+            'label'  => __('Postal Address', 'putrafiber'),
+            'fields' => array(
+                array(
+                    'key'         => 'name',
+                    'label'       => __('Nama Penerima / Tempat (Opsional)', 'putrafiber'),
+                    'placeholder' => __('PutraFiber HQ', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'street',
+                    'label'       => __('Alamat Jalan', 'putrafiber'),
+                    'placeholder' => __('Jl. Merdeka No. 1', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'locality',
+                    'label'       => __('Kota/Kabupaten', 'putrafiber'),
+                    'placeholder' => __('Bandung', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'region',
+                    'label'       => __('Provinsi/Region', 'putrafiber'),
+                    'placeholder' => __('Jawa Barat', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'postal_code',
+                    'label'       => __('Kode Pos', 'putrafiber'),
+                    'placeholder' => __('40115', 'putrafiber'),
+                    'type'        => 'text',
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'country_code',
+                    'label'       => __('Kode Negara', 'putrafiber'),
+                    'placeholder' => __('ID', 'putrafiber'),
+                    'type'        => 'text',
+                    'class'       => 'manual-area-country-code',
+                    'maxlength'   => 2,
+                    'required'    => true,
+                ),
+                array(
+                    'key'         => 'identifier',
+                    'label'       => __('Identifier (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Kode cabang', 'putrafiber'),
+                    'type'        => 'text',
+                ),
+                array(
+                    'key'         => 'note',
+                    'label'       => __('Catatan Tambahan (Opsional)', 'putrafiber'),
+                    'placeholder' => __('Contoh: Alamat surat menyurat', 'putrafiber'),
+                    'type'        => 'textarea',
+                ),
+            ),
+        ),
+    );
+
+    $manual_service_area_types = array();
+    foreach ($manual_service_area_fieldsets as $key => $fieldset) {
+        $manual_service_area_types[$key] = isset($fieldset['label']) ? $fieldset['label'] : $key;
+    }
+
+    $manual_area_defaults = array(
+        'type'             => 'Place',
+        'name'             => '',
+        'country_code'     => 'ID',
+        'identifier'       => '',
+        'note'             => '',
+        'subdivision_code' => '',
+        'province'         => '',
+        'street'           => '',
+        'locality'         => '',
+        'region'           => '',
+        'postal_code'      => '',
+        'latitude'         => '',
+        'longitude'        => '',
+    );
+
     if (!empty($manual_service_areas)) {
         foreach ($manual_service_areas as $index => $area) {
             if (!is_array($area)) {
-                $manual_service_areas[$index] = array(
-                    'type' => 'Place',
-                    'name' => sanitize_text_field($area),
-                    'country_code' => 'ID',
-                    'identifier' => '',
-                    'note' => ''
-                );
-                continue;
+                $manual_service_areas[$index]         = $manual_area_defaults;
+                $manual_service_areas[$index]['type'] = 'Place';
+                $manual_service_areas[$index]['name'] = sanitize_text_field($area);
+            } else {
+                $manual_service_areas[$index] = wp_parse_args($area, $manual_area_defaults);
             }
 
-            $manual_service_areas[$index] = wp_parse_args($area, array(
-                'type' => 'Place',
-                'name' => '',
-                'country_code' => 'ID',
-                'identifier' => '',
-                'note' => ''
-            ));
+            $current_type = isset($manual_service_areas[$index]['type']) ? sanitize_text_field($manual_service_areas[$index]['type']) : 'Place';
+            if (!isset($manual_service_area_fieldsets[$current_type])) {
+                $current_type = 'Place';
+            }
+            $manual_service_areas[$index]['type'] = $current_type;
+
+            $country_code = isset($manual_service_areas[$index]['country_code']) ? strtoupper(sanitize_text_field($manual_service_areas[$index]['country_code'])) : '';
+            if ($country_code !== '') {
+                $country_code = substr($country_code, 0, 2);
+            }
+            $manual_service_areas[$index]['country_code'] = $country_code;
         }
     }
 
     if (empty($manual_service_areas)) {
-        $manual_service_areas[] = array(
-            'type' => 'Country',
-            'name' => 'Indonesia',
-            'country_code' => 'ID',
-            'identifier' => '',
-            'note' => ''
-        );
+        $default_entry = $manual_area_defaults;
+        $default_entry['type'] = 'Country';
+        $default_entry['name'] = 'Indonesia';
+        $default_entry['country_code'] = 'ID';
+        $manual_service_areas[] = $default_entry;
     }
-
-    $manual_service_area_types = array(
-        'Country' => __('Country', 'putrafiber'),
-        'AdministrativeArea' => __('Administrative Area (Province/Region)', 'putrafiber'),
-        'City' => __('City', 'putrafiber'),
-        'Place' => __('Place / Landmark', 'putrafiber'),
-        'PostalAddress' => __('Postal Address', 'putrafiber'),
-    );
 
     // Get saved data - Video
     $enable_video = get_post_meta($post->ID, '_enable_video_schema', true);
@@ -102,15 +363,15 @@ function putrafiber_schema_metabox_callback($post) {
     $video_title = get_post_meta($post->ID, '_video_title', true);
     $video_description = get_post_meta($post->ID, '_video_description', true);
     $video_duration = get_post_meta($post->ID, '_video_duration', true);
-    
+
     // Get saved data - FAQ
     $enable_faq = get_post_meta($post->ID, '_enable_faq_schema', true);
     $faq_items = get_post_meta($post->ID, '_faq_items', true);
-    
+
     // Get saved data - HowTo
     $enable_howto = get_post_meta($post->ID, '_enable_howto_schema', true);
     $howto_steps = get_post_meta($post->ID, '_howto_steps', true);
-    
+
     // Get saved data - TouristAttraction
     $enable_tourist = get_post_meta($post->ID, '_enable_tourist_schema', true);
     $tourist_street = get_post_meta($post->ID, '_tourist_street_address', true);
@@ -129,6 +390,22 @@ function putrafiber_schema_metabox_callback($post) {
     $tourist_rating = get_post_meta($post->ID, '_tourist_rating', true);
     $tourist_review_count = get_post_meta($post->ID, '_tourist_review_count', true);
     $tourist_public_access = get_post_meta($post->ID, '_tourist_public_access', true);
+
+    if ($enable_service_area === '') {
+        $enable_service_area = in_array('service_area', $global_schema_modules, true) ? '1' : '0';
+    }
+    if ($enable_video === '') {
+        $enable_video = in_array('video', $global_schema_modules, true) ? '1' : '0';
+    }
+    if ($enable_faq === '') {
+        $enable_faq = in_array('faq', $global_schema_modules, true) ? '1' : '0';
+    }
+    if ($enable_howto === '') {
+        $enable_howto = in_array('howto', $global_schema_modules, true) ? '1' : '0';
+    }
+    if ($enable_tourist === '') {
+        $enable_tourist = in_array('tourist', $global_schema_modules, true) ? '1' : '0';
+    }
     
     // Auto-detect cities from title
     $auto_detected_cities = putrafiber_extract_cities_from_text(get_the_title($post->ID));
@@ -255,7 +532,7 @@ function putrafiber_schema_metabox_callback($post) {
 
                     <div id="manual-service-areas-container">
                         <?php foreach ($manual_service_areas as $index => $manual_area) : ?>
-                        <div class="schema-repeater-item manual-service-area-item">
+                        <div class="schema-repeater-item manual-service-area-item" data-index="<?php echo esc_attr($index); ?>" data-values="<?php echo esc_attr(wp_json_encode($manual_area)); ?>">
                             <?php if ($index > 0) : ?>
                             <button type="button" class="schema-repeater-remove remove-manual-service-area">✕</button>
                             <?php endif; ?>
@@ -269,29 +546,9 @@ function putrafiber_schema_metabox_callback($post) {
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
-                                <div>
-                                    <label><?php esc_html_e('Nama Area', 'putrafiber'); ?></label>
-                                    <input type="text" name="manual_service_areas[<?php echo $index; ?>][name]" value="<?php echo esc_attr($manual_area['name']); ?>" placeholder="<?php esc_attr_e('Contoh: Indonesia', 'putrafiber'); ?>">
-                                </div>
-
-                                <div>
-                                    <label><?php esc_html_e('Kode Negara (ISO)', 'putrafiber'); ?></label>
-                                    <input type="text" name="manual_service_areas[<?php echo $index; ?>][country_code]" value="<?php echo esc_attr($manual_area['country_code']); ?>" class="manual-area-country-code" maxlength="2" placeholder="<?php esc_attr_e('ID', 'putrafiber'); ?>">
-                                </div>
                             </div>
 
-                            <div class="schema-grid-2 manual-area-extra">
-                                <div>
-                                    <label><?php esc_html_e('Identifier / URL Resmi (Opsional)', 'putrafiber'); ?></label>
-                                    <input type="text" name="manual_service_areas[<?php echo $index; ?>][identifier]" value="<?php echo esc_attr($manual_area['identifier']); ?>" placeholder="<?php esc_attr_e('Contoh: ID atau https://...', 'putrafiber'); ?>">
-                                </div>
-
-                                <div>
-                                    <label><?php esc_html_e('Catatan Tambahan (Opsional)', 'putrafiber'); ?></label>
-                                    <textarea name="manual_service_areas[<?php echo $index; ?>][note]" placeholder="<?php esc_attr_e('Contoh: Area prioritas layanan', 'putrafiber'); ?>"><?php echo esc_textarea($manual_area['note']); ?></textarea>
-                                </div>
-                            </div>
+                            <div class="manual-area-fields" data-area-fields></div>
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -671,6 +928,8 @@ function putrafiber_schema_metabox_callback($post) {
         // Manual Service Area
         var manualServiceAreaIndex = <?php echo count($manual_service_areas); ?>;
         var manualServiceAreaTypes = <?php echo wp_json_encode($manual_service_area_types); ?>;
+        var manualServiceAreaConfig = <?php echo wp_json_encode($manual_service_area_fieldsets); ?>;
+        var manualServiceAreaDefaults = <?php echo wp_json_encode($manual_area_defaults); ?>;
 
         function putrafiberRenderManualAreaOptions(selected) {
             var options = '';
@@ -684,21 +943,143 @@ function putrafiber_schema_metabox_callback($post) {
             return options;
         }
 
+        function pfEscapeHtml(value) {
+            return String(value === undefined ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function pfEscapeAttr(value) {
+            return pfEscapeHtml(value).replace(/"/g, '&quot;');
+        }
+
+        function pfCloneManualDefaults() {
+            return JSON.parse(JSON.stringify(manualServiceAreaDefaults));
+        }
+
+        function pfParseManualAreaValues(item) {
+            var values = pfCloneManualDefaults();
+            var raw = item.getAttribute('data-values');
+            if (raw) {
+                try {
+                    var parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        values = Object.assign(values, parsed);
+                    }
+                } catch (err) {
+                    // ignore malformed payload
+                }
+            }
+            return values;
+        }
+
+        function pfStoreManualAreaValues(item, values) {
+            item.setAttribute('data-values', JSON.stringify(values));
+        }
+
+        function pfRenderManualAreaFields(item) {
+            if (!item) {
+                return;
+            }
+
+            var index = item.getAttribute('data-index');
+            if (index === null) {
+                return;
+            }
+
+            var typeSelect = item.querySelector('.manual-area-type');
+            var type = typeSelect ? typeSelect.value : 'Place';
+            if (!manualServiceAreaConfig[type] || !manualServiceAreaConfig[type].fields) {
+                type = 'Place';
+            }
+
+            var fields = manualServiceAreaConfig[type].fields;
+            var values = pfParseManualAreaValues(item);
+
+            var existingInputs = item.querySelectorAll('[data-field-key]');
+            if (existingInputs.length) {
+                existingInputs.forEach(function(input) {
+                    var key = input.getAttribute('data-field-key');
+                    if (key) {
+                        values[key] = input.value;
+                    }
+                });
+            }
+
+            var container = item.querySelector('[data-area-fields]');
+            if (!container) {
+                return;
+            }
+
+            var rows = fields.map(function(field) {
+                var key = field.key;
+                var label = field.label || key;
+                var placeholder = field.placeholder || '';
+                var helper = field.helper ? '<p class="schema-help">' + field.helper + '</p>' : '';
+                var requiredAttr = field.required ? ' required' : '';
+                var classAttr = field.class ? ' ' + field.class : '';
+                var maxLengthAttr = field.maxlength ? ' maxlength="' + field.maxlength + '"' : '';
+                var fieldName = 'manual_service_areas[' + index + '][' + key + ']';
+                var value = typeof values[key] !== 'undefined' ? values[key] : '';
+                values[key] = value;
+
+                if (field.type === 'textarea') {
+                    return '<tr><th scope="row"><label>' + pfEscapeHtml(label) + '</label></th><td><textarea name="' + fieldName + '" data-field-key="' + key + '" placeholder="' + pfEscapeAttr(placeholder) + '"' + requiredAttr + '>' + pfEscapeHtml(value) + '</textarea>' + helper + '</td></tr>';
+                }
+
+                var inputType = field.type === 'number' ? 'number' : 'text';
+                return '<tr><th scope="row"><label>' + pfEscapeHtml(label) + '</label></th><td><input type="' + inputType + '" name="' + fieldName + '" data-field-key="' + key + '" class="widefat' + classAttr + '" value="' + pfEscapeAttr(value) + '" placeholder="' + pfEscapeAttr(placeholder) + '"' + requiredAttr + maxLengthAttr + '>' + helper + '</td></tr>';
+            }).join('');
+
+            container.innerHTML = '<table class="manual-area-table"><tbody>' + rows + '</tbody></table>';
+            pfStoreManualAreaValues(item, values);
+        }
+
+        document.querySelectorAll('.manual-service-area-item').forEach(function(item) {
+            pfRenderManualAreaFields(item);
+        });
+
+        $(document).on('change', '.manual-area-type', function(){
+            var item = this.closest('.manual-service-area-item');
+            if (!item) {
+                return;
+            }
+            var values = pfParseManualAreaValues(item);
+            values.type = this.value;
+            pfStoreManualAreaValues(item, values);
+            pfRenderManualAreaFields(item);
+        });
+
+        $(document).on('input change', '.manual-service-area-item [data-field-key]', function(){
+            var item = this.closest('.manual-service-area-item');
+            if (!item) {
+                return;
+            }
+            var key = this.getAttribute('data-field-key');
+            if (!key) {
+                return;
+            }
+            var values = pfParseManualAreaValues(item);
+            values[key] = this.value;
+            pfStoreManualAreaValues(item, values);
+        });
+
         $('#add-manual-service-area').on('click', function(){
-            var options = putrafiberRenderManualAreaOptions('Place');
-            var html = '<div class="schema-repeater-item manual-service-area-item">' +
+            var defaults = Object.assign(pfCloneManualDefaults(), { type: 'Place' });
+            var options = putrafiberRenderManualAreaOptions(defaults.type);
+            var html = '<div class="schema-repeater-item manual-service-area-item" data-index="' + manualServiceAreaIndex + '">' +
                 '<button type="button" class="schema-repeater-remove remove-manual-service-area">✕</button>' +
                 '<div class="schema-grid-3 manual-area-grid">' +
-                '<div><label><?php echo esc_js(__('Tipe Area', 'putrafiber')); ?></label><select name="manual_service_areas[' + manualServiceAreaIndex + '][type]" class="manual-area-type">' + options + '</select></div>' +
-                '<div><label><?php echo esc_js(__('Nama Area', 'putrafiber')); ?></label><input type="text" name="manual_service_areas[' + manualServiceAreaIndex + '][name]" placeholder="<?php echo esc_js(__('Contoh: Indonesia', 'putrafiber')); ?>"></div>' +
-                '<div><label><?php echo esc_js(__('Kode Negara (ISO)', 'putrafiber')); ?></label><input type="text" name="manual_service_areas[' + manualServiceAreaIndex + '][country_code]" class="manual-area-country-code" maxlength="2" placeholder="ID"></div>' +
+                    '<div><label><?php echo esc_js(__('Tipe Area', 'putrafiber')); ?></label><select name="manual_service_areas[' + manualServiceAreaIndex + '][type]" class="manual-area-type">' + options + '</select></div>' +
                 '</div>' +
-                '<div class="schema-grid-2 manual-area-extra">' +
-                '<div><label><?php echo esc_js(__('Identifier / URL Resmi (Opsional)', 'putrafiber')); ?></label><input type="text" name="manual_service_areas[' + manualServiceAreaIndex + '][identifier]" placeholder="<?php echo esc_js(__('Contoh: ID atau https://...', 'putrafiber')); ?>"></div>' +
-                '<div><label><?php echo esc_js(__('Catatan Tambahan (Opsional)', 'putrafiber')); ?></label><textarea name="manual_service_areas[' + manualServiceAreaIndex + '][note]" placeholder="<?php echo esc_js(__('Contoh: Area prioritas layanan', 'putrafiber')); ?>"></textarea></div>' +
-                '</div>' +
-                '</div>';
-            $('#manual-service-areas-container').append(html);
+                '<div class="manual-area-fields" data-area-fields></div>' +
+            '</div>';
+
+            var $item = $(html);
+            $item.attr('data-values', JSON.stringify(defaults));
+            $('#manual-service-areas-container').append($item);
+            pfRenderManualAreaFields($item.get(0));
             manualServiceAreaIndex++;
         });
 
@@ -801,21 +1182,51 @@ function putrafiber_save_schema_meta($post_id) {
             }
 
             $country_code = isset($entry['country_code']) ? strtoupper(pf_clean_text($entry['country_code'])) : '';
+            if ($country_code !== '') {
+                $country_code = substr($country_code, 0, 2);
+            }
+
             $identifier_raw = isset($entry['identifier']) ? wp_unslash($entry['identifier']) : '';
             $identifier = '';
-
             if ($identifier_raw !== '') {
                 $identifier = filter_var($identifier_raw, FILTER_VALIDATE_URL)
                     ? pf_clean_url($identifier_raw)
                     : pf_clean_text($identifier_raw);
             }
 
+            $subdivision_code = isset($entry['subdivision_code']) ? pf_clean_text($entry['subdivision_code']) : '';
+            $province        = isset($entry['province']) ? pf_clean_text($entry['province']) : '';
+            $street          = isset($entry['street']) ? pf_clean_text($entry['street']) : '';
+            $locality        = isset($entry['locality']) ? pf_clean_text($entry['locality']) : '';
+            $region          = isset($entry['region']) ? pf_clean_text($entry['region']) : '';
+            $postal_code_raw = isset($entry['postal_code']) ? wp_unslash($entry['postal_code']) : '';
+            $postal_code     = $postal_code_raw !== '' ? preg_replace('/[^0-9A-Za-z\-\s]/', '', $postal_code_raw) : '';
+
+            $latitude_raw  = isset($entry['latitude']) ? trim(wp_unslash($entry['latitude'])) : '';
+            $longitude_raw = isset($entry['longitude']) ? trim(wp_unslash($entry['longitude'])) : '';
+            $latitude  = ($latitude_raw !== '' && preg_match('/^-?\d+(?:\.\d+)?$/', $latitude_raw)) ? $latitude_raw : '';
+            $longitude = ($longitude_raw !== '' && preg_match('/^-?\d+(?:\.\d+)?$/', $longitude_raw)) ? $longitude_raw : '';
+
+            $note = isset($entry['note']) ? pf_clean_html($entry['note']) : '';
+
+            if ($type === 'Country' && $country_code === '' && $name !== '') {
+                $country_code = 'ID';
+            }
+
             $manual_entries[] = array(
-                'type'         => $type,
-                'name'         => $name,
-                'country_code' => $country_code,
-                'identifier'   => $identifier,
-                'note'         => isset($entry['note']) ? pf_clean_html($entry['note']) : '',
+                'type'             => $type,
+                'name'             => $name,
+                'country_code'     => $country_code,
+                'identifier'       => $identifier,
+                'note'             => $note,
+                'subdivision_code' => $subdivision_code,
+                'province'         => $province,
+                'street'           => $street,
+                'locality'         => $locality,
+                'region'           => $region,
+                'postal_code'      => $postal_code,
+                'latitude'         => $latitude,
+                'longitude'        => $longitude,
             );
         }
 
