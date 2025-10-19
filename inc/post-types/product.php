@@ -335,7 +335,7 @@ function putrafiber_product_gallery_callback($post) {
     <button type="button" class="button button-primary button-large" id="upload-gallery-button" style="width:100%;margin-bottom:15px;">
       <span class="dashicons dashicons-images-alt2" style="margin-top:3px;"></span> <?php _e('Upload Gambar Gallery', 'putrafiber'); ?>
     </button>
-    <div id="gallery-preview" class="gallery-preview-grid">
+    <div id="product-gallery-preview" class="gallery-preview-grid">
       <?php
       if (!empty($gallery_ids)) {
         foreach ($gallery_ids as $img_id) {
