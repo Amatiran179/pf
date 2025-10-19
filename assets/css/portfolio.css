@@ -77,6 +77,13 @@
     object-fit: cover;
 }
 
+/* Hardening: enforce no-zoom behaviour on all gallery items */
+.gallery-container .gallery-item,
+.gallery-container .gallery-image {
+    transform: none !important;
+    animation: none !important;
+}
+
 /* Hard reset transforms & animations for slider context */
 .single-portfolio-page .portfolio-gallery-slider .gallery-item,
 .single-portfolio-page .portfolio-gallery-slider .gallery-image {

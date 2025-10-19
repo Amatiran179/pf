@@ -215,6 +215,13 @@
     object-fit: cover;
 }
 
+/* Hardening: enforce no-zoom behaviour on all gallery items */
+.gallery-container .gallery-item,
+.gallery-container .gallery-image {
+    transform: none !important;
+    animation: none !important;
+}
+
 /* Hard reset transforms & animations to stop rogue zoom behaviour */
 .product-single-page .product-gallery-slider .gallery-item,
 .product-single-page .product-gallery-slider .gallery-image {
