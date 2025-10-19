@@ -381,65 +381,224 @@ function putrafiber_get_svg_icon($icon_name, $width = 24, $height = 24) {
  * Breadcrumbs
  * ========================================================================== */
 function putrafiber_breadcrumbs() {
-  if (is_front_page()) return;
+  if (is_front_page()) {
+    return;
+  }
 
-  $items = array(array('title' => 'Home', 'url' => home_url('/')));
+  $items   = array();
+  $context = array(
+    'object_id'   => isset($GLOBALS['post']) && $GLOBALS['post'] instanceof WP_Post ? $GLOBALS['post']->ID : 0,
+    'is_archive'  => is_archive(),
+    'is_search'   => is_search(),
+    'is_404'      => is_404(),
+    'queried_obj' => get_queried_object(),
+  );
 
-  if (is_search()) {
+  $items[] = array(
+    'title' => esc_html__('Home', 'putrafiber'),
+    'url'   => home_url('/'),
+  );
+
+  $append_page_ancestors = function($post_id) use (&$items) {
+    if (!$post_id) {
+      return;
+    }
+
+    $ancestors = get_post_ancestors($post_id);
+    if (empty($ancestors)) {
+      return;
+    }
+
+    $ancestors = array_reverse($ancestors);
+    foreach ($ancestors as $ancestor_id) {
+      $title = get_the_title($ancestor_id);
+      if (!$title) {
+        continue;
+      }
+
+      $items[] = array(
+        'title' => $title,
+        'url'   => get_permalink($ancestor_id),
+      );
+    }
+  };
+
+  $append_term_lineage = function($term, $taxonomy) use (&$items) {
+    if (!$term || is_wp_error($term)) {
+      return;
+    }
+
+    if ($term->parent) {
+      $ancestors = get_ancestors($term->term_id, $taxonomy);
+      $ancestors = array_reverse($ancestors);
+      foreach ($ancestors as $ancestor_id) {
+        $ancestor = get_term($ancestor_id, $taxonomy);
+        if ($ancestor && !is_wp_error($ancestor)) {
+          $url = get_term_link($ancestor);
+          if (!is_wp_error($url)) {
+            $items[] = array(
+              'title' => $ancestor->name,
+              'url'   => $url,
+            );
+          }
+        }
+      }
+    }
+
+    $term_link = get_term_link($term);
+    if (!is_wp_error($term_link)) {
+      $items[] = array(
+        'title' => $term->name,
+        'url'   => $term_link,
+      );
+    } else {
+      $items[] = array('title' => $term->name);
+    }
+  };
+
+  if (is_home() && !is_front_page()) {
+    $posts_page_id = (int) get_option('page_for_posts');
+    if ($posts_page_id) {
+      $append_page_ancestors($posts_page_id);
+      $items[] = array('title' => get_the_title($posts_page_id));
+    } else {
+      $items[] = array('title' => esc_html__('Blog', 'putrafiber'));
+    }
+  } elseif (is_search()) {
     $search_query = wp_strip_all_tags(get_search_query());
     $items[] = array('title' => sprintf(__('Search results for "%s"', 'putrafiber'), $search_query));
   } elseif (is_404()) {
     $items[] = array('title' => __('Not Found', 'putrafiber'));
+  } elseif (is_post_type_archive('product')) {
+    $product_obj = get_post_type_object('product');
+    $items[]     = array('title' => $product_obj ? $product_obj->labels->name : __('Products', 'putrafiber'));
+  } elseif (is_post_type_archive('portfolio')) {
+    $portfolio_obj = get_post_type_object('portfolio');
+    $items[]       = array('title' => $portfolio_obj ? $portfolio_obj->labels->name : __('Portfolio', 'putrafiber'));
   } elseif (is_post_type_archive()) {
     $items[] = array('title' => post_type_archive_title('', false));
   } elseif (is_tax('product_category')) {
-    $items[] = array('title' => get_post_type_object('product')->labels->name, 'url' => get_post_type_archive_link('product'));
-    $term = get_queried_object();
-    if ($term && $term->parent) {
-        $ancestors = get_ancestors($term->term_id, 'product_category');
-        $ancestors = array_reverse($ancestors);
-        foreach ($ancestors as $ancestor_id) {
-            $ancestor = get_term($ancestor_id, 'product_category');
-            if ($ancestor && !is_wp_error($ancestor)) {
-                $items[] = array('title' => $ancestor->name, 'url' => get_term_link($ancestor));
-            }
-        }
+    $product_obj = get_post_type_object('product');
+    if ($product_obj) {
+      $items[] = array(
+        'title' => $product_obj->labels->name,
+        'url'   => get_post_type_archive_link('product'),
+      );
     }
-    $items[] = array('title' => single_term_title('', false));
+
+    $term = get_queried_object();
+    if ($term instanceof WP_Term) {
+      $append_term_lineage($term, 'product_category');
+    }
+  } elseif (is_tax('portfolio_category')) {
+    $portfolio_obj = get_post_type_object('portfolio');
+    if ($portfolio_obj) {
+      $items[] = array(
+        'title' => $portfolio_obj->labels->name,
+        'url'   => get_post_type_archive_link('portfolio'),
+      );
+    }
+
+    $term = get_queried_object();
+    if ($term instanceof WP_Term) {
+      $append_term_lineage($term, 'portfolio_category');
+    }
+  } elseif (is_category()) {
+    $term = get_queried_object();
+    if ($term instanceof WP_Term) {
+      $append_term_lineage($term, 'category');
+    }
   } elseif (is_singular('portfolio')) {
-    $items[] = array('title' => get_post_type_object('portfolio')->labels->name, 'url' => get_post_type_archive_link('portfolio'));
-    // Bisa ditambahkan logika taksonomi portofolio di sini jika ada
+    $portfolio_obj = get_post_type_object('portfolio');
+    if ($portfolio_obj) {
+      $items[] = array(
+        'title' => $portfolio_obj->labels->name,
+        'url'   => get_post_type_archive_link('portfolio'),
+      );
+    }
+
+    $terms = get_the_terms(get_the_ID(), 'portfolio_category');
+    if ($terms && !is_wp_error($terms)) {
+      $sorted_terms = wp_list_sort($terms, 'parent', 'ASC');
+      $primary_term = $sorted_terms ? reset($sorted_terms) : null;
+      if ($primary_term) {
+        $append_term_lineage($primary_term, 'portfolio_category');
+      }
+    }
+
     $items[] = array('title' => get_the_title());
   } elseif (is_singular('product')) {
-    $items[] = array('title' => post_type_archive_title('', false), 'url' => get_post_type_archive_link('product'));
+    $product_obj = get_post_type_object('product');
+    if ($product_obj) {
+      $items[] = array(
+        'title' => $product_obj->labels->name,
+        'url'   => get_post_type_archive_link('product'),
+      );
+    }
+
     $terms = get_the_terms(get_the_ID(), 'product_category');
     if ($terms && !is_wp_error($terms)) {
-      $items[] = array('title' => $terms[0]->name, 'url' => get_term_link($terms[0]));
+      $sorted_terms = wp_list_sort($terms, 'parent', 'ASC');
+      $primary_term = $sorted_terms ? reset($sorted_terms) : null;
+      if ($primary_term) {
+        $append_term_lineage($primary_term, 'product_category');
+      }
     }
+
     $items[] = array('title' => get_the_title());
   } elseif (is_singular('post')) {
-    $cat = get_the_category();
-    if (!empty($cat)) {
-      $items[] = array('title' => $cat[0]->name, 'url' => get_category_link($cat[0]->term_id));
+    $categories = get_the_category();
+    if (!empty($categories)) {
+      $primary_category = $categories[0];
+      $append_term_lineage($primary_category, 'category');
     }
     $items[] = array('title' => get_the_title());
   } elseif (is_page()) {
+    $append_page_ancestors(get_the_ID());
     $items[] = array('title' => get_the_title());
   } elseif (is_archive()) {
     $items[] = array('title' => wp_strip_all_tags(get_the_archive_title()));
   }
 
-  echo '<div class="breadcrumbs">';
-  $last = array_key_last($items);
-  foreach ($items as $i => $it) {
-    if ($i === $last) {
-      echo '<span>' . esc_html($it['title']) . '</span>';
-    } else {
-      $url = isset($it['url']) ? $it['url'] : '#';
-      echo '<a href="' . esc_url($url) . '">' . esc_html($it['title']) . '</a> / ';
-    }
+  $items     = array_values(array_filter($items, function($item) {
+    return !empty($item['title']);
+  }));
+  $items     = apply_filters('putrafiber_breadcrumb_items', $items, $context);
+  $separator = function_exists('putrafiber_breadcrumb_separator')
+    ? putrafiber_breadcrumb_separator(' / ')
+    : ' / ';
+
+  if (empty($items)) {
+    return;
   }
-  echo '</div>';
+
+  $last_index = count($items) - 1;
+
+  echo '<nav class="breadcrumbs" aria-label="' . esc_attr__('Breadcrumb', 'putrafiber') . '">';
+  echo '<ol class="breadcrumbs__list">';
+
+  foreach ($items as $index => $item) {
+    $is_last = ($index === $last_index);
+    $title   = esc_html($item['title']);
+    $url     = isset($item['url']) ? $item['url'] : '';
+
+    echo '<li class="breadcrumb-item' . ($is_last ? ' active' : '') . '">';
+
+    if (!$is_last && !empty($url)) {
+      echo '<a href="' . esc_url($url) . '">' . $title . '</a>';
+    } else {
+      echo '<span>' . $title . '</span>';
+    }
+
+    if (!$is_last) {
+      echo '<span class="breadcrumbs__separator">' . esc_html($separator) . '</span>';
+    }
+
+    echo '</li>';
+  }
+
+  echo '</ol>';
+  echo '</nav>';
 }
 
 /** ==========================================================================

@@ -230,18 +230,38 @@
     color: #666;
 }
 
-.breadcrumbs a {
+.breadcrumbs__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.breadcrumb-item a {
     color: #00BCD4;
     text-decoration: none;
 }
 
-.breadcrumbs a:hover {
+.breadcrumb-item a:hover {
     color: #0097A7;
 }
 
-.breadcrumbs span {
+.breadcrumb-item span {
     color: #333;
     font-weight: 600;
+}
+
+.breadcrumbs__separator {
+    color: #666;
 }
 
 /* Portfolio Info */
