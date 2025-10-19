@@ -1,0 +1,4 @@
+{
+  "enableBuild": false,
+  "description": "Set to true to re-enable npm run build during deployments."
+}

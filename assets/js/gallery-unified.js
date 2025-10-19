@@ -38,6 +38,7 @@
 
     $(document).ready(function() {
         log('DOM Ready - Starting initialization...', 'loading');
+        guardAllGalleries();
         waitForLibraries();
     });
 
@@ -137,6 +138,7 @@
         requestAnimationFrame(() => {
             resetGalleryTransforms('.product-gallery-slider');
             resetGalleryTransforms('.portfolio-gallery-slider');
+            resetGalleryTransforms('.full-gallery-grid');
         });
     }
 
