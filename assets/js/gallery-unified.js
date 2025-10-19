@@ -21,6 +21,15 @@
     let portfolioGalleryThumbs = null;
     let lightboxInstance = null;
     const zoomObservers = new WeakMap();
+    const galleryRootSelector = '.gallery-container, .product-gallery-slider, .portfolio-gallery-slider, .full-gallery-grid';
+    const gallerySelectors = [
+        '.product-gallery-slider',
+        '.product-gallery-thumbs',
+        '.portfolio-gallery-slider',
+        '.portfolio-gallery-thumbs',
+        '.full-gallery-grid',
+        '.gallery-container'
+    ];
 
     const config = window.pfGalleryConfig || {
         autoplayDelay: 4000,
@@ -39,6 +48,7 @@
     $(document).ready(function() {
         log('DOM Ready - Starting initialization...', 'loading');
         guardAllGalleries();
+        startGlobalGalleryObserver();
         waitForLibraries();
     });
 
@@ -136,10 +146,49 @@
 
     function guardAllGalleries() {
         requestAnimationFrame(() => {
-            resetGalleryTransforms('.product-gallery-slider');
-            resetGalleryTransforms('.portfolio-gallery-slider');
-            resetGalleryTransforms('.full-gallery-grid');
+            gallerySelectors.forEach((selector) => resetGalleryTransforms(selector));
         });
+    }
+
+    function startGlobalGalleryObserver() {
+        if (typeof MutationObserver === 'undefined') {
+            return;
+        }
+
+        if (window.pfGalleryGlobalObserverStarted) {
+            return;
+        }
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (!(node instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    if (node.matches('.gallery-item, .gallery-image')) {
+                        neutraliseZoomTarget(node);
+                        const container = node.closest(galleryRootSelector);
+                        if (container) {
+                            guardGalleryContainer(container);
+                        }
+                    }
+
+                    const descendants = node.querySelectorAll ? node.querySelectorAll('.gallery-item, .gallery-image') : [];
+                    descendants.forEach((element) => {
+                        neutraliseZoomTarget(element);
+                        const container = element.closest(galleryRootSelector);
+                        if (container) {
+                            guardGalleryContainer(container);
+                        }
+                    });
+                });
+            });
+        });
+
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        window.pfGalleryGlobalObserver = observer;
+        window.pfGalleryGlobalObserverStarted = true;
     }
 
     function initProductGallery() {
