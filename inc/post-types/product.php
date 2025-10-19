@@ -113,6 +113,15 @@ function putrafiber_product_admin_assets($hook) {
   // Drag & drop urutan galeri
   wp_enqueue_script('jquery-ui-sortable');
 
+  // Skrip admin terpadu (galeri, PDF uploader, dsb.)
+  wp_enqueue_script(
+    'putrafiber-admin',
+    PUTRAFIBER_URI . '/assets/js/admin.js',
+    array('jquery', 'jquery-ui-sortable'),
+    pf_asset_version('assets/js/admin.js'),
+    true
+  );
+
 }
 add_action('admin_enqueue_scripts', 'putrafiber_product_admin_assets');
 

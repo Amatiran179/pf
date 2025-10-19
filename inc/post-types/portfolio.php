@@ -118,6 +118,14 @@ function putrafiber_portfolio_admin_assets($hook_suffix) {
 
     wp_enqueue_media();
     wp_enqueue_script('jquery-ui-sortable');
+
+    wp_enqueue_script(
+        'putrafiber-admin',
+        PUTRAFIBER_URI . '/assets/js/admin.js',
+        array('jquery', 'jquery-ui-sortable'),
+        pf_asset_version('assets/js/admin.js'),
+        true
+    );
 }
 add_action('admin_enqueue_scripts', 'putrafiber_portfolio_admin_assets');
 
