@@ -26,6 +26,10 @@ Setelah menerapkan perbaikan terakhir, beberapa file menjadi tidak terpakai (red
 
 > **Langkah selanjutnya:** Otomatiskan proses build (`npm run build`) pada pipeline deploy/staging dan tambahkan dokumentasi singkat tentang cara membersihkan cache CDN setelah mengganti aset ber-hash.
 
+### Toggle Build
+
+- Gunakan `build.config.json` untuk menonaktifkan atau mengaktifkan proses `npm run build` sementara. Set `"enableBuild": false` untuk melewati bundling (default saat ini), dan ubah ke `true` ketika siap menjalankan build produksi. Flag environment `PF_SKIP_BUILD` dan `PF_FORCE_BUILD` juga tersedia untuk override cepat di pipeline.
+
 ---
 
 ## 2. Penjelasan Perbaikan yang Telah Dilakukan

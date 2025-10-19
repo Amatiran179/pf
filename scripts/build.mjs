@@ -22,6 +22,52 @@ for (const key of sanitizedEnvKeys) {
   }
 }
 
+const toggleFile = path.resolve(rootDir, 'build.config.json');
+let buildToggle = {};
+
+if (existsSync(toggleFile)) {
+  try {
+    const toggleRaw = await readFile(toggleFile, 'utf8');
+    buildToggle = JSON.parse(toggleRaw);
+  } catch (error) {
+    throw new Error(`[build] Failed to parse build.config.json: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
+const normalizeBoolean = (value, fallback = true) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const lowered = value.trim().toLowerCase();
+    if (['0', 'false', 'no', 'off'].includes(lowered)) {
+      return false;
+    }
+    if (['1', 'true', 'yes', 'on'].includes(lowered)) {
+      return true;
+    }
+  }
+  if (typeof value === 'number') {
+    return value !== 0;
+  }
+  return fallback;
+};
+
+let shouldRunBuild = normalizeBoolean(buildToggle.enableBuild, true);
+
+if (typeof process.env.PF_SKIP_BUILD !== 'undefined') {
+  shouldRunBuild = !normalizeBoolean(process.env.PF_SKIP_BUILD, false);
+}
+
+if (normalizeBoolean(process.env.PF_FORCE_BUILD, false)) {
+  shouldRunBuild = true;
+}
+
+if (!shouldRunBuild) {
+  console.warn('[build] Build process disabled via build.config.json or environment flag. Skipping Vite build.');
+  process.exit(0);
+}
+
 const configFile = path.resolve(rootDir, 'vite.config.mjs');
 let userConfigModule;
 try {
