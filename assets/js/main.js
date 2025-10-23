@@ -45,26 +45,65 @@
 
         // Dark Mode Toggle
         const darkModeToggle = $('.dark-mode-toggle');
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        
-        $('html').attr('data-theme', currentTheme);
-        
+        const themeVariables = {
+            light: {
+                '--primary-color': '#0f75ff',
+                '--primary-dark': '#0b4bd6'
+            },
+            dark: {
+                '--primary-color': '#4d9bff',
+                '--primary-dark': '#2569ff'
+            }
+        };
+
+        function applyThemeVariables(theme) {
+            const variables = themeVariables[theme] || themeVariables.light;
+            Object.keys(variables).forEach(function(key) {
+                document.documentElement.style.setProperty(key, variables[key]);
+            });
+        }
+
+        const storedTheme = localStorage.getItem('theme');
+        const initialTheme = storedTheme && themeVariables[storedTheme] ? storedTheme : 'light';
+
+        $('html').attr('data-theme', initialTheme);
+        applyThemeVariables(initialTheme);
+
         darkModeToggle.on('click', function() {
             const theme = $('html').attr('data-theme') === 'light' ? 'dark' : 'light';
             $('html').attr('data-theme', theme);
+            applyThemeVariables(theme);
             localStorage.setItem('theme', theme);
         });
 
         // Smooth Scroll
-        $('a[href*="#"]:not([href="#"])').on('click', function() {
+        function shouldIgnoreSmoothScroll($link) {
+            if ($link.is('.gallery-item, .swiper-button-next, .swiper-button-prev')) {
+                return true;
+            }
+
+            if ($link.attr('data-lightbox')) {
+                return true;
+            }
+
+            return $link.closest('.gallery-container, .swiper').length > 0;
+        }
+
+        $('a[href*="#"]').not('[href="#"]').on('click', function(event) {
+            var $link = $(this);
+
+            if (shouldIgnoreSmoothScroll($link)) {
+                return;
+            }
+
             if (location.pathname.replace(/^\//, '') === this.pathname.replace(/^\//, '') && location.hostname === this.hostname) {
                 var target = $(this.hash);
                 target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
                 if (target.length) {
+                    event.preventDefault();
                     $('html, body').animate({
                         scrollTop: target.offset().top - 80
                     }, 800);
-                    return false;
                 }
             }
         });

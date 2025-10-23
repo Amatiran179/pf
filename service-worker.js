@@ -1,6 +1,18 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_PREFIX = 'pf-cache';
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline';
+
+const PRECACHE_URLS = [
+  '/',
+  OFFLINE_URL,
+  '/style.css',
+  '/assets/css/product.css',
+  '/assets/css/portfolio.css',
+  '/assets/css/utilities.css',
+  '/assets/js/main.js',
+  '/assets/js/gallery-unified.js'
+];
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -9,7 +21,7 @@ self.addEventListener('install', event => {
       .open(CACHE_NAME)
       .then(cache =>
         Promise.all(
-          ['/', '/offline'].map(url => cache.add(url).catch(() => null))
+          PRECACHE_URLS.map(url => cache.add(url).catch(() => null))
         )
       )
       .catch(() => Promise.resolve())
@@ -49,22 +61,64 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  event.respondWith(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.match(request).then(match => {
-        if (match) {
-          return match;
-        }
+  if (request.destination === 'image' || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(requestUrl.pathname)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
 
-        return fetch(request)
-          .then(response => {
-            if (response && response.status === 200 && response.type === 'basic') {
-              cache.put(request, response.clone());
-            }
-            return response;
-          })
-          .catch(() => cache.match('/offline'));
-      })
-    )
-  );
+  if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  event.respondWith(staleWhileRevalidate(request));
 });
+
+function cacheFirst(request) {
+  return caches.open(CACHE_NAME).then(cache =>
+    cache.match(request).then(match => {
+      if (match) {
+        return match;
+      }
+
+      return fetch(request)
+        .then(response => {
+          if (response && response.status === 200) {
+            cache.put(request, response.clone());
+          }
+          return response;
+        })
+        .catch(() => caches.match(OFFLINE_URL));
+    })
+  );
+}
+
+function networkFirst(request) {
+  return caches.open(CACHE_NAME).then(cache =>
+    fetch(request)
+      .then(response => {
+        if (response && response.status === 200) {
+          cache.put(request, response.clone());
+        }
+        return response;
+      })
+      .catch(() => cache.match(request).then(match => match || cache.match(OFFLINE_URL)))
+  );
+}
+
+function staleWhileRevalidate(request) {
+  return caches.open(CACHE_NAME).then(cache =>
+    cache.match(request).then(cachedResponse => {
+      const fetchPromise = fetch(request)
+        .then(response => {
+          if (response && response.status === 200) {
+            cache.put(request, response.clone());
+          }
+          return response;
+        })
+        .catch(() => cachedResponse || cache.match(OFFLINE_URL));
+
+      return cachedResponse || fetchPromise;
+    })
+  );
+}

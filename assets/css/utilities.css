@@ -1,9 +1,16 @@
 /**
  * Utility Classes
- * 
+ *
  * @package PutraFiber
  * @since 1.0.0
  */
+
+/* Motion utilities */
+.no-zoom {
+    transform: none !important;
+    animation: none !important;
+    will-change: auto !important;
+}
 
 /* ==========================================================================
    DISPLAY UTILITIES
