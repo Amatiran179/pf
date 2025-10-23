@@ -23,9 +23,12 @@ if (!defined('ABSPATH')) exit;
                                 <h3><?php bloginfo('name'); ?></h3>
                             <?php endif; ?>
                         </div>
-                        <p class="footer-description">
-                            <?php echo esc_html(get_bloginfo('description')); ?>
-                        </p>
+                        <?php $site_description = get_bloginfo('description'); ?>
+                        <?php if (!empty($site_description)): ?>
+                            <p class="footer-description">
+                                <?php echo esc_html($site_description); ?>
+                            </p>
+                        <?php endif; ?>
                         <div class="footer-social">
                             <?php
                             $social_links = array(
@@ -61,51 +64,84 @@ if (!defined('ABSPATH')) exit;
 
                     <div class="footer-column">
                         <h4 class="footer-widget-title"><?php _e('Quick Links', 'putrafiber'); ?></h4>
-                        <?php
-                        wp_nav_menu(array(
-                            'theme_location' => 'footer',
-                            'menu_class'     => 'footer-menu',
-                            'container'      => false,
-                            'fallback_cb'    => false,
-                        ));
-                        ?>
+                        <?php if (has_nav_menu('footer')): ?>
+                            <?php
+                            wp_nav_menu(array(
+                                'theme_location' => 'footer',
+                                'menu_class'     => 'footer-menu',
+                                'container'      => false,
+                                'fallback_cb'    => false,
+                            ));
+                            ?>
+                        <?php else: ?>
+                            <?php
+                            $fallback_pages = wp_list_pages(array(
+                                'title_li' => '',
+                                'echo'     => false,
+                                'depth'    => 1,
+                            ));
+                            if (!empty($fallback_pages)) {
+                                echo '<ul class="footer-menu">' . $fallback_pages . '</ul>';
+                            }
+                            ?>
+                        <?php endif; ?>
                     </div>
 
                     <div class="footer-column">
                         <h4 class="footer-widget-title"><?php _e('Contact Info', 'putrafiber'); ?></h4>
-                        <ul class="footer-contact">
-                            <li>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
-                                <?php echo nl2br(esc_html(putrafiber_get_option('company_address', ''))); ?>
-                            </li>
-                            <li>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                </svg>
-                                <a href="tel:<?php echo esc_attr(putrafiber_get_option('company_phone', '')); ?>">
-                                    <?php echo esc_html(putrafiber_get_option('company_phone', '')); ?>
-                                </a>
-                            </li>
-                            <li>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                    <polyline points="22,6 12,13 2,6"></polyline>
-                                </svg>
-                                <a href="mailto:<?php echo esc_attr(putrafiber_get_option('company_email', '')); ?>">
-                                    <?php echo esc_html(putrafiber_get_option('company_email', '')); ?>
-                                </a>
-                            </li>
-                            <li>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                                <?php echo esc_html(putrafiber_get_option('business_hours', '')); ?>
-                            </li>
-                        </ul>
+                        <?php
+                        $company_address = putrafiber_get_option('company_address', '');
+                        $company_phone   = putrafiber_get_option('company_phone', '');
+                        $company_email   = putrafiber_get_option('company_email', '');
+                        $business_hours  = putrafiber_get_option('business_hours', '');
+                        ?>
+                        <?php if ($company_address || $company_phone || $company_email || $business_hours): ?>
+                            <ul class="footer-contact">
+                                <?php if (!empty($company_address)): ?>
+                                    <li>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                            <circle cx="12" cy="10" r="3"></circle>
+                                        </svg>
+                                        <?php echo nl2br(esc_html($company_address)); ?>
+                                    </li>
+                                <?php endif; ?>
+
+                                <?php if (!empty($company_phone)): ?>
+                                    <?php $phone_href = preg_replace('/[^0-9+]/', '', $company_phone); ?>
+                                    <li>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                        <a href="tel:<?php echo esc_attr($phone_href); ?>">
+                                            <?php echo esc_html($company_phone); ?>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+
+                                <?php if (!empty($company_email)): ?>
+                                    <li>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                        <a href="mailto:<?php echo esc_attr($company_email); ?>">
+                                            <?php echo esc_html($company_email); ?>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+
+                                <?php if (!empty($business_hours)): ?>
+                                    <li>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        <?php echo esc_html($business_hours); ?>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
+                        <?php endif; ?>
                     </div>
 
                     <div class="footer-column">

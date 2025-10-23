@@ -31,13 +31,47 @@
         '.gallery-container'
     ];
 
-    const config = window.pfGalleryConfig || {
+    const defaultConfig = {
         autoplayDelay: 4000,
         slideSpeed: 600,
         enableLoop: true,
         enableAutoplay: true,
         debug: false
     };
+
+    const rawConfig = window.pfGalleryConfig || {};
+    const config = {
+        ...defaultConfig,
+        ...rawConfig
+    };
+
+    const normalizeBoolean = (value, fallback = false) => {
+        if (typeof value === 'boolean') {
+            return value;
+        }
+        if (typeof value === 'number') {
+            return value === 1;
+        }
+        if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            if (normalized === '') {
+                return fallback;
+            }
+            return ['1', 'true', 'yes', 'on', 'enabled'].includes(normalized);
+        }
+        return fallback;
+    };
+
+    const normaliseInteger = (value, fallback) => {
+        const parsed = parseInt(value, 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+    };
+
+    config.autoplayDelay = normaliseInteger(config.autoplayDelay, defaultConfig.autoplayDelay);
+    config.slideSpeed = normaliseInteger(config.slideSpeed, defaultConfig.slideSpeed);
+    config.enableLoop = normalizeBoolean(config.enableLoop, defaultConfig.enableLoop);
+    config.enableAutoplay = normalizeBoolean(config.enableAutoplay, defaultConfig.enableAutoplay);
+    config.debug = normalizeBoolean(config.debug, defaultConfig.debug);
 
     function log(message, type = 'info') {
         if (!config.debug) return;
@@ -251,6 +285,9 @@
 
             const mainSliderConfig = buildSwiperConfig(totalSlides, galleryThumbs, '.product-gallery-slider');
             galleryMain = new Swiper('.product-gallery-slider', mainSliderConfig);
+            if (config.enableAutoplay && galleryMain && galleryMain.autoplay) {
+                galleryMain.autoplay.start();
+            }
             resetGalleryTransforms('.product-gallery-slider');
             guardAllGalleries();
             log('Product gallery initialized successfully!', 'success');
@@ -285,6 +322,9 @@
             // MENGGUNAKAN KONFIGURASI YANG SAMA DAN KONSISTEN
             const portfolioSliderConfig = buildSwiperConfig(totalSlides, portfolioGalleryThumbs, '.portfolio-gallery-slider');
             portfolioGalleryMain = new Swiper('.portfolio-gallery-slider', portfolioSliderConfig);
+            if (config.enableAutoplay && portfolioGalleryMain && portfolioGalleryMain.autoplay) {
+                portfolioGalleryMain.autoplay.start();
+            }
             resetGalleryTransforms('.portfolio-gallery-slider');
             guardAllGalleries();
             log('Portfolio gallery initialized successfully!', 'success');
@@ -303,6 +343,7 @@
             spaceBetween: 10,
             slidesPerView: 1,
             watchOverflow: true, // Prevents nav buttons on single slide
+            speed: config.slideSpeed,
 
             // ===================================
             // PERBAIKAN UTAMA: Selector disederhanakan untuk menghindari konflik
