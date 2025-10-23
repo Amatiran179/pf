@@ -264,6 +264,11 @@
     color: #666;
 }
 
+.breadcrumbs .breadcrumb-item + .breadcrumb-item::before,
+.breadcrumbs-section .breadcrumb-item + .breadcrumb-item::before {
+    content: none;
+}
+
 /* Portfolio Info */
 .portfolio-info {
     padding: 20px 0;

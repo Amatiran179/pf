@@ -680,6 +680,11 @@
     color: var(--text-light);
 }
 
+.breadcrumbs .breadcrumb-item + .breadcrumb-item::before,
+.breadcrumbs-section .breadcrumb-item + .breadcrumb-item::before {
+    content: none;
+}
+
 /* Pagination */
 .pagination {
     display: flex;
