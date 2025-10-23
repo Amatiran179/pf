@@ -81,6 +81,27 @@ img {
     height: auto;
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Gallery zoom hardening                                                     */
+/* -------------------------------------------------------------------------- */
+
+.gallery-container .gallery-item,
+.gallery-container .gallery-image,
+.product-gallery-slider .gallery-item,
+.product-gallery-slider .gallery-image,
+.portfolio-gallery-slider .gallery-item,
+.portfolio-gallery-slider .gallery-image,
+.full-gallery-grid .gallery-item,
+.full-gallery-grid .gallery-image,
+.no-zoom,
+.no-zoom .gallery-image,
+.gallery-item.no-zoom .gallery-image {
+    transform: none !important;
+    animation: none !important;
+    will-change: auto !important;
+}
+
+
 a {
     text-decoration: none;
     color: inherit;
@@ -324,8 +345,19 @@ a {
     transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+.custom-section__media img.no-zoom,
+.custom-section__media .no-zoom {
+    transform: none !important;
+    transition: none !important;
+}
+
 .custom-section__media:hover img {
     transform: scale(1.035);
+}
+
+.custom-section__media:hover img.no-zoom,
+.custom-section__media:hover .no-zoom {
+    transform: none !important;
 }
 
 .custom-section__media--full {

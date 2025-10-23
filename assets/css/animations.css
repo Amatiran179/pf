@@ -204,6 +204,19 @@
     animation-delay: var(--animation-delay, 0s);
 }
 
+/* Prevent zoom-related animations from interfering with Swiper transforms */
+.gallery-container .fade-in.animate-zoom-in,
+.product-gallery-slider .fade-in.animate-zoom-in,
+.portfolio-gallery-slider .fade-in.animate-zoom-in,
+.gallery-item.no-zoom,
+.gallery-item.no-zoom .fade-in,
+.gallery-item .gallery-image.no-zoom,
+.no-zoom.fade-in,
+.no-zoom .fade-in {
+    animation: none !important;
+    transform: none !important;
+}
+
 .fade-in.animate-tilt-in {
     transform-origin: top;
     transform: translateY(30px) rotateX(10deg);

@@ -7,6 +7,31 @@
         console.log('   - jQuery:', typeof jQuery !== 'undefined' ? '✅' : '❌');
         console.log('   - WP Media:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined' ? '✅' : '❌');
 
+        function ensureMediaLibrary(onReady) {
+            var attempts = 0;
+            var maxAttempts = 10;
+
+            function probe() {
+                if (typeof wp !== 'undefined' && typeof wp.media !== 'undefined') {
+                    if (typeof onReady === 'function') {
+                        onReady();
+                    }
+                    return;
+                }
+
+                attempts += 1;
+                if (attempts >= maxAttempts) {
+                    window.alert('WordPress Media library belum siap. Silakan muat ulang halaman.');
+                    console.error('❌ wp.media not available after retries');
+                    return;
+                }
+
+                setTimeout(probe, 400);
+            }
+
+            probe();
+        }
+
         // ===================================================================
         // GENERIC GALLERY UPLOADER (for Product & Portfolio)
         // ===================================================================
@@ -21,42 +46,38 @@
 
             console.log('🖼️ Gallery upload triggered for:', galleryType);
 
-            if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
-                alert('WordPress Media library not loaded. Please refresh the page.');
-                console.error('❌ wp.media not available');
-                return;
-            }
+            ensureMediaLibrary(function() {
+                if (galleryUploader) {
+                    galleryUploader.off('select');
+                }
 
-            if (galleryUploader) {
-                galleryUploader.off('select');
-            }
-
-            galleryUploader = wp.media({
-                title: 'Select ' + (galleryType.charAt(0).toUpperCase() + galleryType.slice(1)) + ' Gallery Images',
-                button: { text: 'Add to Gallery' },
-                multiple: true
-            });
-
-            galleryUploader.on('select', function() {
-                var attachments = galleryUploader.state().get('selection').toJSON();
-                var existingIds = $hiddenInput.val() ? $hiddenInput.val().split(',') : [];
-
-                console.log('✅ Selected ' + attachments.length + ' images');
-
-                attachments.forEach(function(attachment) {
-                    if ($.inArray(attachment.id.toString(), existingIds) === -1) {
-                        existingIds.push(attachment.id);
-                        var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
-                        var itemHtml = '<div class="gallery-item" data-id="' + attachment.id + '"><img src="' + thumbUrl + '" alt="Gallery image"><button type="button" class="remove-gallery-item" title="Remove">&times;</button></div>';
-                        $previewContainer.append(itemHtml);
-                    }
+                galleryUploader = wp.media({
+                    title: 'Select ' + (galleryType.charAt(0).toUpperCase() + galleryType.slice(1)) + ' Gallery Images',
+                    button: { text: 'Add to Gallery' },
+                    multiple: true
                 });
 
-                $hiddenInput.val(existingIds.join(','));
-                console.log('✅ ' + galleryType + ' gallery updated');
-            });
+                galleryUploader.on('select', function() {
+                    var attachments = galleryUploader.state().get('selection').toJSON();
+                    var existingIds = $hiddenInput.val() ? $hiddenInput.val().split(',') : [];
 
-            galleryUploader.open();
+                    console.log('✅ Selected ' + attachments.length + ' images');
+
+                    attachments.forEach(function(attachment) {
+                        if ($.inArray(attachment.id.toString(), existingIds) === -1) {
+                            existingIds.push(attachment.id);
+                            var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
+                            var itemHtml = '<div class="gallery-item" data-id="' + attachment.id + '"><img src="' + thumbUrl + '" alt="Gallery image"><button type="button" class="remove-gallery-item" title="Remove">&times;</button></div>';
+                            $previewContainer.append(itemHtml);
+                        }
+                    });
+
+                    $hiddenInput.val(existingIds.join(','));
+                    console.log('✅ ' + galleryType + ' gallery updated');
+                });
+
+                galleryUploader.open();
+            });
         });
 
         // ===================================================================

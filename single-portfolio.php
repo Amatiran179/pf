@@ -93,10 +93,6 @@ get_header();
                             if (!empty($all_images)):
                                 $gallery_group = 'pf-portfolio-' . $portfolio_id;
                             ?>
-                                <?php
-                                $no_zoom_anchor_style = 'transform: none !important; animation: none !important;';
-                                $no_zoom_image_style  = $no_zoom_anchor_style . ' transition: opacity 0.3s ease !important; will-change: auto !important;';
-                                ?>
                                 <div class="gallery-container" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
                                     <div class="swiper portfolio-gallery-slider" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
                                         <div class="swiper-wrapper">
@@ -105,14 +101,12 @@ get_header();
                                                     <a href="<?php echo pf_output_url($image['full']); ?>"
                                                        data-lightbox="portfolio-<?php echo $portfolio_id; ?>"
                                                        data-title="<?php echo pf_output_attr($image['alt']); ?>"
-                                                       class="gallery-item"
+                                                       class="gallery-item no-zoom"
                                                        data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
-                                                       data-gallery-index="<?php echo pf_output_attr($index); ?>"
-                                                       style="<?php echo pf_output_attr($no_zoom_anchor_style); ?>">
+                                                       data-gallery-index="<?php echo pf_output_attr($index); ?>">
                                                         <img src="<?php echo pf_output_url($image['url']); ?>"
                                                              alt="<?php echo pf_output_attr($image['alt']); ?>"
-                                                             class="gallery-image"
-                                                             style="<?php echo pf_output_attr($no_zoom_image_style); ?>"
+                                                             class="gallery-image no-zoom"
                                                              <?php if (!empty($image['width']) && !empty($image['height'])): ?>
                                                                  width="<?php echo (int) $image['width']; ?>" height="<?php echo (int) $image['height']; ?>"
                                                              <?php endif; ?>
@@ -154,6 +148,7 @@ get_header();
                                                     <div class="swiper-slide">
                                                         <img src="<?php echo pf_output_url($thumb_url); ?>"
                                                              alt="<?php echo pf_output_attr($image['alt']); ?>"
+                                                             class="no-zoom"
                                                              loading="lazy" decoding="async" fetchpriority="low">
                                                     </div>
                                                 <?php 

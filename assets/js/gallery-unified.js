@@ -54,7 +54,7 @@
 
     function waitForLibraries() {
         let attempts = 0;
-        const maxAttempts = 50;
+        const maxAttempts = 100;
 
         const checkLibraries = setInterval(function() {
             attempts++;
@@ -73,19 +73,46 @@
         }, 100);
     }
 
+    const zoomClassBlacklist = ['animate-zoom-in', 'hover-zoom', 'scaleIn', 'zoom-in', 'zoomIn', 'pf-zoom-in'];
+
     function neutraliseZoomTarget(element) {
-        if (!element) return;
+        if (!(element instanceof HTMLElement)) {
+            return;
+        }
+
+        element.classList.add('no-zoom');
+
+        zoomClassBlacklist.forEach((className) => {
+            if (element.classList.contains(className)) {
+                element.classList.remove(className);
+            }
+        });
 
         element.style.setProperty('transform', 'none', 'important');
         element.style.setProperty('animation', 'none', 'important');
+        element.style.setProperty('will-change', 'auto', 'important');
 
-        if (element.classList && element.classList.contains('animate-zoom-in')) {
-            element.classList.remove('animate-zoom-in');
-        }
-
-        if (element.classList && element.classList.contains('fade-in') && !element.classList.contains('visible')) {
+        if (element.classList.contains('fade-in') && !element.classList.contains('visible')) {
             element.classList.add('visible');
         }
+
+        const childImages = element.matches('img') ? [element] : Array.from(element.querySelectorAll('img, .gallery-image'));
+        childImages.forEach((img) => {
+            if (!(img instanceof HTMLElement)) {
+                return;
+            }
+
+            img.classList.add('no-zoom');
+            zoomClassBlacklist.forEach((className) => {
+                if (img.classList.contains(className)) {
+                    img.classList.remove(className);
+                }
+            });
+
+            img.style.setProperty('transform', 'none', 'important');
+            img.style.setProperty('animation', 'none', 'important');
+            img.style.setProperty('will-change', 'auto', 'important');
+        });
     }
 
     function enforceNoZoomOnHover(container) {
@@ -139,7 +166,7 @@
                 enforceNoZoomOnHover(container);
             });
 
-            observer.observe(container, { childList: true, subtree: true });
+            observer.observe(container, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
             zoomObservers.set(container, observer);
         }
     }
@@ -161,12 +188,22 @@
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.target instanceof HTMLElement) {
+                    if (mutation.target.matches('.gallery-item, .gallery-image, .no-zoom')) {
+                        neutraliseZoomTarget(mutation.target);
+                        const container = mutation.target.closest(galleryRootSelector);
+                        if (container) {
+                            guardGalleryContainer(container);
+                        }
+                    }
+                }
+
                 mutation.addedNodes.forEach((node) => {
                     if (!(node instanceof HTMLElement)) {
                         return;
                     }
 
-                    if (node.matches('.gallery-item, .gallery-image')) {
+                    if (node.matches('.gallery-item, .gallery-image, .no-zoom')) {
                         neutraliseZoomTarget(node);
                         const container = node.closest(galleryRootSelector);
                         if (container) {
@@ -174,7 +211,7 @@
                         }
                     }
 
-                    const descendants = node.querySelectorAll ? node.querySelectorAll('.gallery-item, .gallery-image') : [];
+                    const descendants = node.querySelectorAll ? node.querySelectorAll('.gallery-item, .gallery-image, .no-zoom') : [];
                     descendants.forEach((element) => {
                         neutraliseZoomTarget(element);
                         const container = element.closest(galleryRootSelector);
@@ -186,7 +223,7 @@
             });
         });
 
-        observer.observe(document.documentElement, { childList: true, subtree: true });
+        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
         window.pfGalleryGlobalObserver = observer;
         window.pfGalleryGlobalObserverStarted = true;
     }

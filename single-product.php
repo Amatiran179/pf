@@ -152,10 +152,6 @@ while (have_posts()) : the_post();
             <?php $gallery_group = 'pf-product-' . $product_id; ?>
             <div class="gallery-container" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
               <!-- Main slider -->
-              <?php
-              $no_zoom_anchor_style = 'transform: none !important; animation: none !important;';
-              $no_zoom_image_style  = $no_zoom_anchor_style . ' transition: opacity 0.3s ease !important; will-change: auto !important;';
-              ?>
               <div class="swiper product-gallery-slider" data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>">
                 <div class="swiper-wrapper">
                   <?php foreach ($all_gallery_images as $index => $image):
@@ -170,16 +166,14 @@ while (have_posts()) : the_post();
                       <a href="<?php echo pf_output_url($image['full']); ?>"
                          data-lightbox="product-<?php echo (int) $product_id; ?>"
                          data-title="<?php echo pf_output_attr($img_alt); ?>"
-                         class="gallery-item"
-                       data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
-                       data-gallery-index="<?php echo pf_output_attr($index); ?>"
-                       style="<?php echo pf_output_attr($no_zoom_anchor_style); ?>"
-                       >
+                         class="gallery-item no-zoom"
+                         data-gallery-group="<?php echo pf_output_attr($gallery_group); ?>"
+                         data-gallery-index="<?php echo pf_output_attr($index); ?>"
+                      >
                         <img
                           src="<?php echo pf_output_url($image['url']); ?>"
                           alt="<?php echo pf_output_attr($img_alt); ?>"
-                          class="gallery-image"
-                          style="<?php echo pf_output_attr($no_zoom_image_style); ?>"
+                          class="gallery-image no-zoom"
                           <?php if ($img_width && $img_height): ?>
                             width="<?php echo (int) $img_width; ?>" height="<?php echo (int) $img_height; ?>"
                           <?php endif; ?>
@@ -225,6 +219,7 @@ while (have_posts()) : the_post();
                         <img
                           src="<?php echo pf_output_url($image['thumb']); ?>"
                           alt="<?php echo pf_output_attr($thumb_alt); ?>"
+                          class="no-zoom"
                           loading="lazy"
                           decoding="async"
                           fetchpriority="low"

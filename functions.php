@@ -134,7 +134,8 @@ function pf_enqueue_assets() {
     wp_enqueue_style('pf-header', PUTRAFIBER_URI . '/assets/css/header.css', array('pf-style'), pf_asset_version('assets/css/header.css'));
     wp_enqueue_style('pf-footer', PUTRAFIBER_URI . '/assets/css/footer.css', array('pf-style'), pf_asset_version('assets/css/footer.css'));
     wp_enqueue_style('pf-components', PUTRAFIBER_URI . '/assets/css/components.css', array('pf-style'), pf_asset_version('assets/css/components.css'));
-    wp_enqueue_style('pf-animations', PUTRAFIBER_URI . '/assets/css/animations.css', array('pf-style'), pf_asset_version('assets/css/animations.css'));
+    wp_enqueue_style('pf-utilities', PUTRAFIBER_URI . '/assets/css/utilities.css', array('pf-style'), pf_asset_version('assets/css/utilities.css'));
+    wp_enqueue_style('pf-animations', PUTRAFIBER_URI . '/assets/css/animations.css', array('pf-style', 'pf-utilities'), pf_asset_version('assets/css/animations.css'));
 
     wp_enqueue_style('pf-responsive', PUTRAFIBER_URI . '/assets/css/responsive.css', array('pf-style'), pf_asset_version('assets/css/responsive.css'));
     if ($is_front_page) {

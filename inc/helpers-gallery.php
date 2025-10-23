@@ -130,6 +130,13 @@ if (!function_exists('putrafiber_prepare_gallery_meta_value')) {
             return '';
         }
 
+        $ids = array_map('absint', (array) $ids);
+        $ids = array_filter(array_unique($ids));
+
+        if (empty($ids)) {
+            return '';
+        }
+
         return implode(',', $ids);
     }
 }
